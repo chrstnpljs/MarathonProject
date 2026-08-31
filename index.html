@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marathon: TBR Dream — Training HQ</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light;
+ --navy:#1F3A5F;--teal:#0E7C7B;--ink:#1c2430;--mut:#6b7785;
+ --base:#C9E4CA;--build:#C5DDF2;--peak:#F7D9B7;--taper:#E3D5F0;--rest:#ECEFF2;
+ --acc:#D7F0EE;--yel:#FFF3B0;--line:#e4e8ee;--good:#1f9d6b;--bad:#d2563f;--card:#fff;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:#f4f6f9;font-size:14px;line-height:1.45}
+.wrap{max-width:880px;margin:0 auto;padding:14px}
+.hero{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;border-radius:16px;padding:16px 18px}
+.hero h1{margin:0 0 2px;font-size:18px}
+.hero .sub{opacity:.85;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stat{background:rgba(255,255,255,.13);border-radius:11px;padding:8px 6px;text-align:center}
+.stat .n{font-size:20px;font-weight:800;line-height:1}
+.stat .n.lvlname{font-size:13px;line-height:1.15}
+.stat .l{font-size:10px;opacity:.85;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+.race{margin-top:13px}
+.racelabel{display:flex;justify-content:space-between;font-size:11px;opacity:.9;margin-bottom:4px}
+.track{position:relative;height:22px;background:rgba(255,255,255,.18);border-radius:20px}
+.fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#17B2A3,#7CE0CF);border-radius:20px}
+.runner{position:absolute;top:-7px;font-size:22px;transform:translateX(-50%) scaleX(-1);transition:left .4s}
+.flag{position:absolute;right:6px;top:1px;font-size:16px}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:11px}
+.dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:transparent}
+.dot.g{background:#3ddc97;border-color:#3ddc97}
+.dot.y{background:#ffd45e;border-color:#ffd45e}
+.dot.r{background:#ff8a73;border-color:#ff8a73}
+.dotlegend{font-size:10.5px;opacity:.85;margin-top:7px}
+.tabs{display:flex;gap:6px;margin:14px 0 10px;flex-wrap:wrap}
+.tab{flex:1;min-width:64px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--mut);text-align:center}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}
+.card h2{margin:0 0 4px;font-size:15px}
+.card .cap{color:var(--mut);font-size:12px;margin:0 0 10px}
+.mission{display:flex;align-items:center;gap:12px;background:var(--acc);border-radius:12px;padding:14px 15px}
+.mission .emo{font-size:34px}.mission .t{font-weight:800;font-size:17px}.mission .d{font-size:12.5px;color:var(--mut)}
+.sect{margin:10px 0}
+.sh{font-weight:800;font-size:13px;margin-bottom:4px}
+.sect ul{margin:4px 0 0;padding-left:18px}.sect li{font-size:12.5px;margin:2px 0}
+table.ex{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+table.ex th{text-align:left;color:var(--mut);font-size:10.5px;text-transform:uppercase;border-bottom:1px solid var(--line);padding:5px}
+table.ex td{vertical-align:top;border-bottom:1px solid var(--line);padding:6px 5px}
+.tag{color:var(--teal);font-weight:700;font-size:10.5px}
+.demo{display:inline-block;text-decoration:none;background:#eef1f5;color:var(--teal);border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:700;margin-left:6px;white-space:nowrap}
+.totline{background:#e7f6f5;border-radius:8px;padding:8px 11px;font-size:12.5px;font-weight:700;color:var(--teal);margin-top:8px}
+.natime{color:#9a6a00;font-weight:700;font-size:10.5px;background:#fff3da;border-radius:5px;padding:1px 5px}
+.sessnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 10px}
+.navb{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 11px;font-weight:700;font-size:12px;cursor:pointer;color:var(--teal);white-space:nowrap}
+.navb:disabled{opacity:.4;cursor:default;color:var(--mut)}
+#sessLabel,#prepLabel{font-size:12.5px;text-align:center;flex:1}
+.eff{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}
+.effb{border:1.5px solid var(--line);border-radius:10px;padding:7px 2px;text-align:center;cursor:pointer;font-size:11px}
+.effb .e{font-size:20px;display:block}.effb.on{background:var(--build);border-color:var(--navy);font-weight:700}
+.meal{border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+.meal.mdone{background:#f0faf4;border-color:var(--good)}
+.meal .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.meal .slot{font-weight:800;font-size:13px;color:var(--navy)}
+.meal .right{display:flex;align-items:center;gap:8px}
+.meal .kcal{font-size:11px;color:var(--mut);white-space:nowrap;text-align:right}
+.meal .food{font-size:13px;margin:3px 0}
+.meal .supp{font-size:11.5px;margin-top:5px;background:var(--yel);border-radius:7px;padding:4px 7px;display:inline-block}
+.mcheck{flex:none;width:32px;height:32px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-size:16px;cursor:pointer;color:var(--mut)}
+.mcheck.on{background:var(--good);color:#fff;border-color:var(--good)}
+.totalbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.totalbar .m{background:#f6f8fa;border-radius:10px;padding:8px;text-align:center}
+.totalbar .v{font-size:16px;font-weight:800}.totalbar .k{font-size:10px;color:var(--mut)}
+.qrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:7px}
+.qrow.qon{background:var(--base);border-color:var(--good)}
+.ql{font-weight:700;font-size:13px}.qxp{font-size:10.5px;color:var(--mut);font-weight:600}
+.qs{font-size:11.5px;color:var(--mut)}
+.qbig .ql{font-size:14.5px}
+.qcheck{flex:none;width:40px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:19px;cursor:pointer;color:var(--mut)}
+.qcheck.on{background:var(--good);color:#fff;border-color:var(--good)}
+.qgroup{border:1px dashed #cfd6df;border-radius:12px;padding:10px;margin-bottom:7px;background:#fafbfc}
+.qgh{font-weight:800;font-size:12px;color:var(--navy);margin-bottom:7px}
+textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;font-family:inherit;font-size:13px;resize:vertical;min-height:60px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.btn{border:0;border-radius:10px;padding:9px 13px;font-weight:700;font-size:12.5px;cursor:pointer}
+.btn.p{background:var(--teal);color:#fff}.btn.g{background:#eef1f5;color:var(--ink)}
+.btn.warn{background:#fbe6df;color:var(--bad)}.btn.sick{background:#fff1cf;color:#9a6a00}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{border:1px solid var(--line);border-radius:9px;padding:6px 3px;text-align:center;font-size:11px}
+.day .dn{font-weight:800}.day .de{font-size:15px}
+.day.done{background:var(--base);border-color:var(--good)}.day.today{outline:2px solid var(--teal)}
+.day.miss{background:#fbe6df}.day.sick{background:#fff1cf}
+.field{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.field label{font-size:11px;color:var(--mut);display:block;margin-bottom:3px;font-weight:600}
+.field input,.field select{border:1px solid var(--line);border-radius:9px;padding:8px;font-size:13px;width:92px}
+.field select{width:auto}
+.chart-box{height:210px;margin-top:6px}
+table.t2{width:100%;border-collapse:collapse;font-size:12.5px}
+table.t2 th,table.t2 td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+table.t2 th{color:var(--mut);font-weight:700;font-size:11px;text-transform:uppercase}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.note{border-left:4px solid var(--teal);background:var(--acc);padding:9px 11px;border-radius:8px;font-size:12.5px;margin-top:10px}
+.note.adj{border-color:#9a6a00;background:#fff8e6}
+.note.red{border-color:var(--bad);background:#fdeae4}
+.hide{display:none}.muted{color:var(--mut)}.b{font-weight:800}
+.legend{font-size:11px;color:var(--mut);margin-top:6px}
+.tbr{font-size:12.5px;border-bottom:1px solid var(--line);padding:7px 0;display:flex;justify-content:space-between;gap:10px}
+.coachbox{white-space:pre-wrap;font-size:13px;margin-top:10px;background:#f6f8fa;border-radius:10px;padding:11px}
+small.dim{color:var(--mut);font-size:11px}
+.macro{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.macro .m{background:#f6f8fa;border-radius:10px;padding:9px;text-align:center}
+.macro .m .v{font-size:17px;font-weight:800}.macro .m .k{font-size:10.5px;color:var(--mut)}
+.dcard{border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+.dcard.dtoday{border-color:var(--teal);background:var(--acc)}
+.dhead{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:3px;align-items:baseline}
+.dhead .dt{font-weight:800}
+.dctx{font-size:12px;color:var(--mut);margin-bottom:5px}
+.dmain{font-size:12.5px;margin:2px 0}
+.dnut{font-size:11.5px;color:var(--mut);margin-top:3px}
+.fslot{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:7px 0}
+.fslot .fk{font-size:11px;color:var(--mut);text-align:right;white-space:nowrap;font-weight:700}
+.rgroup{margin-bottom:14px}
+.rgh{font-weight:800;font-size:13px;margin-bottom:6px;color:var(--navy)}
+.ritem{border-bottom:1px solid var(--line);padding:6px 0;font-size:12.5px}
+.rm{color:var(--mut);font-size:11px}
+.modal{position:fixed;inset:0;background:rgba(20,30,45,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal.hide{display:none}
+.modalcard{background:#fff;border-radius:16px;max-width:380px;width:100%;max-height:82vh;overflow:auto;padding:16px}
+.modalhead{display:flex;justify-content:space-between;align-items:center;font-size:16px;margin-bottom:10px}
+.lvlrow{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 11px;border-radius:10px;margin-bottom:6px;border:1px solid var(--line);font-size:13px}
+.lvlrow.cur{background:var(--acc);border-color:var(--teal);font-weight:800}
+.lvlrow.done{opacity:.65}
+.lvlrow .xpreq{font-size:11px;color:var(--mut);white-space:nowrap}
+.mvw{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.mvw .m{border:1.5px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;font-size:11.5px;font-weight:700}
+.mvw .m.hit{background:var(--base);border-color:var(--good)}
+.mvw .m .e{font-size:19px;display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🏅 Marathon: TBR Dream — Training HQ</h1>
+    <div class="sub" id="heroSub">Paul · Race day Sun 14 Feb 2027</div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="sCount">—</div><div class="l">Days to race</div></div>
+      <div class="stat" id="levelTile" style="cursor:pointer"><div class="n lvlname" id="sLevel">—</div><div class="l" id="sLevelL">Level ▸</div></div>
+      <div class="stat"><div class="n" id="sXP">0</div><div class="l" id="xpLabel">Total XP</div></div>
+      <div class="stat"><div class="n" id="sStreak">0🔥</div><div class="l">Streak</div></div>
+    </div>
+    <div class="race">
+      <div class="racelabel"><span id="raceL">Week 0</span><span id="raceR">0%</span></div>
+      <div class="track"><div class="fill" id="fill"></div><div class="runner" id="runner">🏃</div><div class="flag">🏁</div></div>
+      <div class="dots" id="dots"></div>
+      <div class="dotlegend">🟢 done · 🟡 sick · 🔴 missed · ⚪ <span id="daysLeft"></span></div>
+    </div>
+  </div>
+
+  <div id="lvlModal" class="modal hide"><div class="modalcard"><div class="modalhead"><b>🏆 Rank Ladder</b><span id="lvlClose" style="cursor:pointer;font-size:18px">✕</span></div><div id="lvlList"></div></div></div>
+
+  <div class="tabs">
+    <div class="tab on" data-t="today">Today</div>
+    <div class="tab" data-t="recovery">Recovery</div>
+    <div class="tab" data-t="progress">Progress</div>
+    <div class="tab" data-t="food">Food</div>
+    <div class="tab" data-t="runs">Runs</div>
+    <div class="tab" data-t="plan">Plan</div>
+  </div>
+
+  <div id="today">
+    <div class="card">
+      <h2 id="todayDate"></h2>
+      <div class="mission"><div class="emo" id="mEmo">💪</div><div><div class="t" id="mTitle">—</div><div class="d" id="mDetail">—</div></div></div>
+      <div id="restWarn" class="hide"></div>
+      <div id="injuryBox" class="hide"></div>
+      <div class="note" id="rule20">🧠 <b>The 20-Minute Rule:</b> Not feeling it? Don't negotiate the whole session — commit to <b>20 minutes</b>. You can quit after. You almost never will. Starting is the whole battle.</div>
+    </div>
+
+    <div class="card">
+      <h2>This week's 3 non-negotiables</h2>
+      <p class="cap">If life explodes, these 3 are the floor. Hit them and the week counts.</p>
+      <div class="mvw" id="mvwBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>Session <small class="dim">— warm-up → main → cool-down</small></h2>
+      <div class="sessnav"><button id="sessPrev" class="navb">◀ prev</button><span id="sessLabel" class="b"></span><button id="sessNext" class="navb">tomorrow ▶</button></div>
+      <div id="session"></div>
+      <div class="legend">🎯 = targeted to your injuries / Evolt imbalances (left clavicle, ankle history, hamstring).</div>
+    </div>
+
+    <div class="card">
+      <h2>How hard was it? <small class="dim">(tap after you train)</small></h2>
+      <div class="eff" id="effRow"></div>
+    </div>
+
+    <div class="card">
+      <h2>Today's meals <span class="muted" id="mealType"></span></h2>
+      <p class="cap">Grams = cooked. <b>P</b> protein · <b>C</b> carbs · <b>F</b> fat. Tap ＋ per meal.</p>
+      <div id="meals"></div>
+      <div class="totalbar" id="mealTotal"></div>
+      <div class="legend">Target today: <span id="mealTarget" class="b"></span></div>
+    </div>
+
+    <div class="card">
+      <h2>Today's quests</h2>
+      <div id="quests"></div>
+      <div class="row">
+        <button class="btn g" id="pballBtn">🏓 Played pickleball</button>
+        <button class="btn g" id="restBtn" style="background:#e3f0ff;color:#1F3A5F">🛌 Rest (planned)</button>
+        <button class="btn g" id="injuryBtn" style="background:#fde8e0;color:#b03a1e">🩹 Injury mode</button>
+        <button class="btn warn" id="missBtn">Missed</button>
+        <button class="btn sick" id="sickBtn">Sick</button>
+        <button class="btn g" id="coachBtn">Ask Coach 🧠</button>
+      </div>
+      <div class="hide" id="pballPanel" style="margin-top:10px">
+        <div class="cap" style="margin-bottom:6px">How hard was it? (credits today &amp; adjusts tomorrow)</div>
+        <div class="row" style="margin-top:0">
+          <button class="btn g pbi" data-i="casual">🟢 Casual (~1hr)</button>
+          <button class="btn g pbi" data-i="solid">🟡 Solid (2hr)</button>
+          <button class="btn g pbi" data-i="hard">🔴 Hard (3hr+)</button>
+        </div>
+      </div>
+      <div class="coachbox hide" id="coachBox"></div>
+      <div class="note hide" id="guide"></div>
+    </div>
+
+    <div class="card">
+      <h2>Notes of the day 📝</h2>
+      <textarea id="noteBox" placeholder="How did it feel? Energy, niggles, sleep, mood…"></textarea>
+      <div class="row"><button class="btn p" id="noteSave">Save note</button><span class="muted" id="noteMsg" style="align-self:center;font-size:12px"></span></div>
+    </div>
+
+    <div class="card">
+      <h2>This week</h2>
+      <p class="cap" id="weekCap"></p>
+      <div class="week" id="weekStrip"></div>
+      <div class="legend">Green = done · yellow = sick · red = missed · outline = today. <b>Tap a past/today square to mark it done.</b></div>
+    </div>
+  </div>
+
+  <!-- RECOVERY -->
+  <div id="recovery" class="hide">
+    <div class="card">
+      <h2>⌚ Garmin recovery <small class="dim">— live</small></h2>
+      <p class="cap" id="pullMsg">Pulling today's data straight from your watch…</p>
+      <div class="macro" id="rcLive"></div>
+      <div id="verdict" class="hide" style="margin-top:14px"></div>
+      <div class="row">
+        <button class="btn p" id="garminPull">🔄 Refresh from Garmin</button>
+        <button class="btn g" id="seedBtn">⬇ Load history</button>
+        <button class="btn g" id="manualToggle">✏️ Manual override</button>
+      </div>
+      <div class="hide" id="manualBox">
+        <p class="cap" style="margin-top:10px">Fallback only — use if the watch wasn't worn or the pull fails.</p>
+        <div class="field">
+          <div><label>Sleep score</label><input type="number" id="rcSleep" placeholder="0-100"></div>
+          <div><label>HRV status</label><select id="rcHRV"><option value="">—</option><option>Balanced</option><option>Unbalanced</option><option>Low</option><option>Poor</option></select></div>
+          <div><label>Body Battery</label><input type="number" id="rcBB" placeholder="0-100"></div>
+          <div><label>Resting HR</label><input type="number" id="rcRHR" placeholder="bpm"></div>
+          <div><label>Readiness</label><input type="number" id="rcRdy" placeholder="0-100"></div>
+          <div><label>Baseline rHR</label><input type="number" id="rcBase" placeholder="70"></div>
+          <button class="btn p" id="rcGo">Get verdict</button>
+        </div>
+      </div>
+    </div>
+    <div class="card"><h2>Recovery trend</h2><div class="chart-box"><canvas id="rcChart"></canvas></div></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progress" class="hide">
+    <div class="card">
+      <h2>Log an Evolt scan</h2>
+      <p class="cap">Scan every 2–3 weeks. The plan adapts from the trend.</p>
+      <div class="field">
+        <div><label>Date</label><input type="date" id="scDate"></div>
+        <div><label>Weight (kg)</label><input type="number" step="0.1" id="scW" placeholder="78.2"></div>
+        <div><label>Body fat %</label><input type="number" step="0.1" id="scBF" placeholder="23.9"></div>
+        <button class="btn p" id="scAdd">Add scan</button>
+      </div>
+    </div>
+    <div class="card"><h2>Weight → target 72 kg</h2><div class="chart-box"><canvas id="wChart"></canvas></div></div>
+    <div class="card"><h2>Body fat → target 18%</h2><div class="chart-box"><canvas id="bfChart"></canvas></div></div>
+    <div class="card"><h2>Today's auto-nutrition</h2><p class="cap" id="nutDay"></p><div class="macro" id="macro"></div><div class="note" id="nutNote"></div></div>
+  </div>
+
+  <!-- FOOD -->
+  <div id="food" class="hide">
+    <div class="card"><div id="prepWeek"></div></div>
+    <div class="card"><h2>Daily assembly this week 🍽</h2><p class="cap">Grab a prepped portion + fresh eggs/shake. Today highlighted.</p><div id="weekFood"></div></div>
+    <div class="card"><h2>Recipe bank 🔁</h2><div id="recipeBank"></div></div>
+  </div>
+
+  <!-- RUNS -->
+  <div id="runs" class="hide">
+    <div class="card">
+      <h2>This week's running <span class="muted" id="wkRange"></span></h2>
+      <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat" style="background:#eef1f5;color:var(--ink)"><div class="n" id="wkKm">—</div><div class="l">km this week</div></div>
+        <div class="stat" style="background:#eef1f5;color:var(--ink)"><div class="n" id="wkPlan">—</div><div class="l">Mon long (plan)</div></div>
+        <div class="stat" style="background:#eef1f5;color:var(--ink)"><div class="n" id="wkRuns">—</div><div class="l">runs logged</div></div>
+      </div>
+      <p class="cap" id="stravaMsg" style="margin-top:10px"></p>
+    </div>
+    <div class="card"><h2>Recent activities <small class="dim">(live from Strava)</small></h2>
+      <table class="t2"><thead><tr><th>Date</th><th>Activity</th><th>Dist</th><th>Time</th><th>Pace</th></tr></thead><tbody id="actBody"><tr><td colspan="5">Loading…</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div id="plan" class="hide">
+    <div class="card"><h2>How this plan works 📖</h2><div id="planHow"></div></div>
+    <div class="card"><h2>This week — day by day <small class="dim" id="wdTag"></small></h2><div id="weekDetail"></div></div>
+    <div class="card"><h2>TBR Dream official events <small class="dim">(in your fee)</small></h2><div id="tbrList"></div>
+      <p class="legend">Bull Sessions = group long runs. Swap your Monday long run to these when you want company.</p></div>
+    <div class="card"><h2>23-week map</h2>
+      <table class="t2"><thead><tr><th>Wk</th><th>Phase</th><th>Week of</th><th>Shift</th><th>Long run</th><th>Runs</th></tr></thead><tbody id="planBody"></tbody></table></div>
+  </div>
+
+  <p class="legend" style="text-align:center;margin:8px 0 20px">Saves on this device. · <span id="resetLink" style="color:var(--teal);cursor:pointer;text-decoration:underline">reset my logs</span></p>
+</div>
+
+<script>
+const STRAVA="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__list_activities";
+const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week 0 Monday = Aug 31 2026
+const LONG=[6, 8,10,12,8, 14,16,18,12, 20,22,24,16, 25,27,29,20, 30,32,22, 34,26,16,8];
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const SHIFTS=[["2026-08-24","2026-09-20","AP"],["2026-09-21","2026-10-18","NA"],["2026-10-19","2026-11-15","EU"],["2026-11-16","2026-12-13","AP"],["2026-12-14","2027-01-10","NA"],["2027-01-11","2027-02-07","EU"],["2027-02-08","2027-02-14","AP"]];
+const TBR=[["Sep 15","BC1","Welcome + Marathon 101 (webinar)"],["Oct 11","BS1","Form workshop + 1hr run"],["Nov 5","BC2","Fueling & Hydration (webinar)"],["Nov 16","BS2","Group run up to 2hr"],["Dec 3","BC3","Gear & Shoes (webinar)"],["Dec 14","BS3","2h40 run"],["Dec 28","BS4","RACE SIMULATION 24–28km"],["Jan 7","BC4","Strategy & Mental (webinar)"],["Jan 11","BS5","2hr run"],["Jan 25","BS6","30km long run"],["Feb 4","BC5","Course Briefing (webinar)"],["Feb 12","—","Send-off + race kit"]];
+const XPW={main:50,protein:15,carbs:10,creatine:5,vitd:5,magnesium:5,hydration:10,sleep:15,bonus:10};
+const QUESTS=[
+ {key:"main",label:"Complete today's session",sub:"The one that keeps your 🔥 streak",xp:50,grp:"big"},
+ {key:"protein",label:"Protein",sub:"~165g across the day",xp:15,grp:"fuel"},
+ {key:"carbs",label:"Carbs",sub:"hit the day's carb target",xp:10,grp:"fuel"},
+ {key:"creatine",label:"Creatine 5g",sub:"every day",xp:5,grp:"fuel"},
+ {key:"vitd",label:"Vitamin D3",sub:"with a meal that has fat",xp:5,grp:"fuel"},
+ {key:"magnesium",label:"Magnesium",sub:"60–90 min pre-sleep",xp:5,grp:"fuel"},
+ {key:"hydration",label:"Hydration",sub:"3.5–4L",xp:10,grp:"solo"},
+ {key:"sleep",label:"7h Sleep",sub:"your #1 limiter — protect it",xp:15,grp:"solo"},
+ {key:"bonus",label:"Bonus",sub:"walk, mobility, extra pickleball",xp:10,grp:"solo"}];
+const NUT={rest:[1850,165,150,58],gym:[2000,168,195,55],quality:[2200,168,250,52],sat:[2050,168,205,52],long:[2500,168,300,62]};
+const LV=[[0,"First Steps 👟"],[200,"Couch Escapee"],[600,"Pavement Rookie"],[1400,"Sweat Equity"],[2800,"Engine Builder 🔧"],[4800,"Tempo Beast 🔥"],[7500,"Hill Hunter ⛰️"],[10500,"Long-Run Slayer 🐉"],[14000,"Taper Titan ⚡"],[18000,"TBR Dream Marathoner 🏅"]];
+const EFFORTS=[["😌","Very easy",2],["🙂","Easy",4],["😮‍💨","Moderate",6],["😤","Hard",8],["🥵","Very hard",9],["🫠","All-out",10]];
+const GARMIN_SEED=[{"date":"2026-06-01","rhr":56},{"date":"2026-06-05","rhr":63},{"date":"2026-06-10","rhr":69},{"date":"2026-06-14","rhr":70,"sleep":86},{"date":"2026-06-18","rhr":73},{"date":"2026-06-21","rhr":78},{"date":"2026-06-23","rhr":83}];
+
+// ---------- plan helpers ----------
+function keyOf(d){return d.toISOString().slice(0,10)}
+function weekNum(d){return Math.max(0,Math.min(23,Math.floor((d-START)/(7*DAY))))}
+function mondayOf(w){return new Date(START.getTime()+w*7*DAY)}
+function shiftFor(d){const k=keyOf(d);for(const[a,b,s]of SHIFTS)if(k>=a&&k<=b)return s;return "AP"}
+function phaseFor(w){if(w===0)return"Re-entry";if(w<=8)return"Rebuild";if(w<=16)return"Build";if(w<=20)return"Peak";return"Taper"}
+function phaseColor(p){return{"Re-entry":var_rest(),"Rebuild":"var(--base)","Build":"var(--build)","Peak":"var(--peak)","Taper":"var(--taper)"}[p]}
+function var_rest(){return "var(--rest)"}
+function runsPerWeek(w){return (w>=9&&w<=20)?3:2}
+function hasWedRun(w){return runsPerWeek(w)===3}
+function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}
+
+// Mon LONG · Tue UPPER · Wed rest→quality · Thu LOWER · Fri EASY RUN · Sat PICKLEBALL · Sun REST
+function mission(d){const wd=d.getDay(),w=weekNum(d);
+ if(wd===1){const km=LONG[w];return{emo:"🐉",t:`Long Run ${km}km`,d:km>=18?"Boss battle. Z2 + fuel: gels & electrolytes":"Boss battle. Easy Z2, conversational",type:"long"};}
+ if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart",type:"gym"};
+ if(wd===3)return hasWedRun(w)?{emo:"🏃",t:"Quality Run",d:"Tempo/intervals — earned in the Build phase",type:"quality"}:{emo:"🛌",t:"Rest day",d:"Full recovery. Optional 10-min mobility.",type:"rest"};
+ if(wd===4)return{emo:"🦵",t:"Lower Body (gym)",d:"Squat, hinge, single-leg + ankle & hamstring armor",type:"gym"};
+ if(wd===5)return{emo:"🏃",t:"Easy Run 30 min",d:"Short, easy, Zone 2. Podcast pace.",type:"easy"};
+ if(wd===6)return{emo:"🏓",t:"Pickleball",d:"Your cross-training. Play. Enjoy it.",type:"sat"};
+ return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook the week.",type:"rest"};
+}
+const WORKOUTS={
+ upper:{wu:["5 min easy bike/treadmill","Band pull-aparts 2×15","Arm circles + shoulder rolls"],
+  main:[
+   {ex:"Incline Chest Press",mc:"Hammer Strength Incline",sr:"4 × 8–12",note:"3s lower. RPE 7–8. Rest 90s.",tag:"Clavicle-safe: machine path, no bar to stabilise"},
+   {ex:"Lat Pulldown",mc:"Lat pulldown, wide grip",sr:"4 × 8–12",note:"Drive elbows down. Rest 90s."},
+   {ex:"Seated Shoulder Press",mc:"DB or machine",sr:"3 × 10–12",note:"Start light, pain-free ROM.",tag:"Gentle overhead reload for the left clavicle"},
+   {ex:"Chest-Supported Row",mc:"Hammer Strength Iso-Row",sr:"3 × 10–12",note:"Spares the low back for running."},
+   {ex:"Cable Lateral Raise",mc:"Cable, single arm",sr:"3 × 12–15",note:"Slow, no swing."},
+   {ex:"Face Pull",mc:"Cable + rope, high",sr:"3 × 15–20",note:"Don't skip.",tag:"Clavicle / AC-joint prehab"},
+   {ex:"DB Curl + Rope Pushdown",mc:"DBs / cable",sr:"3 × 12 each",note:"Superset to save time."},
+   {ex:"Pallof Press",mc:"Cable, mid-height",sr:"3 × 12/side",note:"Brace, resist rotation.",tag:"Anti-rotation core for running symmetry"}],
+  cd:["5 min easy walk","Doorway pec stretch 30s/side","Lat stretch 30s/side"]},
+ lower:{wu:["5 min bike","Leg swings 10/side","Bodyweight squats 2×15","Glute bridges 2×12"],
+  main:[
+   {ex:"Goblet → Back Squat",mc:"DB goblet → Barbell + rack",sr:"4 × 8–10",note:"RPE 7–8. Rest 2min."},
+   {ex:"Romanian Deadlift",mc:"Barbell or DBs",sr:"3 × 10–12",note:"LIGHT to start. Hinge, feel the stretch, no pain.",tag:"Hamstring rebuild — go slow after your strain"},
+   {ex:"Nordic Curl (assisted) or Leg Curl",mc:"Bench/partner, or leg curl machine",sr:"3 × 8–10",note:"Eccentric focus, 3–4s lower.",tag:"#1 exercise to prevent hamstring re-injury"},
+   {ex:"Bulgarian Split Squat",mc:"DBs, rear foot on bench",sr:"3 × 10/side (LEFT first)",note:"Rest 75s.",tag:"Left-leg balance (Evolt)"},
+   {ex:"Leg Press",mc:"45° leg press",sr:"3 × 12–15"},
+   {ex:"Calf Raise",mc:"Seated/standing calf machine",sr:"4 × 15–20",tag:"Ankle/Achilles armor — old sprains"},
+   {ex:"Tibialis Raise",mc:"Wall or tib bar",sr:"3 × 20",tag:"Shin & ankle prehab"},
+   {ex:"Plank / Side Plank",mc:"Mat",sr:"3 × 45s / 2 × 30s"}],
+  cd:["5 min easy walk","Quad + hip-flexor stretch 30s/side","GENTLE hamstring stretch 30s/side","Calf stretch 30s/side"]}};
+function runWO(d){const wd=d.getDay(),w=weekNum(d);
+ if(wd===1)return{wu:["First 1–2km very easy — that IS your warm-up"],main:[{ex:"Z2 long run "+LONG[w]+"km — by heart rate, run/walk allowed"},{ex:LONG[w]>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"}],cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch"]};
+ if(wd===5)return{wu:["First 5 min very easy"],main:[{ex:"Easy 30 min Zone 2 — conversational the whole way"},{ex:"Optional: 4 × 20s strides at the end"}],cd:["Walk 3–5 min","Calf + hamstring stretch"]};
+ if(wd===3&&hasWedRun(w)){const s=["WU 1.5km easy + 4 strides","3 × 5min @ tempo (90s jog)","CD 1km easy"];return{wu:[s[0]],main:[{ex:s[1],note:"Comfortably hard — you can speak short phrases"}],cd:[s[2],"Stretch"]};}
+ return null;}
+function workoutFor(d){const wd=d.getDay(),w=weekNum(d);
+ if(wd===2)return WORKOUTS.upper;
+ if(wd===4)return WORKOUTS.lower;
+ if(wd===1||wd===5||(wd===3&&hasWedRun(w)))return runWO(d);
+ if(wd===6)return{wu:["Dynamic warm-up: lunges, side shuffles, arm circles — 5 min"],main:[{ex:"Pickleball — play your session"},{ex:"Log it with the 🏓 button so tomorrow auto-adjusts"}],cd:["Light stretch, hydrate, electrolytes"]};
+ return{wu:["Move gently — no training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},{ex:d.getDay()===0?"🍱 Prep day — batch-cook the week (Food tab)":"Optional easy 20-min walk"}],cd:[]};
+}
+// ---------- food ----------
+const PREPWEEKS=[
+ {name:"Pad Kra Pao · Adobo · Lemon Chicken",A:{n:"Chicken Pad Kra Pao",how:"Diced breast: garlic, chili, fish+oyster sauce, Thai basil. Fresh fried egg on top.",tag:"❄️ fridge 3–4d"},B:{n:"Chicken Adobo (lean)",how:"Skinless breast: soy, vinegar, garlic, bay. Don't overcook.",tag:"🧊 freeze"},C:{n:"Lemon Chicken",how:"Pan-seared, light lemon-garlic sauce.",tag:"❄️ fridge 3–4d"},fish:{n:"Tilapia / tuna",tag:"🔥 fresh"},
+  cook:["1. Cook ~7 cups (dry) brown rice; portion.","2. Pad Kra Pao base (~6 portions).","3. Adobo (~5 portions) — freezes great.","4. Lemon chicken (~4).","5. Boil 8 eggs. Make kimchi/ginisa veg."],
+  shop:["Chicken breast ~2kg · eggs 3 dozen · brown rice ~1.3kg","Tilapia/tuna · Thai basil, garlic, chili","Soy, vinegar, oyster & fish sauce, calamansi, lemon, bay","Veg: broccoli, sayote, cauliflower, kangkong, sitaw + KIMCHI","Oats, chia, bread, bananas, fruit, kamote","Greek yogurt, whey, PB, almonds, olive oil, milk","Creatine, Vit D3, magnesium, electrolytes, gels"]},
+ {name:"Roast Chicken · Sinigang · Tofu",A:{n:"Roast Chicken",how:"Tray-roast: garlic, herbs, lemon.",tag:"🧊 freeze"},B:{n:"Sinigang (lean pork 1x ok)",how:"Sour tamarind broth + gulay. Broth separate.",tag:"🧊 freeze"},C:{n:"Tofu stir-fry / Pad Kra Pao",how:"Firm tofu, garlic, chili, basil, soy.",tag:"❄️ fridge 2–3d"},fish:{n:"Tilapia paksiw",tag:"🧊 freeze"},
+  cook:["1. Rice ~7 cups dry; portion.","2. Roast 2 trays chicken (~6).","3. Sinigang (~5), broth separate.","4. Tofu fresh through the week.","5. Boil 8 eggs. Kimchi + roasted veg."],
+  shop:["Chicken ~2kg · lean pork small · tofu 3 blocks · eggs 3 dozen · rice","Tilapia · tamarind mix, gabi, sitaw, kangkong","Garlic, herbs, lemon, soy, chili, basil","Veg: broccoli, cauliflower, sayote, chopsuey mix + KIMCHI","Oats, chia, bread, bananas, fruit","Yogurt, whey, PB, almonds, oil, milk","Supplements + electrolytes + gels"]},
+ {name:"Katsu+Curry · Burger Patties · Inasal",A:{n:"Chicken Katsu + JP Curry",how:"Panko breast (air-fry/bake) + batch curry sauce.",tag:"🧊 curry freezes · katsu: AIR-FRYER reheat"},B:{n:"Ground-Chicken Patties",how:"Ground breast, onion, garlic, egg bind.",tag:"🧊 freeze"},C:{n:"Chicken Inasal",how:"Calamansi-vinegar-lemongrass-achuete. Grill.",tag:"🧊 freeze"},fish:{n:"Salmon (sparing) / tuna",tag:"🔥 fresh"},
+  cook:["1. Rice ~7 cups dry.","2. Curry sauce batch + 5 katsu cutlets.","3. Patties (~6).","4. Inasal (~5).","5. Boil 8 eggs. Kimchi + veg."],
+  shop:["Chicken ~2.2kg (some ground) · eggs 3 dozen · rice","Salmon 1 fillet · panko, curry roux, carrot, potato, onion","Calamansi, vinegar, lemongrass, achuete, soy","Veg: broccoli, cauliflower, sayote + KIMCHI","Oats, chia, bread, buns, bananas, fruit","Yogurt, whey, PB, almonds, oil, milk","Supplements + electrolytes + gels"]},
+ {name:"Pad Kra Pao · Paksiw · Teriyaki",A:{n:"Chicken Pad Kra Pao",how:"Basil, chili, fish+oyster sauce; fried egg on top.",tag:"❄️ fridge 3–4d"},B:{n:"Chicken/Pork Paksiw",how:"Vinegar-braised. Keeps very well.",tag:"🧊 freeze"},C:{n:"Chicken Teriyaki (low-sugar)",how:"Soy, ginger, garlic, splash honey.",tag:"❄️ fridge 3–4d"},fish:{n:"Tuna bowl / tilapia",tag:"🔥 fresh"},
+  cook:["1. Rice ~7 cups dry.","2. Pad Kra Pao base (~6).","3. Paksiw (~5).","4. Teriyaki (~4).","5. Boil 8 eggs. Kimchi + ginisa veg."],
+  shop:["Chicken ~2kg · lean pork optional · eggs 3 dozen · rice","Tuna/tilapia · Thai basil, chili","Vinegar, soy, ginger, garlic, honey, fish+oyster sauce","Veg: broccoli, cauliflower, sayote, kangkong + KIMCHI","Oats, chia, bread, bananas, fruit, kamote","Yogurt, whey, PB, almonds, oil, milk","Supplements + electrolytes + gels"]}];
+const PREP_STORE="📦 🧊 freeze (Thu–Sun portions, thaw overnight) · ❄️ fridge 3–4 days · 🔥 cook fresh (fish, eggs, tofu, veg). Katsu reheats in an AIR-FRYER, not microwave. 🥬 Kimchi 4×/week — it's salty, so ease other salt those days. Whey every other day; off-days get protein from eggs/tofu, with overnight oats as the no-shake breakfast.";
+const ALT_BF="🔄 Shake-day swap: rolled oats (60g) + banana (120g) + fresh milk (250ml) + 1 scoop whey — ≈615 kcal · P44 C82 F14. (Oat milk? add ½ scoop whey to hold protein. Before a run, eat ~90 min prior.)";
+function altBF(slot){return /breakfast/i.test(slot)?`<div class="supp" style="background:#eef1f5;color:var(--navy)">${ALT_BF}</div>`:""}
+const DAYASSEMBLY={
+ 0:{type:"rest day · no shake · 🍱 PREP DAY",target:NUT.rest,slots:[
+  {slot:"Breakfast 🥣 (make night before)",food:"Overnight oats + 2 eggs",how:"oats (50g) + Greek yogurt (100g) + chia (10g) + banana (60g) + milk (100ml); 2 eggs (100g)",kcal:480,p:33,c:52,f:16,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"AM snack",food:"Greek yogurt + almonds",how:"yogurt (170g) + almonds (12g)",kcal:230,p:20,c:14,f:9},
+  {slot:"PM snack",food:"2 boiled eggs + apple",how:"2 eggs (100g) + apple (150g)",kcal:222,p:13,c:22,f:10},
+  {slot:"Lunch",food:"{B}",how:"160g portion + rice (130g) + broccoli (120g)",kcal:450,p:53,c:38,f:8},
+  {slot:"Dinner",food:"{A}",how:"160g portion + rice (120g) + 🥬 kimchi (80g)",kcal:440,p:52,c:36,f:8,supp:"Magnesium"}]},
+ 1:{type:"LONG RUN day · shake",target:NUT.long,slots:[
+  {slot:"Breakfast (≈90min pre-run)",food:"Bread + honey + banana",how:"3 slices (90g) + honey (35g) + banana (120g) + coffee",kcal:460,p:12,c:96,f:5},
+  {slot:"During run",food:"Gels + electrolytes",how:"30–60g carbs/hr if over 75 min · sip every 15 min",kcal:200,p:0,c:50,f:0,supp:"Sodium 300–700mg/hr"},
+  {slot:"Post-run 🥤",food:"Whey shake + rice + banana",how:"2 scoops whey (64g) + rice (150g) + banana (120g)",kcal:480,p:56,c:58,f:4,supp:"Creatine 5g"},
+  {slot:"Lunch",food:"{A}",how:"180g portion + fried egg (50g) + rice (250g) + gulay (120g)",kcal:700,p:57,c:86,f:14},
+  {slot:"Dinner",food:"{fish}",how:"fish (180g) + rice (200g) + ginisang veg (150g) + 2 tsp oil",kcal:660,p:46,c:58,f:20,supp:"Magnesium · Vitamin D3"}]},
+ 2:{type:"Upper gym · shake",target:NUT.gym,slots:[
+  {slot:"Breakfast",food:"3-egg veggie scramble + rice",how:"3 eggs (150g) + tomato/onion (90g) + 1 tsp oil + rice (140g)",kcal:440,p:30,c:44,f:15,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"Pre-workout",food:"Banana",how:"banana (120g) + coffee",kcal:110,p:1,c:27,f:0},
+  {slot:"Post-workout 🥤",food:"Whey + banana",how:"1 scoop whey (32g) + banana (120g)",kcal:230,p:28,c:33,f:2},
+  {slot:"Lunch",food:"{C}",how:"170g portion + rice (170g) + ginisang sayote (120g)",kcal:560,p:56,c:52,f:10},
+  {slot:"Dinner",food:"{A}",how:"160g portion + rice (140g) + 🥬 kimchi (80g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]},
+ 3:{type:"rest / quality run · no shake",target:NUT.quality,slots:[
+  {slot:"Breakfast 🥣 (make night before)",food:"Overnight oats + egg",how:"oats (50g) + yogurt (100g) + chia (10g) + banana (80g) + milk (100ml); 1 egg",kcal:470,p:26,c:62,f:12,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"Pre-run",food:"Banana + coffee",how:"banana (120g) — 45 min before",kcal:110,p:1,c:27,f:0},
+  {slot:"Post-run 🍳",food:"3-egg fried rice",how:"3 eggs (150g) + day-old rice (150g) + kangkong (50g) + 1 tsp oil",kcal:430,p:24,c:54,f:12},
+  {slot:"Lunch",food:"{B}",how:"170g portion + rice (190g) + cauliflower (120g)",kcal:620,p:55,c:62,f:10},
+  {slot:"Dinner",food:"{fish} / tofu",how:"fish (150g) or tofu (200g) + rice (140g) + pinakbet (120g)",kcal:520,p:46,c:46,f:13,supp:"Magnesium"}]},
+ 4:{type:"Lower gym · shake",target:NUT.gym,slots:[
+  {slot:"Breakfast",food:"Egg tapsilog-style",how:"3 eggs (150g) + garlic rice (150g) + tomato (60g)",kcal:450,p:30,c:46,f:15,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"Pre-workout",food:"Bread + peanut butter",how:"2 slices (60g) + PB (12g)",kcal:225,p:9,c:33,f:7},
+  {slot:"Post-workout 🥤",food:"Whey + banana",how:"1 scoop whey (32g) + banana (120g)",kcal:230,p:28,c:33,f:2},
+  {slot:"Lunch",food:"{A}",how:"170g portion + rice (170g) + 🥬 kimchi (80g)",kcal:560,p:56,c:52,f:10},
+  {slot:"Dinner",food:"{C}",how:"160g portion + rice (140g) + chopsuey (120g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]},
+ 5:{type:"easy run · no shake",target:NUT.gym,slots:[
+  {slot:"Breakfast 🥣",food:"Overnight oats + 2 eggs",how:"oats (50g) + yogurt (100g) + chia (10g) + banana (60g) + milk (100ml); 2 eggs",kcal:480,p:33,c:52,f:16,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"Pre-run",food:"Banana (optional)",how:"banana (120g) if hungry",kcal:110,p:1,c:27,f:0},
+  {slot:"Post-run 🍳",food:"3 boiled eggs + fruit",how:"3 eggs (150g) + apple (150g)",kcal:310,p:19,c:24,f:15},
+  {slot:"Lunch",food:"{B}",how:"170g portion + rice (170g) + ginisang sitaw (120g)",kcal:560,p:55,c:52,f:10},
+  {slot:"Dinner",food:"{fish} / tofu",how:"fish (150g) or tofu (200g) + rice (140g) + kangkong (120g)",kcal:500,p:44,c:44,f:12,supp:"Magnesium"}]},
+ 6:{type:"pickleball day · shake",target:NUT.sat,slots:[
+  {slot:"Breakfast",food:"Egg & cheese sandwich",how:"3 eggs (150g) + cheese (20g) + WW bread (60g) + fruit (120g)",kcal:470,p:30,c:46,f:17,supp:"Creatine 5g · Vitamin D3"},
+  {slot:"Pre-pickleball",food:"Banana + coffee",how:"banana (120g)",kcal:110,p:1,c:27,f:0},
+  {slot:"During/after 🥤",food:"Whey + banana + electrolytes",how:"1 scoop whey (32g) + banana (120g) · sip electrolytes if 2hr+",kcal:230,p:28,c:33,f:2},
+  {slot:"Lunch",food:"{C}",how:"170g portion + rice (160g) + 🥬 kimchi (80g)",kcal:560,p:55,c:50,f:10},
+  {slot:"Dinner",food:"{A}",how:"160g portion + rice (140g) + cauliflower (120g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]}};
+function prepIdx(d){return weekNum(d)%PREPWEEKS.length}
+function fillTokens(t,pw){return (t||"").replace("{A}",pw.A.n).replace("{B}",pw.B.n).replace("{C}",pw.C.n).replace("{fish}",pw.fish.n)}
+function dayPlan(d){const a=DAYASSEMBLY[d.getDay()],pw=PREPWEEKS[prepIdx(d)];
+ return {type:a.type,target:a.target,slots:a.slots.map(s=>({slot:s.slot,food:fillTokens(s.food,pw),how:fillTokens(s.how,pw),kcal:s.kcal,p:s.p,c:s.c,f:s.f,supp:s.supp||""}))};}
+function naDay(d){return shiftFor(d)==="NA" && [2,3,4,5,6].indexOf(d.getDay())>=0}
+function naTiming(slot){const s=(slot||"").toLowerCase();
+ if(s.indexOf("breakfast")>=0)return "at wake (~30 min after)";
+ if(s.indexOf("pre")>=0)return "~45 min before session";
+ if(s.indexOf("post")>=0||s.indexOf("during")>=0)return "within 45 min after";
+ if(s.indexOf("lunch")>=0)return "~2–3 hrs before shift";
+ if(s.indexOf("dinner")>=0)return "pre-shift meal (~1 hr before 10pm)";
+ return "";}
+const RECIPES=[
+ ["🍳 Eggs & breakfast",[["Overnight oats","Oats + Greek yogurt + chia + milk + banana; fridge overnight.","+2 eggs: ~480 · 33P"],["Tortang talong","Char eggplant, mash into egg, pan-fry.","2 eggs: 180 · 14P"],["Veggie scramble","Eggs + tomato, onion, malunggay.","3 eggs: 230 · 19P"],["Egg fried rice","Day-old rice + garlic + 3 eggs + kangkong.","430 · 24P"],["Boiled eggs (prep 8)","Instant protein all week.","each 78 · 6P"]]],
+ ["🍗 Chicken",[["Pad Kra Pao ⭐","Diced breast, garlic, chili, Thai basil, fish+oyster sauce, fried egg.","620 · 50P"],["Lemon Chicken","Seared breast, lemon-garlic-herb.","180g: 300 · 50P"],["Roast Chicken","Tray-roast, garlic/herbs/lemon.","180g: 320 · 50P"],["Katsu + JP Curry","Panko breast air-fried + curry sauce.","650 · 48P"],["Ground-chicken patties","Ground breast + onion, garlic, egg.","2: 360 · 46P"],["Inasal / Teriyaki / Adobo","Filipino staples, lean breast.","200g: 320–340 · 50P"]]],
+ ["🐟 Fish & 🌱 tofu",[["Salmon (sparing)","Pricey — 1×/wk treat.","150g: 280 · 34P"],["Tilapia / bangus","Grill or paksiw (freezes).","200g: 280–330 · 42P"],["Tuna rice bowl","Tuna + egg + veg + soy-sesame.","420 · 40P"],["Tofu stir-fry / sisig","Crisp tofu, basil/chili or calamansi.","300 · 24P"]]],
+ ["🥩 Pork (limited) & 🥬 veg",[["Sinigang / Paksiw","Lean cut, trim fat. Freezes.","360 · 38P"],["🥬 Kimchi (4×/wk)","Fermented, gut-friendly. Salty — ease other salt.","20"],["Broccoli / cauliflower","Steamed or ginisa.","45–80"],["Pinakbet / chopsuey / kangkong / sitaw","Rotate the gulay.","80–120"]]]];
+
+// ---------- state ----------
+const S={get(){try{return JSON.parse(localStorage.getItem("tbrhq2")||"{}")}catch(e){return{}}},set(o){localStorage.setItem("tbrhq2",JSON.stringify(o))}};
+function state(){const o=S.get();o.logs=o.logs||{};o.scans=o.scans||[];o.recovery=o.recovery||{};return o}
+function dayXP(l){if(!l)return 0;let x=0;for(const k in XPW)x+=(l[k]?XPW[k]:0);return x}
+function completed(d,l){const o=state();if(o.injured&&o.injuryStart&&keyOf(d)>=o.injuryStart&&d<=TODAY)return true;
+ if(!l||l.status==="missed"||l.status==="sick")return false;if(l.status==="rest")return true;
+ const t=mission(d).type;if(t==="rest")return !!l.sleep||dayXP(l)>=20;return !!l.main}
+function totalXP(o){let t=0;for(const k in o.logs)t+=dayXP(o.logs[k]);return t}
+function streak(o){let c=0,d=new Date(TODAY);if(!o.logs[keyOf(d)]&&!o.injured)d=new Date(d-DAY);
+ for(let i=0;i<400;i++){const l=o.logs[keyOf(d)];if(completed(d,l)){c++;d=new Date(d-DAY)}else break}return c}
+function trainStreak(o){let c=0,d=new Date(TODAY);for(let i=0;i<30;i++){const l=o.logs[keyOf(d)];const t=l&&(l.pball||(l.main&&mission(d).type!=="rest"));if(t){c++;d=new Date(d-DAY)}else break}return c}
+function levelInfo(xp){const fin=!!state().finished,TOP=LV.length-1,XPMAX=TOP-1;
+ let i=0;for(let k=0;k<=XPMAX;k++)if(xp>=LV[k][0])i=k;if(fin)i=TOP;
+ const atTop=i===TOP,finalLocked=(i===XPMAX&&!fin),nxt=atTop?null:LV[i+1];
+ return{name:LV[i][1],lvl:i+1,toNext:nxt?nxt[0]-xp:0,isMax:atTop,finalLocked}}
+const INAPP=!!(window.cowork&&window.cowork.callMcpTool);
+const TODAY=new Date(2026,7,31);
+(function(){const r=new Date();r.setHours(0,0,0,0);if(r>=new Date(2026,7,30)&&r<=RACE)TODAY.setTime(r.getTime())})();
+let cur=mission(TODAY),sessOff=0,prepView=-1;
+
+// ---------- render ----------
+function renderHero(o){o=o||state();const w=weekNum(TODAY);
+ document.getElementById("sCount").textContent=Math.max(0,Math.round((RACE-new Date())/DAY));
+ const xp=totalXP(o),li=levelInfo(xp);
+ document.getElementById("sXP").textContent=xp;
+ document.getElementById("sLevel").textContent=li.name;
+ document.getElementById("sLevelL").textContent="Lvl "+li.lvl+" ▸";
+ document.getElementById("xpLabel").textContent=li.isMax?"MAX 🏅":li.finalLocked?"🏁 Finish the race":"🔼 "+li.toNext+" XP to next";
+ document.getElementById("sStreak").textContent=streak(o)+"🔥";
+ document.getElementById("heroSub").textContent=`Paul · Wk ${w}/23 · ${phaseFor(w)} · ${shiftFor(TODAY)} shift`;
+ const pct=Math.max(0,Math.min(100,Math.round((TODAY-START)/(RACE-START)*100)));
+ document.getElementById("fill").style.width=pct+"%";document.getElementById("runner").style.left=pct+"%";
+ document.getElementById("raceL").textContent=`Week ${w} of 23 · ${phaseFor(w)}`;document.getElementById("raceR").textContent=pct+"% there";
+ renderDots(o);}
+function renderDots(o){const c=document.getElementById("dots");const n=Math.round((RACE-START)/DAY)+1;let left=0,html="";
+ for(let i=0;i<n;i++){const d=new Date(START.getTime()+i*DAY),log=o.logs[keyOf(d)];let cls="dot";
+  if(d<=TODAY){if(log&&log.status==="missed")cls+=" r";else if(log&&log.status==="sick")cls+=" y";else if(completed(d,log))cls+=" g"}else left++;
+  html+=`<span class="${cls}" title="${keyOf(d)}"></span>`}
+ c.innerHTML=html;document.getElementById("daysLeft").textContent=left+" to go";}
+function demoLink(q){const t=(q||"").replace(/\d+\s*[×x].*$/,"").replace(/\(.*?\)/g,"").trim()||q;return ` <a class="demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent('how to '+t+' proper form')}" target="_blank" rel="noopener">▶ demo</a>`}
+function renderSession(){const vd=new Date(TODAY.getTime()+sessOff*DAY),wo=workoutFor(vd),m=mission(vd),w=weekNum(vd),wd=vd.getDay();
+ document.getElementById("sessLabel").textContent=(sessOff===0?"Today":sessOff===1?"Tomorrow":WD[wd])+" · "+vd.toLocaleDateString('en-US',{month:'short',day:'numeric'})+" — "+m.emo+" "+m.t;
+ document.getElementById("sessPrev").disabled=sessOff===0;
+ document.getElementById("sessNext").textContent=(sessOff===0?"tomorrow ▶":"next day ▶");
+ const el=document.getElementById("session");const gym=!!(wo&&wo.main[0]&&wo.main[0].mc);let h="";
+ if(wo){
+  if(wo.wu&&wo.wu.length)h+=`<div class="sect"><div class="sh">🔥 Warm-up</div><ul>${wo.wu.map(x=>`<li>${x}${gym&&!/min|km/i.test(x)?demoLink(x):""}</li>`).join("")}</ul></div>`;
+  h+=`<div class="sect"><div class="sh">💥 Main</div>`;
+  if(gym){h+=`<table class="ex"><thead><tr><th>Exercise</th><th>Station</th><th>Sets × Reps</th></tr></thead><tbody>`+
+    wo.main.map(x=>`<tr><td><b>${x.ex}</b>${demoLink(x.ex)}${x.note?`<br><small class="dim">${x.note}</small>`:""}${x.tag?`<br><span class="tag">🎯 ${x.tag}</span>`:""}</td><td>${x.mc||""}</td><td class="b">${x.sr||""}</td></tr>`).join("")+`</tbody></table>`;}
+  else h+=`<ul>${wo.main.map(x=>`<li>${x.ex}${x.note?` — <small class="dim">${x.note}</small>`:""}</li>`).join("")}</ul>`;
+  h+=`</div>`;
+  if(wo.cd&&wo.cd.length)h+=`<div class="sect"><div class="sh">🧊 Cool-down</div><ul>${wo.cd.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+  if(wd===1)h+=`<div class="totline">📏 Total ≈ ${LONG[w]} km — first 1–2km easy is your warm-up.</div>`;
+  else if(wd===5)h+=`<div class="totline">📏 ~30 min ≈ 3.5–4 km. Short on purpose — just go.</div>`;
+ }
+ if(naDay(vd))h+=`<div class="totline" style="background:#fff3da;color:#9a6a00">🌙 NA shift — train <b>~2 hrs after waking, before your 10pm shift</b>.<br><span style="font-weight:400">7am finish → snack → 🕶️ blackout sleep 8am–3pm → wake &amp; eat → TRAIN → pre-shift meal → shift.</span></div>`;
+ if(sessOff===0){const done=(state().logs[keyOf(TODAY)]||{}).main;h+=`<button class="btn ${done?'g':'p'}" id="sessDone" style="margin-top:12px;width:100%;padding:11px">${done?'✓ Session completed — tap to undo':'Mark session done ✓  (+50 XP, keeps your streak)'}</button>`;}
+ else h+=`<div class="legend" style="margin-top:10px">👀 Previewing ahead — go back to Today to log it.</div>`;
+ el.innerHTML=h;
+ const b=document.getElementById("sessDone");if(b)b.onclick=()=>toggleQuest("main");}
+function renderMVW(o){const w=weekNum(TODAY),mon=mondayOf(w);let longDone=false,gymDone=0,pb=false;
+ for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l)continue;
+  const t=mission(d).type;if(t==="long"&&(l.main||l.pball))longDone=true;
+  if(t==="gym"&&l.main)gymDone++;if(l.pball||(t==="sat"&&l.main))pb=true;}
+ document.getElementById("mvwBox").innerHTML=
+  `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'pending'}</small></div>`+
+  `<div class="m ${gymDone>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gymDone} done</small></div>`+
+  `<div class="m ${pb?'hit':''}"><span class="e">🏓</span>Pickleball<br><small>${pb?'DONE':'pending'}</small></div>`;}
+function renderQuests(log){const c=document.getElementById("quests");
+ const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
+ c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
+ c.querySelectorAll(".qcheck").forEach(b=>b.onclick=()=>toggleQuest(b.dataset.k));}
+function toggleQuest(k){const o=state(),key=keyOf(TODAY);const l=o.logs[key]||{};l[k]=!l[k];o.logs[key]=l;S.set(o);renderToday()}
+function renderMeals(log){const plan=dayPlan(TODAY),done=log.meals||{};
+ document.getElementById("mealType").textContent="· "+plan.type;
+ let tk=0,tp=0,tc=0,tf=0;
+ document.getElementById("meals").innerHTML=plan.slots.map((m,i)=>{tk+=m.kcal;tp+=m.p;tc+=m.c;tf+=m.f;const dn=!!done[i];
+  return `<div class="meal ${dn?'mdone':''}"><div class="top"><span class="slot">${m.slot}${naDay(TODAY)?` <span class="natime">⏰ ${naTiming(m.slot)}</span>`:""}</span><div class="right"><span class="kcal">${m.kcal} kcal<br>P${m.p} C${m.c} F${m.f}</span><button class="mcheck ${dn?'on':''}" data-i="${i}">${dn?'✓':'＋'}</button></div></div><div class="food">${m.food}${m.how?` <span class="muted" style="font-size:11px">— ${m.how}</span>`:""}</div>${m.supp?`<div class="supp">💊 ${m.supp}</div>`:""}${altBF(m.slot)}</div>`}).join("");
+ document.getElementById("mealTotal").innerHTML=[["≈"+tk,"kcal"],[tp+"g","protein"],[tc+"g","carbs"],[tf+"g","fat"]].map(([v,k])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
+ const tg=plan.target;document.getElementById("mealTarget").textContent=`≈${tg[0]} kcal · ${tg[1]}g P · ${tg[2]}g C · ${tg[3]}g F`;
+ document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{const o=state(),key=keyOf(TODAY);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
+function renderToday(){const o=state();cur=mission(TODAY);
+ document.getElementById("todayDate").textContent=fmtDate(TODAY);
+ document.getElementById("mEmo").textContent=cur.emo;document.getElementById("mTitle").textContent=cur.t;document.getElementById("mDetail").textContent=cur.d;
+ const log=o.logs[keyOf(TODAY)]||{};
+ renderSession();renderMVW(o);
+ const er=document.getElementById("effRow");er.innerHTML="";
+ EFFORTS.forEach(([e,lab,rpe])=>{const el=document.createElement("div");el.className="effb"+(log.rpe===rpe?" on":"");el.innerHTML=`<span class="e">${e}</span>${lab}`;
+  el.onclick=()=>{const o2=state(),k=keyOf(TODAY);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});
+ renderMeals(log);renderQuests(log);
+ document.getElementById("noteBox").value=log.note||"";
+ const g=document.getElementById("guide");
+ if(log.status==="missed"){g.className="note adj";g.innerHTML="<b>Missed — own it, move on.</b> One day is a blip; three is a pattern. Get the next one."}
+ else if(log.status==="sick"){g.className="note adj";g.innerHTML="<b>🤒 Neck check:</b> above-neck (cold) → easy Z2 OK. Below-neck (chest/fever/aches) → REST until 24h symptom-free, then 50% volume 2–3 days."}
+ else if(log.status==="rest"){g.className="note";g.innerHTML="🛌 <b>Planned rest — streak protected.</b> Recovery IS training. Walk, stretch, hydrate, sleep."}
+ else g.className="note hide";
+ const ts=trainStreak(o),rw=document.getElementById("restWarn"),ib=document.getElementById("injuryBox");
+ if(o.injured){rw.className="hide";ib.className="note red";ib.innerHTML=`🩹 <b>Injury mode ON.</b> Running &amp; leg work PAUSED. Streak protected. <b>See a physio.</b><br><b>Return-to-run:</b> 1) pain-free walking → 2) walk-run 6–8×(1min jog/2min walk) → 3) continuous easy runs +5–10min → 4) after a pain-free easy week, add back long/quality. Any pain during or next morning → drop back a step.<br><span id="injuryOff" style="cursor:pointer;text-decoration:underline;font-weight:700">✅ I'm recovered — turn off</span>`;
+  const off=document.getElementById("injuryOff");if(off)off.onclick=()=>{const o2=state();o2.injured=false;S.set(o2);renderToday()};}
+ else{ib.className="hide";
+  if(ts>=6){rw.className="note red";rw.innerHTML=`🛑 <b>${ts} days straight, no rest.</b> Take a full rest day — you adapt on rest days, not through them.`}
+  else if(ts>=4){rw.className="note adj";rw.innerHTML=`⚠️ <b>${ts} days in a row.</b> Plan a rest day in the next day or two.`}
+  else rw.className="hide";}
+ renderHero(o);renderWeek(o);}
+function renderWeek(o){o=o||state();const w=weekNum(TODAY);
+ document.getElementById("weekCap").textContent="Week "+w+" · "+phaseFor(w)+" · long run "+LONG[w]+"km · "+runsPerWeek(w)+" runs";
+ const mon=mondayOf(w),strip=document.getElementById("weekStrip");strip.innerHTML="";
+ for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),log=o.logs[keyOf(d)];
+  let cls="day";if(log&&completed(d,log))cls+=" done";if(log&&log.status==="missed")cls+=" miss";if(log&&log.status==="sick")cls+=" sick";
+  if(keyOf(d)===keyOf(TODAY))cls+=" today";
+  const el=document.createElement("div");el.className=cls;el.innerHTML=`<div class="dn">${WD[d.getDay()]}</div><div class="de">${m.emo}</div>`;
+  if(d<=TODAY){el.style.cursor="pointer";const dk=keyOf(d);el.onclick=()=>{const o2=state();const l=o2.logs[dk]||{};l.main=!l.main;if(l.main)delete l.status;o2.logs[dk]=l;S.set(o2);renderToday()}}
+  strip.appendChild(el)}}
+function setStatus(s){const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
+function pickleAdvice(x){const tmr=mission(new Date(TODAY.getTime()+DAY)),t=tmr.type,hard=(x==="hard"),solid=(x==="solid");
+ let rec="";
+ if(t==="long")rec=hard?"keep it strict Z2, walk breaks OK, cut ~20–30% if legs are heavy":"run it easy Z2 — you'll be fine";
+ else if(t==="quality"||t==="easy")rec=hard?"make it an easy Z2 jog only":"proceed, bail to easy if legs feel heavy";
+ else if(t==="gym")rec=hard?"drop a set on the big lifts, warm up thoroughly":"proceed as normal";
+ else rec="perfect timing — let the legs recover";
+ const warn=hard?" 🦵 Big load — hydrate, protein tonight, watch the ankles and hamstring.":(solid?" Hydrate + protein tonight.":"");
+ return `🏓 Logged! Today credited. <b>Tomorrow (${tmr.t}):</b> ${rec}.${warn}`;}
+// buttons
+document.getElementById("pballBtn").onclick=()=>document.getElementById("pballPanel").classList.toggle("hide");
+document.querySelectorAll(".pbi").forEach(b=>b.onclick=()=>{const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};l.main=true;l.bonus=true;l.pball=b.dataset.i;delete l.status;o.logs[k]=l;S.set(o);
+ renderToday();document.getElementById("pballPanel").classList.add("hide");const g=document.getElementById("guide");g.className="note";g.innerHTML=pickleAdvice(b.dataset.i);});
+document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
+document.getElementById("injuryBtn").onclick=()=>{const o=state();if(o.injured){o.injured=false}else{if(!confirm("Turn ON injury mode? Pauses running & leg work and protects your streak while you heal."))return;o.injured=true;o.injuryStart=keyOf(TODAY);}S.set(o);renderToday()};
+document.getElementById("missBtn").onclick=()=>{if(confirm("Mark today missed? Streak resets."))setStatus("missed")};
+document.getElementById("sickBtn").onclick=()=>setStatus("sick");
+document.getElementById("noteSave").onclick=()=>{const o=state(),k=keyOf(TODAY);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};
+document.getElementById("coachBtn").onclick=async()=>{const cb=document.getElementById("coachBox");cb.classList.remove("hide");cb.textContent="Coach is thinking…";
+ if(!INAPP){cb.textContent="Coach is offline in the web version — but the mission is simple: "+cur.t+". Start with 20 minutes.";return}
+ try{const o=state();const r=await window.cowork.askClaude("You are Paul's marathon coach. He restarted Sept 1 after months of inconsistency. Give 2-3 short, warm but FIRM sentences for TODAY only. Session: "+cur.t+" — "+cur.d+". Phase "+phaseFor(weekNum(TODAY))+", "+shiftFor(TODAY)+" shift. No lists.",[{streak:streak(o)}]);
+  cb.textContent=(typeof r==="string"?r:(r&&r.text)||JSON.stringify(r))}catch(e){cb.textContent="Coach offline — but you know the mission: "+cur.t+". 20 minutes. Go."}};
+document.getElementById("levelTile").onclick=showLevels;
+document.getElementById("lvlClose").onclick=()=>document.getElementById("lvlModal").classList.add("hide");
+document.getElementById("lvlModal").onclick=e=>{if(e.target.id==="lvlModal")document.getElementById("lvlModal").classList.add("hide")};
+document.getElementById("sessNext").onclick=()=>{if(sessOff<20){sessOff++;renderSession()}};
+document.getElementById("sessPrev").onclick=()=>{if(sessOff>0){sessOff--;renderSession()}};
+document.getElementById("resetLink").onclick=()=>{if(confirm("Erase all saved data on this device?")){localStorage.removeItem("tbrhq2");location.reload()}};
+function showLevels(){const xp=totalXP(state()),li=levelInfo(xp),fin=!!state().finished,TOP=LV.length-1,reached=(new Date()>=RACE);
+ document.getElementById("lvlList").innerHTML=LV.map((l,idx)=>{const th=l[0],name=l[1],isF=idx===TOP,cu=(idx+1===li.lvl);
+  const un=isF?fin:(xp>=th),dn=un&&!cu,req=isF?(fin?"🏁 DONE":"🏁 Finish the race"):th+" XP";
+  return `<div class="lvlrow ${cu?'cur':''} ${dn?'done':''}"><span>${cu?'⭐ ':dn?'✅ ':'🔒 '}Lvl ${idx+1} · ${name}</span><span class="xpreq">${req}${cu?' · YOU':''}</span></div>`}).join("")
+  +`<div class="legend" style="margin-top:8px">You're at <b>${xp} XP</b>. ${li.isMax?'Maxed — legend. 🏅':li.finalLocked?'Lvl 10 unlocks only when you <b>finish the marathon</b>. 🏁':li.toNext+' XP to the next rank.'}</div>`
+  +(reached&&!fin?`<button class="btn p" id="finishBtn" style="width:100%;margin-top:10px;padding:11px">🏁 I finished the marathon!</button>`:"");
+ const fb=document.getElementById("finishBtn");if(fb)fb.onclick=()=>{if(confirm("Mark the TBR Dream Marathon as FINISHED? 🏅")){const o=state();o.finished=true;S.set(o);showLevels();renderHero();}};
+ document.getElementById("lvlModal").classList.remove("hide");}
+
+// RECOVERY
+const RHV={GREEN:["#1f9d6b","#e7f6ee","🟢"],AMBER:["#9a6a00","#fff8e6","🟡"],RED:["#d2563f","#fbe6df","🔴"]};
+let rcChart,wChart,bfChart;
+function numOr(id){const v=parseFloat(document.getElementById(id).value);return isNaN(v)?null:v}
+function recVerdict(s,hrv,rdy,bb,rhr,base){const red=[],amber=[];hrv=(hrv||"").toUpperCase();
+ if(rdy!=null&&rdy<40)red.push("readiness low");else if(rdy!=null&&rdy<70)amber.push("readiness moderate");
+ if(s!=null&&s<50)red.push("poor sleep");else if(s!=null&&s<70)amber.push("fair sleep");
+ if(hrv==="LOW"||hrv==="POOR")red.push("HRV low");else if(hrv==="UNBALANCED")amber.push("HRV unbalanced");
+ if(bb!=null&&bb<25)amber.push("low body battery");
+ if(rhr!=null&&base&&(rhr-base)>=7)amber.push("resting HR elevated");
+ return{state:red.length?"RED":(amber.length?"AMBER":"GREEN"),reasons:red.concat(amber)}}
+function regulation(st,t){if(st==="GREEN")return"Full send — hit today's "+cur.t+" as written.";
+ if(st==="AMBER"){const m={long:"Long run but firmly Z2, walk breaks OK.",quality:"Cut hard reps ~30%.",easy:"Keep it truly easy.",gym:"Drop 1 set, cap RPE 7.",sat:"Light/social pickleball.",rest:"Rest is exactly right."};return"Caution. "+(m[t]||"Ease off.")}
+ const m={long:"Cut ~30%, Z2/run-walk, or move it.",quality:"Swap for easy 30min Z2.",easy:"Walk instead.",gym:"Light technique day or rest.",sat:"Skip or very light.",rest:"Fully rest."};
+ return"Back off today. "+(m[t]||"Rest.")+" Protect sleep tonight."}
+function showVerdict(v,t){const a=RHV[v.state];const el=document.getElementById("verdict");el.classList.remove("hide");
+ el.innerHTML=`<div style="border-left:5px solid ${a[0]};background:${a[1]};border-radius:10px;padding:12px 14px"><div style="font-size:16px;font-weight:800;color:${a[0]}">${a[2]} ${v.state}</div>${v.reasons.length?`<div class="muted" style="font-size:12px;margin:3px 0 8px">${v.reasons.join(", ")}</div>`:`<div class="muted" style="font-size:12px;margin:3px 0 8px">All clear.</div>`}<div style="font-size:13.5px">${regulation(v.state,t)}</div></div>`}
+function renderLive(r){const cells=[["Sleep",r&&r.sleep!=null?r.sleep:"—"],["Body Batt",r&&r.bb!=null?r.bb:"—"],["Rest HR",r&&r.rhr!=null?r.rhr:"—"],["HRV",r&&r.hrv?r.hrv:"—"]];
+ document.getElementById("rcLive").innerHTML=cells.map(([k,v])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");}
+function renderRecovery(){const o=state(),r=o.recovery[keyOf(TODAY)];
+ const b=document.getElementById("rcBase");if(b)b.value=o.rhrBase!=null?o.rhrBase:70;
+ if(r){const g=id=>document.getElementById(id);
+  if(g("rcSleep")){g("rcSleep").value=r.sleep??"";g("rcHRV").value=r.hrv||"";g("rcBB").value=r.bb??"";g("rcRHR").value=r.rhr??"";g("rcRdy").value=r.rdy??"";}
+  showVerdict(recVerdict(r.sleep,r.hrv,r.rdy,r.bb,r.rhr,o.rhrBase??70),cur.type)}
+ renderLive(r);drawRecChart(o);
+ if(!r&&INAPP)garminPull(true);}
+async function garminPull(silent){const pm=document.getElementById("pullMsg"),o=state();
+ if(!INAPP){pm.innerHTML="📵 Live Garmin pull only works inside the Claude app. Use <b>Manual override</b> here.";document.getElementById("manualBox").classList.remove("hide");return}
+ pm.textContent="⌚ Pulling from Garmin…";
+ try{const res=await window.cowork.callMcpTool("mcp__garmin__get_recovery_summary",{resting_hr_baseline:o.rhrBase||70});
+  const d=res.structuredContent??JSON.parse(res.content[0].text);
+  const rec={sleep:d.sleep_score??null,hrv:d.hrv_status?(d.hrv_status[0]+d.hrv_status.slice(1).toLowerCase()):"",bb:d.body_battery??null,rhr:d.resting_hr??null,rdy:d.readiness??null};
+  const any=[rec.sleep,rec.bb,rec.rhr,rec.rdy].some(v=>v!=null);
+  if(any){o.recovery[keyOf(TODAY)]=rec;S.set(o);
+   pm.innerHTML="✅ <b>Live from your Garmin</b> — updated just now.";
+   renderLive(rec);showVerdict(recVerdict(rec.sleep,rec.hrv,rec.rdy,rec.bb,rec.rhr,o.rhrBase??70),cur.type);drawRecChart(o);renderHero();}
+  else{pm.innerHTML="⌚ Connected, but <b>no data for today</b> — watch not worn or not synced yet. Wear it overnight and refresh.";
+   document.getElementById("manualBox").classList.remove("hide");}
+ }catch(e){pm.innerHTML="⚠️ Couldn't reach the Garmin server. Check it's running and Claude was fully restarted. Using manual entry meanwhile.";
+  document.getElementById("manualBox").classList.remove("hide");}}
+function drawRecChart(o){const rec=o.recovery||{},ks=Object.keys(rec).sort();
+ if(rcChart)rcChart.destroy();
+ rcChart=new Chart(document.getElementById("rcChart"),{data:{labels:ks.length?ks.map(k=>k.slice(5)):["—"],datasets:[
+  {type:"line",label:"Sleep score",data:ks.map(k=>rec[k].sleep??null),borderColor:"#0E7C7B",yAxisID:"y",tension:.3,spanGaps:true},
+  {type:"line",label:"Resting HR",data:ks.map(k=>rec[k].rhr??null),borderColor:"#d2563f",yAxisID:"y1",tension:.3,spanGaps:true}]},
+  options:{responsive:true,maintainAspectRatio:false,scales:{y:{position:"left"},y1:{position:"right",grid:{drawOnChartArea:false}}}}})}
+document.getElementById("rcGo").onclick=()=>{const o=state(),b=parseFloat(document.getElementById("rcBase").value);if(!isNaN(b))o.rhrBase=b;
+ o.recovery[keyOf(TODAY)]={sleep:numOr("rcSleep"),hrv:document.getElementById("rcHRV").value,bb:numOr("rcBB"),rhr:numOr("rcRHR"),rdy:numOr("rcRdy")};S.set(o);renderRecovery();renderHero()};
+document.getElementById("seedBtn").onclick=()=>{const o=state();GARMIN_SEED.forEach(x=>{o.recovery[x.date]=Object.assign({},o.recovery[x.date],{rhr:x.rhr??null,sleep:x.sleep??null})});o.rhrBase=70;S.set(o);
+ document.getElementById("pullMsg").textContent="✅ Loaded "+GARMIN_SEED.length+" days.";renderRecovery();renderHero()};
+document.getElementById("garminPull").onclick=()=>garminPull(false);
+document.getElementById("manualToggle").onclick=()=>document.getElementById("manualBox").classList.toggle("hide");
+// PROGRESS
+function dayType(d){return mission(d).type==="gym"?"gym":mission(d).type==="long"?"long":mission(d).type==="quality"?"quality":mission(d).type==="sat"?"sat":mission(d).type==="rest"?"rest":"gym"}
+function trendPerWeek(sc){if(sc.length<2)return null;const a=sc[0],b=sc[sc.length-1],dd=(new Date(b.date)-new Date(a.date))/DAY;if(dd<5)return null;return (b.weight-a.weight)/dd*7}
+function renderProgress(){const o=state(),scans=o.scans.slice().sort((x,y)=>x.date<y.date?-1:1);
+ const wt=dayType(TODAY);let[kcal,p,c,fat]=NUT[wt];const slope=trendPerWeek(scans.filter(s=>s.weight!=null));
+ const nn=document.getElementById("nutNote");let adj=0,msg="";
+ if(slope===null)msg="Log 2+ scans a week apart and I'll auto-tune from the real trend.";
+ else if(slope>-0.15){adj=-150;msg=`Trend ≈ ${slope.toFixed(2)} kg/wk — too slow. Trimming ~150 kcal.`}
+ else if(slope<-0.7){adj=150;msg=`Trend ≈ ${slope.toFixed(2)} kg/wk — too fast. Adding ~150 kcal to protect muscle.`}
+ else msg=`Trend ≈ ${slope.toFixed(2)} kg/wk — on track. Hold. 💪`;
+ kcal+=adj;c=Math.max(120,c+Math.round(adj/4));nn.className="note"+(adj?" adj":"");nn.textContent=msg;
+ document.getElementById("nutDay").textContent=`${WD[TODAY.getDay()]} · ${wt.toUpperCase()} day`;
+ document.getElementById("macro").innerHTML=[["kcal",kcal],["Protein",p+"g"],["Carbs",c+"g"],["Fat",fat+"g"]].map(([k,v])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
+ const wD=scans.filter(s=>s.weight!=null),bD=scans.filter(s=>s.bf!=null);
+ if(wChart)wChart.destroy();if(bfChart)bfChart.destroy();const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+ wChart=new Chart(document.getElementById("wChart"),{type:"line",data:{labels:wD.length?wD.map(s=>s.date.slice(5)):["start"],datasets:[{data:wD.length?wD.map(s=>s.weight):[78.2],borderColor:"#0E7C7B",backgroundColor:"rgba(14,124,123,.12)",fill:true,tension:.3},{data:(wD.length?wD:[0]).map(_=>72),borderColor:"#d2563f",borderDash:[6,5],pointRadius:0}]},options:co});
+ bfChart=new Chart(document.getElementById("bfChart"),{type:"line",data:{labels:bD.length?bD.map(s=>s.date.slice(5)):["start"],datasets:[{data:bD.length?bD.map(s=>s.bf):[23.9],borderColor:"#1F3A5F",backgroundColor:"rgba(31,58,95,.12)",fill:true,tension:.3},{data:(bD.length?bD:[0]).map(_=>18),borderColor:"#d2563f",borderDash:[6,5],pointRadius:0}]},options:co});}
+document.getElementById("scAdd").onclick=()=>{const o=state(),d=document.getElementById("scDate").value||keyOf(TODAY),w=parseFloat(document.getElementById("scW").value),bf=parseFloat(document.getElementById("scBF").value);
+ if(isNaN(w)&&isNaN(bf)){alert("Enter weight and/or body fat %");return}
+ o.scans=o.scans.filter(s=>s.date!==d);o.scans.push({date:d,weight:isNaN(w)?null:w,bf:isNaN(bf)?null:bf});S.set(o);
+ document.getElementById("scW").value="";document.getElementById("scBF").value="";renderProgress()};
+// FOOD
+function renderFood(){const cu=prepIdx(TODAY);if(prepView<0)prepView=cu;const pwI=prepView,pw=PREPWEEKS[pwI];
+ document.getElementById("prepWeek").innerHTML=
+  `<div class="sessnav"><button id="prevWk" class="navb">◀ prev</button><span id="prepLabel" class="b">Prep Week ${pwI+1} / ${PREPWEEKS.length}${pwI===cu?" · THIS WEEK":""}</span><button id="nextWk" class="navb">next ▶</button></div>`+
+  `<h2 style="margin-top:4px">🍱 ${pw.name}</h2><p class="cap">${pwI===cu?"Your current week — ":"📅 Future week (grocery planning) — "}batch-cook Sunday, portion, assemble daily.</p>`+
+  `<div class="rgroup"><div class="rgh">This week's 3 mains</div>`+
+   `<div class="ritem"><b>🅰 ${pw.A.n}</b> <span class="rm">${pw.A.tag}</span><div class="muted" style="font-size:11.5px">${pw.A.how}</div></div>`+
+   `<div class="ritem"><b>🅱 ${pw.B.n}</b> <span class="rm">${pw.B.tag}</span><div class="muted" style="font-size:11.5px">${pw.B.how}</div></div>`+
+   `<div class="ritem"><b>🅲 ${pw.C.n}</b> <span class="rm">${pw.C.tag}</span><div class="muted" style="font-size:11.5px">${pw.C.how}</div></div>`+
+   `<div class="ritem"><b>🐟 ${pw.fish.n}</b> <span class="rm">${pw.fish.tag}</span> · 🍳 eggs &amp; 🌱 tofu fresh daily</div></div>`+
+  `<div class="rgroup"><div class="rgh">👨‍🍳 Sunday cook</div>`+pw.cook.map(x=>`<div class="ritem">${x}</div>`).join("")+`</div>`+
+  `<div class="rgroup"><div class="rgh">🛒 Shopping list</div>`+pw.shop.map(x=>`<div class="ritem">${x}</div>`).join("")+`</div>`+
+  `<div class="note">${PREP_STORE}</div>`;
+ document.getElementById("prevWk").onclick=()=>{prepView=(prepView+PREPWEEKS.length-1)%PREPWEEKS.length;renderFood()};
+ document.getElementById("nextWk").onclick=()=>{prepView=(prepView+1)%PREPWEEKS.length;renderFood()};
+ const w=weekNum(TODAY),mon=mondayOf(w);let h="";
+ for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),td=keyOf(d)===keyOf(TODAY),plan=dayPlan(d);
+  h+=`<div class="dcard ${td?'dtoday':''}"><div class="dhead"><span class="dt">${WD[d.getDay()]} ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${td?' · TODAY':''}</span><span class="muted">${plan.type} · ≈${plan.target[0]} kcal</span></div>`+
+   plan.slots.map(s=>`<div class="fslot"><div><b>${s.slot}</b>${naDay(d)?` <span class="natime">⏰ ${naTiming(s.slot)}</span>`:""} — ${s.food}${s.how?`<div class="muted" style="font-size:11px">${s.how}</div>`:""}${s.supp?`<div class="supp">💊 ${s.supp}</div>`:""}</div><div class="fk">${s.kcal}<br>${s.p}/${s.c}/${s.f}</div></div>`).join("")+`</div>`;}
+ document.getElementById("weekFood").innerHTML=h;
+ document.getElementById("recipeBank").innerHTML=RECIPES.map(([g,items])=>`<div class="rgroup"><div class="rgh">${g}</div>`+items.map(([n,how,m])=>`<div class="ritem"><b>${n}</b> <span class="rm">${m}</span><div class="muted" style="font-size:11.5px">${how}</div></div>`).join("")+`</div>`).join("");}
+// RUNS
+function pace(sec,m){if(!m)return"—";const s=sec/(m/1000),mm=Math.floor(s/60),ss=Math.round(s%60);return mm+":"+String(ss).padStart(2,"0")}
+async function loadRuns(){const body=document.getElementById("actBody");
+ if(!INAPP){document.getElementById("stravaMsg").textContent="📵 Live Strava sync only works inside the Claude app.";body.innerHTML='<tr><td colspan="5" class="muted">Open in the Claude app for live runs.</td></tr>';return}
+ try{const r=await window.cowork.callMcpTool(STRAVA,{first:20});const data=r.structuredContent??JSON.parse(r.content[0].text);const acts=data.activities||[];
+  const t0=new Date(TODAY),dfm=(t0.getDay()+6)%7,mon=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()-dfm),sun=new Date(mon.getTime()+7*DAY);let km=0,nr=0;
+  acts.forEach(a=>{const dt=new Date(a.start_local);if(/run/i.test(a.sport_type)&&dt>=mon&&dt<sun){km+=a.summary.distance/1000;nr++}});
+  document.getElementById("wkKm").textContent=km.toFixed(1);document.getElementById("wkRuns").textContent=nr;document.getElementById("wkPlan").textContent=LONG[weekNum(mon)]+"km";
+  document.getElementById("wkRange").textContent="("+mon.toLocaleDateString("en-US",{month:"short",day:"numeric"})+"–"+new Date(sun-DAY).toLocaleDateString("en-US",{month:"short",day:"numeric"})+")";
+  document.getElementById("stravaMsg").textContent="✅ Live from Strava.";
+  body.innerHTML=acts.slice(0,12).map(a=>{const k=(a.summary.distance/1000).toFixed(2),t=Math.round(a.summary.moving_time/60),run=/run/i.test(a.sport_type);
+   return `<tr><td>${new Date(a.start_local).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${a.name}<br><small class="dim">${a.sport_type}</small></td><td>${k} km</td><td>${t} min</td><td>${run?pace(a.summary.moving_time,a.summary.distance)+"/km":"—"}</td></tr>`}).join("")}
+ catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="5">Unavailable.</td></tr>'}}
+// PLAN
+function renderPlan(){
+ document.getElementById("planHow").innerHTML=`
+ <div class="rgroup"><div class="rgh">Your week (5 training days, 2 rest)</div>
+ <div class="ritem"><b>Mon</b> 🐉 LONG RUN — the one that builds the marathon</div>
+ <div class="ritem"><b>Tue</b> 💪 Upper gym</div>
+ <div class="ritem"><b>Wed</b> 🛌 Rest → becomes 🏃 Quality Run from Week 9</div>
+ <div class="ritem"><b>Thu</b> 🦵 Lower gym</div>
+ <div class="ritem"><b>Fri</b> 🏃 Easy run 30 min</div>
+ <div class="ritem"><b>Sat</b> 🏓 Pickleball — your cross-training, guilt-free</div>
+ <div class="ritem"><b>Sun</b> 🛌 Rest + 🍱 batch-cook</div></div>
+ <div class="rgroup"><div class="rgh">The rules</div>
+ <div class="ritem"><b>1. The long run is sacred.</b> Miss anything else first. It's the only session that can't be replaced.</div>
+ <div class="ritem"><b>2. The 20-minute rule.</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div>
+ <div class="ritem"><b>3. Minimum viable week.</b> Long run + 1 gym + pickleball = the week counts. Everything else is upside.</div>
+ <div class="ritem"><b>4. Night-shift weeks:</b> drop to the 3 non-negotiables. Survive, don't conquer.</div>
+ <div class="ritem"><b>5. The 6th day is earned.</b> String 4 consistent weeks and you unlock an optional Sunday upper session.</div></div>`;
+ const w=weekNum(TODAY),mon=mondayOf(w);document.getElementById("wdTag").textContent="— Week "+w+"/23 · "+phaseFor(w)+" · "+shiftFor(TODAY)+" shift";
+ let h="";
+ for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),wo=workoutFor(d),td=keyOf(d)===keyOf(TODAY);
+  const doTxt=wo?wo.main.map(x=>x.ex).join(" · "):"—";const tg=dayPlan(d).target;
+  h+=`<div class="dcard ${td?'dtoday':''}"><div class="dhead"><span class="dt">${WD[d.getDay()]} ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${td?' · TODAY':''}</span><span>${m.emo} ${m.t}</span></div><div class="dctx">${m.d}</div><div class="dmain"><b>Do:</b> ${doTxt}</div><div class="dnut">🍽 ≈${tg[0]} kcal · ${tg[1]}g protein</div></div>`;}
+ document.getElementById("weekDetail").innerHTML=h;
+ document.getElementById("tbrList").innerHTML=TBR.map(([d,c,t])=>`<div class="tbr"><span><b>${d}</b> · ${c}</span><span class="muted">${t}</span></div>`).join("");
+ const pb=document.getElementById("planBody");pb.innerHTML="";
+ for(let k=0;k<=23;k++){const p=phaseFor(k),mo=mondayOf(k),s=shiftFor(mo);const tr=document.createElement("tr");if(k===w)tr.style.outline="2px solid var(--teal)";
+  tr.innerHTML=`<td class="b">${k}</td><td><span class="pill" style="background:${phaseColor(p)}">${p}</span></td><td>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${s}</td><td class="b">${k===23?"42.2 🏁":LONG[k]+"km"}</td><td>${runsPerWeek(k)}</td>`;pb.appendChild(tr)}}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+ ["today","recovery","progress","food","runs","plan"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
+ if(t.dataset.t==="recovery")renderRecovery();if(t.dataset.t==="progress")renderProgress();if(t.dataset.t==="food")renderFood();if(t.dataset.t==="runs")loadRuns();if(t.dataset.t==="plan")renderPlan()});
+document.getElementById("scDate").value=keyOf(TODAY);
+renderToday();loadRuns();
+</script>
+</body>
+</html>
