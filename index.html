@@ -309,6 +309,11 @@ small.dim{color:var(--mut);font-size:11px}
 
   <!-- PLAN -->
   <div id="plan" class="hide">
+    <div class="card"><h2>❤️ Your heart-rate zones <small class="dim">— from your own Garmin data</small></h2>
+      <p class="cap">Max HR <b>196</b> (measured, not estimated) · resting ~62. Run to these numbers, not to pace.</p>
+      <table class="t2"><thead><tr><th>Use</th><th>BPM</th><th>Feels like</th></tr></thead><tbody id="hrBody"></tbody></table>
+      <div class="note">💡 In heat, pace lies but heart rate doesn't. If HR climbs on a hot day, <b>slow down</b> — the zone is the target, not the pace.</div>
+    </div>
     <div class="card"><h2>How this plan works 📖</h2><div id="planHow"></div></div>
     <div class="card"><h2>This week — day by day <small class="dim" id="wdTag"></small></h2><div id="weekDetail"></div></div>
     <div class="card"><h2>TBR Dream official events <small class="dim">(in your fee)</small></h2><div id="tbrList"></div>
@@ -325,6 +330,15 @@ const STRAVA="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__list_activities";
 const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week 0 Monday = Aug 31 2026
 const LONG=[6, 8,10,12,8, 14,16,18,12, 20,22,24,16, 25,27,29,20, 30,32,22, 34,26,16,8];
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+// HR zones from YOUR Garmin data: max 196 (measured), resting ~62 → Karvonen
+const HRMAX=196, HRREST=62;
+const HRZ={recovery:"<135",easy:"135–152",steady:"152–160",mp:"158–168",tempo:"168–180",interval:"180–196"};
+const HRTABLE=[["Recovery / walk-jog","<135","Very easy, nose-breathing"],
+ ["🟢 Easy & Long runs","135–152","Conversational — 80% of your running"],
+ ["Steady aerobic","152–160","Comfortable, sentences get shorter"],
+ ["🎯 Marathon pace","158–168","Your race-day effort"],
+ ["🔥 Tempo / Threshold","168–180","Comfortably hard, few words"],
+ ["⚡ Intervals","180–196","Hard. Short reps only"]];
 const SHIFTS=[["2026-08-24","2026-09-20","AP"],["2026-09-21","2026-10-18","NA"],["2026-10-19","2026-11-15","EU"],["2026-11-16","2026-12-13","AP"],["2026-12-14","2027-01-10","NA"],["2027-01-11","2027-02-07","EU"],["2027-02-08","2027-02-14","AP"]];
 const TBR=[["Sep 15","BC1","Welcome + Marathon 101 (webinar)"],["Oct 11","BS1","Form workshop + 1hr run"],["Nov 5","BC2","Fueling & Hydration (webinar)"],["Nov 16","BS2","Group run up to 2hr"],["Dec 3","BC3","Gear & Shoes (webinar)"],["Dec 14","BS3","2h40 run"],["Dec 28","BS4","RACE SIMULATION 24–28km"],["Jan 7","BC4","Strategy & Mental (webinar)"],["Jan 11","BS5","2hr run"],["Jan 25","BS6","30km long run"],["Feb 4","BC5","Course Briefing (webinar)"],["Feb 12","—","Send-off + race kit"]];
 const XPW={main:50,protein:15,carbs:10,creatine:5,vitd:5,magnesium:5,hydration:10,sleep:15,bonus:10};
@@ -357,11 +371,11 @@ function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"s
 
 // Mon LONG · Tue UPPER · Wed rest→quality · Thu LOWER · Fri EASY RUN · Sat PICKLEBALL · Sun REST
 function mission(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1){const km=LONG[w];return{emo:"🐉",t:`Long Run ${km}km`,d:km>=18?"Boss battle. Z2 + fuel: gels & electrolytes":"Boss battle. Easy Z2, conversational",type:"long"};}
+ if(wd===1){const km=LONG[w];return{emo:"🐉",t:`Long Run ${km}km`,d:`Keep HR ${HRZ.easy} bpm`+(km>=18?" · fuel: gels + electrolytes":" · conversational the whole way"),type:"long"};}
  if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart",type:"gym"};
- if(wd===3)return hasWedRun(w)?{emo:"🏃",t:"Quality Run",d:"Tempo/intervals — earned in the Build phase",type:"quality"}:{emo:"🛌",t:"Rest day",d:"Full recovery. Optional 10-min mobility.",type:"rest"};
+ if(wd===3)return hasWedRun(w)?{emo:"🏃",t:"Quality Run",d:`Tempo reps at ${HRZ.tempo} bpm · recover under 145`,type:"quality"}:{emo:"🛌",t:"Rest day",d:"Full recovery. Optional 10-min mobility.",type:"rest"};
  if(wd===4)return{emo:"🦵",t:"Lower Body (gym)",d:"Squat, hinge, single-leg + ankle & hamstring armor",type:"gym"};
- if(wd===5)return{emo:"🏃",t:"Easy Run 30 min",d:"Short, easy, Zone 2. Podcast pace.",type:"easy"};
+ if(wd===5)return{emo:"🏃",t:"Easy Run 30 min",d:`Short & easy — HR ${HRZ.easy} bpm. Podcast pace.`,type:"easy"};
  if(wd===6)return{emo:"🏓",t:"Pickleball",d:"Your cross-training. Play. Enjoy it.",type:"sat"};
  return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook the week.",type:"rest"};
 }
@@ -389,9 +403,17 @@ const WORKOUTS={
    {ex:"Plank / Side Plank",mc:"Mat",sr:"3 × 45s / 2 × 30s"}],
   cd:["5 min easy walk","Quad + hip-flexor stretch 30s/side","GENTLE hamstring stretch 30s/side","Calf stretch 30s/side"]}};
 function runWO(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1)return{wu:["First 1–2km very easy — that IS your warm-up"],main:[{ex:"Z2 long run "+LONG[w]+"km — by heart rate, run/walk allowed"},{ex:LONG[w]>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"}],cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch"]};
- if(wd===5)return{wu:["First 5 min very easy"],main:[{ex:"Easy 30 min Zone 2 — conversational the whole way"},{ex:"Optional: 4 × 20s strides at the end"}],cd:["Walk 3–5 min","Calf + hamstring stretch"]};
- if(wd===3&&hasWedRun(w)){const s=["WU 1.5km easy + 4 strides","3 × 5min @ tempo (90s jog)","CD 1km easy"];return{wu:[s[0]],main:[{ex:s[1],note:"Comfortably hard — you can speak short phrases"}],cd:[s[2],"Stretch"]};}
+ if(wd===1)return{wu:[`First 1–2km very easy (HR under 140) — that IS your warm-up`],
+  main:[{ex:`Long run ${LONG[w]}km — hold HR ${HRZ.easy} bpm`,note:"If HR drifts above 155, walk 60s. Run/walk is allowed and smart."},
+        {ex:LONG[w]>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"}],
+  cd:["Walk 5 min until HR under 120","Refuel within 45 min (protein + carbs)","Gentle stretch"]};
+ if(wd===5)return{wu:["First 5 min very easy, let HR rise gradually"],
+  main:[{ex:`Easy 30 min — HR ${HRZ.easy} bpm`,note:"Conversational. If you can't speak a full sentence, slow down."},
+        {ex:"Optional: 4 × 20s strides at the end (HR will spike — that's fine, it's brief)"}],
+  cd:["Walk 3–5 min","Calf + hamstring stretch"]};
+ if(wd===3&&hasWedRun(w))return{wu:["WU 1.5km easy (HR under 145) + 4 × 20s strides"],
+  main:[{ex:`3 × 5 min at HR ${HRZ.tempo} bpm`,note:"Comfortably hard. Jog 90s between until HR drops under 145."}],
+  cd:["CD 1km easy, HR under 140","Stretch"]};
  return null;}
 function workoutFor(d){const wd=d.getDay(),w=weekNum(d);
  if(wd===2)return WORKOUTS.upper;
@@ -738,6 +760,7 @@ async function loadRuns(){const body=document.getElementById("actBody");
  catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="5">Unavailable.</td></tr>'}}
 // PLAN
 function renderPlan(){
+ document.getElementById("hrBody").innerHTML=HRTABLE.map(([u,b,f])=>`<tr><td><b>${u}</b></td><td class="b" style="color:var(--teal);white-space:nowrap">${b}</td><td><small>${f}</small></td></tr>`).join("");
  document.getElementById("planHow").innerHTML=`
  <div class="rgroup"><div class="rgh">Your week (5 training days, 2 rest)</div>
  <div class="ritem"><b>Mon</b> 🐉 LONG RUN — the one that builds the marathon</div>
