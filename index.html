@@ -180,6 +180,7 @@ small.dim{color:var(--mut);font-size:11px}
       <h2>This week's 3 non-negotiables</h2>
       <p class="cap">If life explodes, these 3 are the floor. Hit them and the week counts.</p>
       <div class="mvw" id="mvwBox"></div>
+      <div id="volBar"></div>
     </div>
 
     <div class="card">
@@ -206,20 +207,11 @@ small.dim{color:var(--mut);font-size:11px}
       <h2>Today's quests</h2>
       <div id="quests"></div>
       <div class="row">
-        <button class="btn g" id="pballBtn">🏓 Played pickleball</button>
         <button class="btn g" id="restBtn" style="background:#e3f0ff;color:#1F3A5F">🛌 Rest (planned)</button>
         <button class="btn g" id="injuryBtn" style="background:#fde8e0;color:#b03a1e">🩹 Injury mode</button>
         <button class="btn warn" id="missBtn">Missed</button>
         <button class="btn sick" id="sickBtn">Sick</button>
         <button class="btn g" id="coachBtn">Ask Coach 🧠</button>
-      </div>
-      <div class="hide" id="pballPanel" style="margin-top:10px">
-        <div class="cap" style="margin-bottom:6px">How hard was it? (credits today &amp; adjusts tomorrow)</div>
-        <div class="row" style="margin-top:0">
-          <button class="btn g pbi" data-i="casual">🟢 Casual (~1hr)</button>
-          <button class="btn g pbi" data-i="solid">🟡 Solid (2hr)</button>
-          <button class="btn g pbi" data-i="hard">🔴 Hard (3hr+)</button>
-        </div>
       </div>
       <div class="coachbox hide" id="coachBox"></div>
       <div class="note hide" id="guide"></div>
@@ -319,7 +311,7 @@ small.dim{color:var(--mut);font-size:11px}
     <div class="card"><h2>TBR Dream official events <small class="dim">(in your fee)</small></h2><div id="tbrList"></div>
       <p class="legend">Bull Sessions = group long runs. Swap your Monday long run to these when you want company.</p></div>
     <div class="card"><h2>23-week map</h2>
-      <table class="t2"><thead><tr><th>Wk</th><th>Phase</th><th>Week of</th><th>Shift</th><th>Long run</th><th>Runs</th></tr></thead><tbody id="planBody"></tbody></table></div>
+      <table class="t2"><thead><tr><th>Wk</th><th>Phase</th><th>Week of</th><th>Shift</th><th>Long run</th><th>Week km</th><th>Focus</th></tr></thead><tbody id="planBody"></tbody></table></div>
   </div>
 
   <p class="legend" style="text-align:center;margin:8px 0 20px">Saves on this device. · <span id="resetLink" style="color:var(--teal);cursor:pointer;text-decoration:underline">reset my logs</span></p>
@@ -328,7 +320,13 @@ small.dim{color:var(--mut);font-size:11px}
 <script>
 const STRAVA="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__list_activities";
 const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week 0 Monday = Aug 31 2026
-const LONG=[6, 8,10,12,8, 14,16,18,12, 20,22,24,16, 25,27,29,20, 30,32,22, 34,26,16,8];
+// index = week number (0–23). Long run km, weekly volume km, easy-run km, quality-run km
+const LONG   =[ 6,  8, 10, 12,  8, 14, 16, 18, 12, 20, 22, 24, 16, 25, 27, 29, 20, 30, 32, 22, 32, 24, 16,  8];
+const WEEKLY =[18, 21, 24, 27, 21, 30, 34, 36, 28, 40, 43, 46, 35, 48, 52, 54, 41, 56, 58, 45, 58, 45, 33, 20];
+const EASYKM =[ 4,  4,  5,  5,  4,  5,  6,  6,  5,  6,  7,  7,  6,  8,  8,  8,  7,  9,  9,  7,  9,  7,  6,  5];
+// Marathon-pace work inside the long run (km at MP), from week 13
+const MPKM   =[ 0,0,0,0,0, 0,0,0,0, 0,0,0,0, 5, 6, 8, 0, 10, 8, 0, 10, 6, 0, 0];
+const RACESIM={17:"RACE REHEARSAL #1",20:"RACE REHEARSAL #2"};
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 // HR zones from YOUR Garmin data: max 196 (measured), resting ~62 → Karvonen
 const HRMAX=196, HRREST=62;
@@ -365,18 +363,27 @@ function shiftFor(d){const k=keyOf(d);for(const[a,b,s]of SHIFTS)if(k>=a&&k<=b)re
 function phaseFor(w){if(w===0)return"Re-entry";if(w<=8)return"Rebuild";if(w<=16)return"Build";if(w<=20)return"Peak";return"Taper"}
 function phaseColor(p){return{"Re-entry":var_rest(),"Rebuild":"var(--base)","Build":"var(--build)","Peak":"var(--peak)","Taper":"var(--taper)"}[p]}
 function var_rest(){return "var(--rest)"}
-function runsPerWeek(w){return (w>=9&&w<=20)?3:2}
-function hasWedRun(w){return runsPerWeek(w)===3}
+function runsPerWeek(w){return 4}
+function qualityKind(w){ // Wednesday session evolves with the phase
+ if(w<=6) return {t:"Easy + strides",d:`Easy ${EASYKM[w]+1}km at ${HRZ.easy} bpm + 6 × 20s strides`,hard:false};
+ if(w<=13)return {t:"Tempo intervals",d:`3–4 × 6 min at ${HRZ.tempo} bpm, 90s jog under 145`,hard:true};
+ if(w<=20)return {t:"Marathon-pace reps",d:`2 × 15 min at ${HRZ.mp} bpm (marathon effort), 3 min jog`,hard:true};
+ return {t:"Sharpener",d:`3 × 3 min at ${HRZ.tempo} bpm — short and sharp, stay fresh`,hard:true};}
 function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}
 
-// Mon LONG · Tue UPPER · Wed rest→quality · Thu LOWER · Fri EASY RUN · Sat PICKLEBALL · Sun REST
+// Mon LONG · Tue UPPER · Wed QUALITY · Thu LOWER · Fri EASY · Sat EASY · Sun REST
 function mission(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1){const km=LONG[w];return{emo:"🐉",t:`Long Run ${km}km`,d:`Keep HR ${HRZ.easy} bpm`+(km>=18?" · fuel: gels + electrolytes":" · conversational the whole way"),type:"long"};}
+ if(wd===1){const km=LONG[w],mp=MPKM[w],sim=RACESIM[w];
+  let det=`Hold HR ${HRZ.easy} bpm`;
+  if(mp)det+=` · finish last ${mp}km at ${HRZ.mp} bpm (marathon effort)`;
+  else if(km>=18)det+=" · fuel: gels + electrolytes every 30–40 min";
+  else det+=" · conversational the whole way";
+  return{emo:sim?"🎽":"🐉",t:(sim?sim+" — ":"")+`Long Run ${km}km`,d:det,type:"long"};}
  if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart",type:"gym"};
- if(wd===3)return hasWedRun(w)?{emo:"🏃",t:"Quality Run",d:`Tempo reps at ${HRZ.tempo} bpm · recover under 145`,type:"quality"}:{emo:"🛌",t:"Rest day",d:"Full recovery. Optional 10-min mobility.",type:"rest"};
+ if(wd===3){const q=qualityKind(w);return{emo:"🏃",t:"Quality Run — "+q.t,d:q.d,type:q.hard?"quality":"easy"};}
  if(wd===4)return{emo:"🦵",t:"Lower Body (gym)",d:"Squat, hinge, single-leg + ankle & hamstring armor",type:"gym"};
- if(wd===5)return{emo:"🏃",t:"Easy Run 30 min",d:`Short & easy — HR ${HRZ.easy} bpm. Podcast pace.`,type:"easy"};
- if(wd===6)return{emo:"🏓",t:"Pickleball",d:"Your cross-training. Play. Enjoy it.",type:"sat"};
+ if(wd===5)return{emo:"🏃",t:`Easy Run ${EASYKM[w]}km`,d:`Easy — HR ${HRZ.easy} bpm. Podcast pace.`,type:"easy"};
+ if(wd===6)return{emo:"🏃",t:`Easy Run ${EASYKM[w]}km`,d:`Relaxed volume — HR ${HRZ.easy} bpm. Drop this one first on a night-shift week.`,type:"easy"};
  return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook the week.",type:"rest"};
 }
 const WORKOUTS={
@@ -403,24 +410,28 @@ const WORKOUTS={
    {ex:"Plank / Side Plank",mc:"Mat",sr:"3 × 45s / 2 × 30s"}],
   cd:["5 min easy walk","Quad + hip-flexor stretch 30s/side","GENTLE hamstring stretch 30s/side","Calf stretch 30s/side"]}};
 function runWO(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1)return{wu:[`First 1–2km very easy (HR under 140) — that IS your warm-up`],
-  main:[{ex:`Long run ${LONG[w]}km — hold HR ${HRZ.easy} bpm`,note:"If HR drifts above 155, walk 60s. Run/walk is allowed and smart."},
-        {ex:LONG[w]>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"}],
-  cd:["Walk 5 min until HR under 120","Refuel within 45 min (protein + carbs)","Gentle stretch"]};
- if(wd===5)return{wu:["First 5 min very easy, let HR rise gradually"],
-  main:[{ex:`Easy 30 min — HR ${HRZ.easy} bpm`,note:"Conversational. If you can't speak a full sentence, slow down."},
-        {ex:"Optional: 4 × 20s strides at the end (HR will spike — that's fine, it's brief)"}],
+ if(wd===1){const km=LONG[w],mp=MPKM[w],sim=RACESIM[w];
+  const main=[{ex:`Long run ${km}km — hold HR ${HRZ.easy} bpm`,note:"If HR drifts above 155, walk 60s. Run/walk is smart, not weak."}];
+  if(mp)main.push({ex:`Final ${mp}km at ${HRZ.mp} bpm (marathon effort)`,note:"Practising race pace on tired legs — this is the session that wins race day."});
+  main.push({ex:km>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"});
+  if(sim)main.push({ex:"🎽 FULL DRESS REHEARSAL: race shoes, race kit, race breakfast, exact race fueling.",note:"Nothing new on race day — test it all here."});
+  return{wu:["First 1–2km very easy (HR under 140) — that IS your warm-up"],main:main,
+   cd:["Walk 5 min until HR under 120","Refuel within 45 min (protein + carbs)","Gentle stretch"]};}
+ if(wd===3){const q=qualityKind(w);
+  if(!q.hard)return{wu:["5 min very easy"],main:[{ex:q.d}],cd:["Walk 3–5 min","Stretch"]};
+  return{wu:["WU 1.5km easy (HR under 145) + 4 × 20s strides"],
+   main:[{ex:q.d,note:"Hard but controlled — you should finish feeling you could do one more rep."}],
+   cd:["CD 1km easy, HR under 140","Stretch"]};}
+ if(wd===5||wd===6)return{wu:["First 5 min very easy, let HR rise gradually"],
+  main:[{ex:`Easy ${EASYKM[w]}km — HR ${HRZ.easy} bpm`,note:"Conversational. If you can't speak a full sentence, slow down."},
+        {ex:wd===5?"Optional: 4 × 20s strides at the end":"Pure aerobic volume — resist going faster"}],
   cd:["Walk 3–5 min","Calf + hamstring stretch"]};
- if(wd===3&&hasWedRun(w))return{wu:["WU 1.5km easy (HR under 145) + 4 × 20s strides"],
-  main:[{ex:`3 × 5 min at HR ${HRZ.tempo} bpm`,note:"Comfortably hard. Jog 90s between until HR drops under 145."}],
-  cd:["CD 1km easy, HR under 140","Stretch"]};
  return null;}
-function workoutFor(d){const wd=d.getDay(),w=weekNum(d);
+function workoutFor(d){const wd=d.getDay();
  if(wd===2)return WORKOUTS.upper;
  if(wd===4)return WORKOUTS.lower;
- if(wd===1||wd===5||(wd===3&&hasWedRun(w)))return runWO(d);
- if(wd===6)return{wu:["Dynamic warm-up: lunges, side shuffles, arm circles — 5 min"],main:[{ex:"Pickleball — play your session"},{ex:"Log it with the 🏓 button so tomorrow auto-adjusts"}],cd:["Light stretch, hydrate, electrolytes"]};
- return{wu:["Move gently — no training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},{ex:d.getDay()===0?"🍱 Prep day — batch-cook the week (Food tab)":"Optional easy 20-min walk"}],cd:[]};
+ if(wd===1||wd===3||wd===5||wd===6)return runWO(d);
+ return{wu:["Move gently — no training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},{ex:"🍱 Prep day — batch-cook the week (Food tab)"},{ex:"Optional easy 20-min walk"}],cd:[]};
 }
 // ---------- food ----------
 const PREPWEEKS=[
@@ -476,10 +487,10 @@ const DAYASSEMBLY={
   {slot:"Post-run 🍳",food:"3 boiled eggs + fruit",how:"3 eggs (150g) + apple (150g)",kcal:310,p:19,c:24,f:15},
   {slot:"Lunch",food:"{B}",how:"170g portion + rice (170g) + ginisang sitaw (120g)",kcal:560,p:55,c:52,f:10},
   {slot:"Dinner",food:"{fish} / tofu",how:"fish (150g) or tofu (200g) + rice (140g) + kangkong (120g)",kcal:500,p:44,c:44,f:12,supp:"Magnesium"}]},
- 6:{type:"pickleball day · shake",target:NUT.sat,slots:[
+ 6:{type:"easy run day · shake",target:NUT.sat,slots:[
   {slot:"Breakfast",food:"Egg & cheese sandwich",how:"3 eggs (150g) + cheese (20g) + WW bread (60g) + fruit (120g)",kcal:470,p:30,c:46,f:17,supp:"Creatine 5g · Vitamin D3"},
-  {slot:"Pre-pickleball",food:"Banana + coffee",how:"banana (120g)",kcal:110,p:1,c:27,f:0},
-  {slot:"During/after 🥤",food:"Whey + banana + electrolytes",how:"1 scoop whey (32g) + banana (120g) · sip electrolytes if 2hr+",kcal:230,p:28,c:33,f:2},
+  {slot:"Pre-run",food:"Banana + coffee",how:"banana (120g)",kcal:110,p:1,c:27,f:0},
+  {slot:"Post-run 🥤",food:"Whey + banana",how:"1 scoop whey (32g) + banana (120g)",kcal:230,p:28,c:33,f:2},
   {slot:"Lunch",food:"{C}",how:"170g portion + rice (160g) + 🥬 kimchi (80g)",kcal:560,p:55,c:50,f:10},
   {slot:"Dinner",food:"{A}",how:"160g portion + rice (140g) + cauliflower (120g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]}};
 function prepIdx(d){return weekNum(d)%PREPWEEKS.length}
@@ -561,14 +572,21 @@ function renderSession(){const vd=new Date(TODAY.getTime()+sessOff*DAY),wo=worko
  else h+=`<div class="legend" style="margin-top:10px">👀 Previewing ahead — go back to Today to log it.</div>`;
  el.innerHTML=h;
  const b=document.getElementById("sessDone");if(b)b.onclick=()=>toggleQuest("main");}
-function renderMVW(o){const w=weekNum(TODAY),mon=mondayOf(w);let longDone=false,gymDone=0,pb=false;
- for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l)continue;
-  const t=mission(d).type;if(t==="long"&&(l.main||l.pball))longDone=true;
-  if(t==="gym"&&l.main)gymDone++;if(l.pball||(t==="sat"&&l.main))pb=true;}
+function renderMVW(o){const w=weekNum(TODAY),mon=mondayOf(w);let longDone=false,qDone=false,gymDone=0,km=0;
+ for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l||!l.main)continue;
+  const t=mission(d).type,wd=d.getDay();
+  if(t==="long")longDone=true;
+  if(wd===3)qDone=true;
+  if(t==="gym")gymDone++;
+  if(wd===1)km+=LONG[w]; else if(wd===3)km+=EASYKM[w]+1; else if(wd===5||wd===6)km+=EASYKM[w];}
  document.getElementById("mvwBox").innerHTML=
   `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'pending'}</small></div>`+
-  `<div class="m ${gymDone>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gymDone} done</small></div>`+
-  `<div class="m ${pb?'hit':''}"><span class="e">🏓</span>Pickleball<br><small>${pb?'DONE':'pending'}</small></div>`;}
+  `<div class="m ${qDone?'hit':''}"><span class="e">🏃</span>Quality run<br><small>${qDone?'DONE':'pending'}</small></div>`+
+  `<div class="m ${gymDone>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gymDone} done</small></div>`;
+ const wk=document.getElementById("volBar");
+ if(wk){const tgt=WEEKLY[w],pct=Math.min(100,Math.round(km/tgt*100));
+  wk.innerHTML=`<div class="cap" style="margin:8px 0 4px">Weekly volume: <b>${km} / ${tgt} km</b> (${pct}%)</div>
+   <div style="height:10px;background:#eef1f5;border-radius:20px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),#7CE0CF)"></div></div>`;}}
 function renderQuests(log){const c=document.getElementById("quests");
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
@@ -615,18 +633,6 @@ function renderWeek(o){o=o||state();const w=weekNum(TODAY);
   if(d<=TODAY){el.style.cursor="pointer";const dk=keyOf(d);el.onclick=()=>{const o2=state();const l=o2.logs[dk]||{};l.main=!l.main;if(l.main)delete l.status;o2.logs[dk]=l;S.set(o2);renderToday()}}
   strip.appendChild(el)}}
 function setStatus(s){const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
-function pickleAdvice(x){const tmr=mission(new Date(TODAY.getTime()+DAY)),t=tmr.type,hard=(x==="hard"),solid=(x==="solid");
- let rec="";
- if(t==="long")rec=hard?"keep it strict Z2, walk breaks OK, cut ~20–30% if legs are heavy":"run it easy Z2 — you'll be fine";
- else if(t==="quality"||t==="easy")rec=hard?"make it an easy Z2 jog only":"proceed, bail to easy if legs feel heavy";
- else if(t==="gym")rec=hard?"drop a set on the big lifts, warm up thoroughly":"proceed as normal";
- else rec="perfect timing — let the legs recover";
- const warn=hard?" 🦵 Big load — hydrate, protein tonight, watch the ankles and hamstring.":(solid?" Hydrate + protein tonight.":"");
- return `🏓 Logged! Today credited. <b>Tomorrow (${tmr.t}):</b> ${rec}.${warn}`;}
-// buttons
-document.getElementById("pballBtn").onclick=()=>document.getElementById("pballPanel").classList.toggle("hide");
-document.querySelectorAll(".pbi").forEach(b=>b.onclick=()=>{const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};l.main=true;l.bonus=true;l.pball=b.dataset.i;delete l.status;o.logs[k]=l;S.set(o);
- renderToday();document.getElementById("pballPanel").classList.add("hide");const g=document.getElementById("guide");g.className="note";g.innerHTML=pickleAdvice(b.dataset.i);});
 document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
 document.getElementById("injuryBtn").onclick=()=>{const o=state();if(o.injured){o.injured=false}else{if(!confirm("Turn ON injury mode? Pauses running & leg work and protects your streak while you heal."))return;o.injured=true;o.injuryStart=keyOf(TODAY);}S.set(o);renderToday()};
 document.getElementById("missBtn").onclick=()=>{if(confirm("Mark today missed? Streak resets."))setStatus("missed")};
@@ -663,7 +669,7 @@ function recVerdict(s,hrv,rdy,bb,rhr,base){const red=[],amber=[];hrv=(hrv||"").t
  if(rhr!=null&&base&&(rhr-base)>=7)amber.push("resting HR elevated");
  return{state:red.length?"RED":(amber.length?"AMBER":"GREEN"),reasons:red.concat(amber)}}
 function regulation(st,t){if(st==="GREEN")return"Full send — hit today's "+cur.t+" as written.";
- if(st==="AMBER"){const m={long:"Long run but firmly Z2, walk breaks OK.",quality:"Cut hard reps ~30%.",easy:"Keep it truly easy.",gym:"Drop 1 set, cap RPE 7.",sat:"Light/social pickleball.",rest:"Rest is exactly right."};return"Caution. "+(m[t]||"Ease off.")}
+ if(st==="AMBER"){const m={long:"Long run but firmly easy, walk breaks OK. Skip any MP segment.",quality:"Cut the hard reps ~30%.",easy:"Keep it truly easy or shorten it.",gym:"Drop 1 set, cap RPE 7.",rest:"Rest is exactly right."};return"Caution. "+(m[t]||"Ease off.")}
  const m={long:"Cut ~30%, Z2/run-walk, or move it.",quality:"Swap for easy 30min Z2.",easy:"Walk instead.",gym:"Light technique day or rest.",sat:"Skip or very light.",rest:"Fully rest."};
  return"Back off today. "+(m[t]||"Rest.")+" Protect sleep tonight."}
 function showVerdict(v,t){const a=RHV[v.state];const el=document.getElementById("verdict");el.classList.remove("hide");
@@ -762,20 +768,22 @@ async function loadRuns(){const body=document.getElementById("actBody");
 function renderPlan(){
  document.getElementById("hrBody").innerHTML=HRTABLE.map(([u,b,f])=>`<tr><td><b>${u}</b></td><td class="b" style="color:var(--teal);white-space:nowrap">${b}</td><td><small>${f}</small></td></tr>`).join("");
  document.getElementById("planHow").innerHTML=`
- <div class="rgroup"><div class="rgh">Your week (5 training days, 2 rest)</div>
- <div class="ritem"><b>Mon</b> 🐉 LONG RUN — the one that builds the marathon</div>
- <div class="ritem"><b>Tue</b> 💪 Upper gym</div>
- <div class="ritem"><b>Wed</b> 🛌 Rest → becomes 🏃 Quality Run from Week 9</div>
- <div class="ritem"><b>Thu</b> 🦵 Lower gym</div>
- <div class="ritem"><b>Fri</b> 🏃 Easy run 30 min</div>
- <div class="ritem"><b>Sat</b> 🏓 Pickleball — your cross-training, guilt-free</div>
+ <div class="rgroup"><div class="rgh">Your week — 4 runs, 2 gym, 1 rest</div>
+ <div class="ritem"><b>Mon</b> 🐉 LONG RUN — your day off, fresh legs after Sunday rest</div>
+ <div class="ritem"><b>Tue</b> 💪 Upper gym — legs recover, no running stress</div>
+ <div class="ritem"><b>Wed</b> 🏃 QUALITY RUN — 2 days after the long run, legs ready to work</div>
+ <div class="ritem"><b>Thu</b> 🦵 Lower gym — 3 days clear of the next hard run</div>
+ <div class="ritem"><b>Fri</b> 🏃 Easy run — flushes the legs</div>
+ <div class="ritem"><b>Sat</b> 🏃 Easy run — cheap aerobic volume</div>
  <div class="ritem"><b>Sun</b> 🛌 Rest + 🍱 batch-cook</div></div>
  <div class="rgroup"><div class="rgh">The rules</div>
- <div class="ritem"><b>1. The long run is sacred.</b> Miss anything else first. It's the only session that can't be replaced.</div>
- <div class="ritem"><b>2. The 20-minute rule.</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div>
- <div class="ritem"><b>3. Minimum viable week.</b> Long run + 1 gym + pickleball = the week counts. Everything else is upside.</div>
- <div class="ritem"><b>4. Night-shift weeks:</b> drop to the 3 non-negotiables. Survive, don't conquer.</div>
- <div class="ritem"><b>5. The 6th day is earned.</b> String 4 consistent weeks and you unlock an optional Sunday upper session.</div></div>`;
+ <div class="ritem"><b>1. The long run is sacred.</b> Miss anything else first — it's the only session that can't be replaced.</div>
+ <div class="ritem"><b>2. 80/20.</b> Roughly 80% of your running easy (135–152 bpm), 20% hard. Easy days easy is what makes hard days work.</div>
+ <div class="ritem"><b>3. The 20-minute rule.</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div>
+ <div class="ritem"><b>4. Minimum viable week.</b> Long run + quality run + 1 gym = the week counts.</div>
+ <div class="ritem"><b>5. Night-shift weeks:</b> drop Saturday's easy run first, then Friday's. Survive, don't conquer.</div>
+ <div class="ritem"><b>6. Pickleball is a bonus, never a substitute.</b> If you play, it goes <i>on top of</i> the plan — it doesn't replace a run.</div>
+ <div class="ritem"><b>7. Volume beats heroics.</b> Weekly km matters more than one big Sunday. Build it ~10%/week, deload every 4th.</div></div>`;
  const w=weekNum(TODAY),mon=mondayOf(w);document.getElementById("wdTag").textContent="— Week "+w+"/23 · "+phaseFor(w)+" · "+shiftFor(TODAY)+" shift";
  let h="";
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),wo=workoutFor(d),td=keyOf(d)===keyOf(TODAY);
@@ -785,7 +793,8 @@ function renderPlan(){
  document.getElementById("tbrList").innerHTML=TBR.map(([d,c,t])=>`<div class="tbr"><span><b>${d}</b> · ${c}</span><span class="muted">${t}</span></div>`).join("");
  const pb=document.getElementById("planBody");pb.innerHTML="";
  for(let k=0;k<=23;k++){const p=phaseFor(k),mo=mondayOf(k),s=shiftFor(mo);const tr=document.createElement("tr");if(k===w)tr.style.outline="2px solid var(--teal)";
-  tr.innerHTML=`<td class="b">${k}</td><td><span class="pill" style="background:${phaseColor(p)}">${p}</span></td><td>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${s}</td><td class="b">${k===23?"42.2 🏁":LONG[k]+"km"}</td><td>${runsPerWeek(k)}</td>`;pb.appendChild(tr)}}
+  let focus=RACESIM[k]?"🎽 "+RACESIM[k]:(MPKM[k]?`${MPKM[k]}km @ marathon pace`:(k===23?"🏁 RACE WEEK":qualityKind(k).t));
+  tr.innerHTML=`<td class="b">${k}</td><td><span class="pill" style="background:${phaseColor(p)}">${p}</span></td><td>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${s}</td><td class="b">${k===23?"42.2 🏁":LONG[k]+"km"}</td><td>${WEEKLY[k]}</td><td><small>${focus}</small></td>`;pb.appendChild(tr)}}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
  ["today","recovery","progress","food","runs","plan"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
  if(t.dataset.t==="recovery")renderRecovery();if(t.dataset.t==="progress")renderProgress();if(t.dataset.t==="food")renderFood();if(t.dataset.t==="runs")loadRuns();if(t.dataset.t==="plan")renderPlan()});
