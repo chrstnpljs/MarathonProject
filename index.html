@@ -171,6 +171,12 @@ small.dim{color:var(--mut);font-size:11px}
 
   <div id="today">
     <div class="card">
+      <div class="sessnav" style="margin-top:0">
+        <button id="dayPrev" class="navb">◀ prev day</button>
+        <input type="date" id="dayPick" style="flex:1;min-width:120px;border:1px solid var(--line);border-radius:9px;padding:7px;font-size:12.5px;text-align:center">
+        <button id="dayNext" class="navb">next day ▶</button>
+      </div>
+      <div id="dayBackNote"></div>
       <h2 id="todayDate"></h2>
       <div class="mission"><div class="emo" id="mEmo">💪</div><div><div class="t" id="mTitle">—</div><div class="d" id="mDetail">—</div></div></div>
       <div id="restWarn" class="hide"></div>
@@ -229,7 +235,7 @@ small.dim{color:var(--mut);font-size:11px}
       <h2>This week</h2>
       <p class="cap" id="weekCap"></p>
       <div class="week" id="weekStrip"></div>
-      <div class="legend">Green = done · yellow = sick · red = missed · outline = today. <b>Tap a past/today square to mark it done.</b></div>
+      <div class="legend">Green = done · yellow = sick · red = missed · outline = the day you're viewing. <b>Tap any past square to open and log that day.</b></div>
     </div>
   </div>
 
@@ -426,7 +432,8 @@ const EFFORTS=[["😌","Very easy",2],["🙂","Easy",4],["😮‍💨","Moderate
 const GARMIN_SEED=[{"date":"2026-06-01","rhr":56},{"date":"2026-06-05","rhr":63},{"date":"2026-06-10","rhr":69},{"date":"2026-06-14","rhr":70,"sleep":86},{"date":"2026-06-18","rhr":73},{"date":"2026-06-21","rhr":78},{"date":"2026-06-23","rhr":83}];
 
 // ---------- plan helpers ----------
-function keyOf(d){return d.toISOString().slice(0,10)}
+// LOCAL date key — toISOString() would shift to UTC and lose a day at UTC+8 (Manila)
+function keyOf(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 // TBR week number: 1–20 from Sep 28; 0 / -1 / -2 / -3 during the Bridge phase
 function tbrWeek(d){const mon=new Date(d);mon.setDate(mon.getDate()-((d.getDay()+6)%7));mon.setHours(0,0,0,0);
  return Math.round((mon-PROGSTART)/(7*DAY))+1;}
@@ -609,7 +616,8 @@ function levelInfo(xp){const fin=!!state().finished,TOP=LV.length-1,XPMAX=TOP-1;
 const INAPP=!!(window.cowork&&window.cowork.callMcpTool);
 const TODAY=new Date(2026,7,31);
 (function(){const r=new Date();r.setHours(0,0,0,0);if(r>=new Date(2026,7,30)&&r<=RACE)TODAY.setTime(r.getTime())})();
-let cur=mission(TODAY),sessOff=0,prepView=-1;
+let VIEW=new Date(TODAY);            // the day the Today tab is showing/logging
+let cur=mission(VIEW),sessOff=0,prepView=-1;
 
 // ---------- render ----------
 function renderHero(o){o=o||state();
@@ -632,7 +640,7 @@ function renderDots(o){const c=document.getElementById("dots");const n=Math.roun
   html+=`<span class="${cls}" title="${keyOf(d)}"></span>`}
  c.innerHTML=html;document.getElementById("daysLeft").textContent=left+" to go";}
 function demoLink(q){const t=(q||"").replace(/\d+\s*[×x].*$/,"").replace(/\(.*?\)/g,"").trim()||q;return ` <a class="demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent('how to '+t+' proper form')}" target="_blank" rel="noopener">▶ demo</a>`}
-function renderSession(){const vd=new Date(TODAY.getTime()+sessOff*DAY),wo=workoutFor(vd),m=mission(vd),w=weekNum(vd),wd=vd.getDay();
+function renderSession(){const vd=new Date(VIEW.getTime()+sessOff*DAY),wo=workoutFor(vd),m=mission(vd),w=weekNum(vd),wd=vd.getDay();
  document.getElementById("sessLabel").textContent=(sessOff===0?"Today":sessOff===1?"Tomorrow":WD[wd])+" · "+vd.toLocaleDateString('en-US',{month:'short',day:'numeric'})+" — "+m.emo+" "+m.t;
  document.getElementById("sessPrev").disabled=sessOff===0;
  document.getElementById("sessNext").textContent=(sessOff===0?"tomorrow ▶":"next day ▶");
@@ -650,11 +658,11 @@ function renderSession(){const vd=new Date(TODAY.getTime()+sessOff*DAY),wo=worko
    else if(wd===3||wd===5)h+=`<div class="totline">📏 ${(wd===3?wp.p.wd1:wp.p.wd2)} — holds your conditioning between long runs.</div>`;}
  }
  if(naDay(vd))h+=`<div class="totline" style="background:#fff3da;color:#9a6a00">🌙 NA shift — train <b>~2 hrs after waking, before your 10pm shift</b>.<br><span style="font-weight:400">7am finish → snack → 🕶️ blackout sleep 8am–3pm → wake &amp; eat → TRAIN → pre-shift meal → shift.</span></div>`;
- if(sessOff===0){const done=(state().logs[keyOf(TODAY)]||{}).main;h+=`<button class="btn ${done?'g':'p'}" id="sessDone" style="margin-top:12px;width:100%;padding:11px">${done?'✓ Session completed — tap to undo':'Mark session done ✓  (+50 XP, keeps your streak)'}</button>`;}
+ if(sessOff===0){const done=(state().logs[keyOf(VIEW)]||{}).main;h+=`<button class="btn ${done?'g':'p'}" id="sessDone" style="margin-top:12px;width:100%;padding:11px">${done?'✓ Session completed — tap to undo':'Mark session done ✓  (+50 XP, keeps your streak)'}</button>`;}
  else h+=`<div class="legend" style="margin-top:10px">👀 Previewing ahead — go back to Today to log it.</div>`;
  el.innerHTML=h;
  const b=document.getElementById("sessDone");if(b)b.onclick=()=>toggleQuest("main");}
-function renderMVW(o){const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
+function renderMVW(o){const mon=new Date(VIEW);mon.setDate(mon.getDate()-((VIEW.getDay()+6)%7));
  let longDone=false,wd1=false,wd2=false,gym=0;
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l||!l.main)continue;
   const wd=d.getDay();
@@ -664,30 +672,30 @@ function renderMVW(o){const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODA
   `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'NO-MISS'}</small></div>`+
   `<div class="m ${(wd1||wd2)?'hit':''}"><span class="e">🏃</span>1+ weekday run<br><small>${(wd1?1:0)+(wd2?1:0)} of 2</small></div>`+
   `<div class="m ${gym>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gym} done</small></div>`;
- const wk=document.getElementById("volBar"),{w,p}=weekPlan(TODAY);
+ const wk=document.getElementById("volBar"),{w,p}=weekPlan(VIEW);
  if(wk)wk.innerHTML=`<div class="note" style="margin-top:10px">📋 <b>This week (${w>=1?"TBR Week "+w:"Bridge"}):</b>
    Long run <b>${p.lr}</b> · Wed <b>${p.wd1}</b> · Fri <b>${p.wd2}</b>${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}
 function renderQuests(log){const c=document.getElementById("quests");
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
  c.querySelectorAll(".qcheck").forEach(b=>b.onclick=()=>toggleQuest(b.dataset.k));}
-function toggleQuest(k){const o=state(),key=keyOf(TODAY);const l=o.logs[key]||{};l[k]=!l[k];o.logs[key]=l;S.set(o);renderToday()}
-function renderMeals(log){const plan=dayPlan(TODAY),done=log.meals||{};
+function toggleQuest(k){const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l[k]=!l[k];o.logs[key]=l;S.set(o);renderToday()}
+function renderMeals(log){const plan=dayPlan(VIEW),done=log.meals||{};
  document.getElementById("mealType").textContent="· "+plan.type;
  let tk=0,tp=0,tc=0,tf=0;
  document.getElementById("meals").innerHTML=plan.slots.map((m,i)=>{tk+=m.kcal;tp+=m.p;tc+=m.c;tf+=m.f;const dn=!!done[i];
-  return `<div class="meal ${dn?'mdone':''}"><div class="top"><span class="slot">${m.slot}${naDay(TODAY)?` <span class="natime">⏰ ${naTiming(m.slot)}</span>`:""}</span><div class="right"><span class="kcal">${m.kcal} kcal<br>P${m.p} C${m.c} F${m.f}</span><button class="mcheck ${dn?'on':''}" data-i="${i}">${dn?'✓':'＋'}</button></div></div><div class="food">${m.food}${m.how?` <span class="muted" style="font-size:11px">— ${m.how}</span>`:""}</div>${m.supp?`<div class="supp">💊 ${m.supp}</div>`:""}${altBF(m.slot)}</div>`}).join("");
+  return `<div class="meal ${dn?'mdone':''}"><div class="top"><span class="slot">${m.slot}${naDay(VIEW)?` <span class="natime">⏰ ${naTiming(m.slot)}</span>`:""}</span><div class="right"><span class="kcal">${m.kcal} kcal<br>P${m.p} C${m.c} F${m.f}</span><button class="mcheck ${dn?'on':''}" data-i="${i}">${dn?'✓':'＋'}</button></div></div><div class="food">${m.food}${m.how?` <span class="muted" style="font-size:11px">— ${m.how}</span>`:""}</div>${m.supp?`<div class="supp">💊 ${m.supp}</div>`:""}${altBF(m.slot)}</div>`}).join("");
  document.getElementById("mealTotal").innerHTML=[["≈"+tk,"kcal"],[tp+"g","protein"],[tc+"g","carbs"],[tf+"g","fat"]].map(([v,k])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
  const tg=plan.target;document.getElementById("mealTarget").textContent=`≈${tg[0]} kcal · ${tg[1]}g P · ${tg[2]}g C · ${tg[3]}g F`;
- document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{const o=state(),key=keyOf(TODAY);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
-function renderToday(){const o=state();cur=mission(TODAY);
- document.getElementById("todayDate").textContent=fmtDate(TODAY);
+ document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
+function renderToday(){const o=state();cur=mission(VIEW);renderDateNav();
+ document.getElementById("todayDate").textContent=fmtDate(VIEW)+(keyOf(VIEW)===keyOf(TODAY)?"":"  ⏪ past day");
  document.getElementById("mEmo").textContent=cur.emo;document.getElementById("mTitle").textContent=cur.t;document.getElementById("mDetail").textContent=cur.d;
- const log=o.logs[keyOf(TODAY)]||{};
+ const log=o.logs[keyOf(VIEW)]||{};
  renderSession();renderMVW(o);
  const er=document.getElementById("effRow");er.innerHTML="";
  EFFORTS.forEach(([e,lab,rpe])=>{const el=document.createElement("div");el.className="effb"+(log.rpe===rpe?" on":"");el.innerHTML=`<span class="e">${e}</span>${lab}`;
-  el.onclick=()=>{const o2=state(),k=keyOf(TODAY);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});
+  el.onclick=()=>{const o2=state(),k=keyOf(VIEW);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});
  renderMeals(log);renderQuests(log);
  document.getElementById("noteBox").value=log.note||"";
  const g=document.getElementById("guide");
@@ -704,22 +712,34 @@ function renderToday(){const o=state();cur=mission(TODAY);
   else rw.className="hide";}
  renderHero(o);renderWeek(o);}
 function renderWeek(o){o=o||state();
- const wp=weekPlan(TODAY);
+ const wp=weekPlan(VIEW);
  document.getElementById("weekCap").textContent=(wp.w>=1?"TBR Week "+wp.w:"Bridge")+" · long run "+wp.p.lr+" · 3 runs + 2 gym";
- const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
+ const mon=new Date(VIEW);mon.setDate(mon.getDate()-((VIEW.getDay()+6)%7));
  const strip=document.getElementById("weekStrip");strip.innerHTML="";
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),log=o.logs[keyOf(d)];
   let cls="day";if(log&&completed(d,log))cls+=" done";if(log&&log.status==="missed")cls+=" miss";if(log&&log.status==="sick")cls+=" sick";
-  if(keyOf(d)===keyOf(TODAY))cls+=" today";
+  if(keyOf(d)===keyOf(VIEW))cls+=" today";
   const el=document.createElement("div");el.className=cls;el.innerHTML=`<div class="dn">${WD[d.getDay()]}</div><div class="de">${m.emo}</div>`;
-  if(d<=TODAY){el.style.cursor="pointer";const dk=keyOf(d);el.onclick=()=>{const o2=state();const l=o2.logs[dk]||{};l.main=!l.main;if(l.main)delete l.status;o2.logs[dk]=l;S.set(o2);renderToday()}}
+  if(d<=TODAY){el.style.cursor="pointer";el.title="Tap to open this day";const dd=new Date(d);el.onclick=()=>gotoDay(dd);}
   strip.appendChild(el)}}
-function setStatus(s){const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
-document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(TODAY);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
+function gotoDay(d){const x=new Date(d);x.setHours(0,0,0,0);
+ if(x>TODAY)return;                       // no logging the future
+ if(x<START)return;
+ VIEW=x;sessOff=0;renderToday();}
+function renderDateNav(){const pick=document.getElementById("dayPick");if(pick)pick.value=keyOf(VIEW);
+ const nx=document.getElementById("dayNext");if(nx)nx.disabled=(keyOf(VIEW)===keyOf(TODAY));
+ const note=document.getElementById("dayBackNote");if(!note)return;
+ if(keyOf(VIEW)===keyOf(TODAY)){note.className="hide";}
+ else{note.className="note adj";
+  const diff=Math.round((TODAY-VIEW)/DAY);
+  note.innerHTML=`⏪ <b>Editing a past day</b> — ${diff} day${diff>1?"s":""} ago. Anything you tick saves to <b>${fmtDate(VIEW)}</b>. <span id="backToday" style="cursor:pointer;text-decoration:underline;font-weight:700">Jump back to today</span>`;
+  const b=document.getElementById("backToday");if(b)b.onclick=()=>gotoDay(TODAY);}}
+function setStatus(s){const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
+document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
 document.getElementById("injuryBtn").onclick=()=>{const o=state();if(o.injured){o.injured=false}else{if(!confirm("Turn ON injury mode? Pauses running & leg work and protects your streak while you heal."))return;o.injured=true;o.injuryStart=keyOf(TODAY);}S.set(o);renderToday()};
 document.getElementById("missBtn").onclick=()=>{if(confirm("Mark today missed? Streak resets."))setStatus("missed")};
 document.getElementById("sickBtn").onclick=()=>setStatus("sick");
-document.getElementById("noteSave").onclick=()=>{const o=state(),k=keyOf(TODAY);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};
+document.getElementById("noteSave").onclick=()=>{const o=state(),k=keyOf(VIEW);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};
 document.getElementById("coachBtn").onclick=async()=>{const cb=document.getElementById("coachBox");cb.classList.remove("hide");cb.textContent="Coach is thinking…";
  if(!INAPP){cb.textContent="Coach is offline in the web version — but the mission is simple: "+cur.t+". Start with 20 minutes.";return}
  try{const o=state();const r=await window.cowork.askClaude("You are Paul's marathon coach. He restarted Sept 1 after months of inconsistency. Give 2-3 short, warm but FIRM sentences for TODAY only. Session: "+cur.t+" — "+cur.d+". Phase "+weekPlan(TODAY).phase+", "+shiftFor(TODAY)+" shift. No lists.",[{streak:streak(o)}]);
@@ -729,6 +749,9 @@ document.getElementById("lvlClose").onclick=()=>document.getElementById("lvlModa
 document.getElementById("lvlModal").onclick=e=>{if(e.target.id==="lvlModal")document.getElementById("lvlModal").classList.add("hide")};
 document.getElementById("sessNext").onclick=()=>{if(sessOff<20){sessOff++;renderSession()}};
 document.getElementById("sessPrev").onclick=()=>{if(sessOff>0){sessOff--;renderSession()}};
+document.getElementById("dayPrev").onclick=()=>gotoDay(new Date(VIEW.getTime()-DAY));
+document.getElementById("dayNext").onclick=()=>gotoDay(new Date(VIEW.getTime()+DAY));
+document.getElementById("dayPick").onchange=e=>{const v=e.target.value;if(v){const[y,m,d]=v.split("-").map(Number);gotoDay(new Date(y,m-1,d));}};
 document.getElementById("resetLink").onclick=()=>{if(confirm("Erase all saved data on this device?")){localStorage.removeItem("tbrhq2");location.reload()}};
 function showLevels(){const xp=totalXP(state()),li=levelInfo(xp),fin=!!state().finished,TOP=LV.length-1,reached=(new Date()>=RACE);
  document.getElementById("lvlList").innerHTML=LV.map((l,idx)=>{const th=l[0],name=l[1],isF=idx===TOP,cu=(idx+1===li.lvl);
