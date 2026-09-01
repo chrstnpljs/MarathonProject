@@ -165,6 +165,8 @@ small.dim{color:var(--mut);font-size:11px}
     <div class="tab" data-t="food">Food</div>
     <div class="tab" data-t="runs">Runs</div>
     <div class="tab" data-t="plan">Plan</div>
+    <div class="tab" data-t="tldr">TL;DR</div>
+    <div class="tab" data-t="handbook">Handbook</div>
   </div>
 
   <div id="today">
@@ -311,7 +313,34 @@ small.dim{color:var(--mut);font-size:11px}
     <div class="card"><h2>TBR Dream official events <small class="dim">(in your fee)</small></h2><div id="tbrList"></div>
       <p class="legend">Bull Sessions = group long runs. Swap your Monday long run to these when you want company.</p></div>
     <div class="card"><h2>23-week map</h2>
-      <table class="t2"><thead><tr><th>Wk</th><th>Phase</th><th>Week of</th><th>Shift</th><th>Long run</th><th>Week km</th><th>Focus</th></tr></thead><tbody id="planBody"></tbody></table></div>
+      <table class="t2"><thead><tr><th>Week</th><th>Starts</th><th>Shift</th><th>Sun Long Run</th><th>Wed</th><th>Fri</th><th>Notes</th></tr></thead><tbody id="planBody"></tbody></table></div>
+  </div>
+
+  <!-- TL;DR -->
+  <div id="tldr" class="hide">
+    <div class="card" style="border-color:var(--bad)">
+      <h2>🚨 The 5 things you cannot forget</h2>
+      <div id="tldrCritical"></div>
+    </div>
+    <div class="card"><h2>📋 TBR TL;DR — everything that matters</h2><div id="tldrBody"></div></div>
+    <div class="card"><h2>🗓 Key dates</h2><div id="tldrDates"></div>
+      <div class="note">📅 Import <b>TBR-Dream-2027.ics</b> (in your project folder) into Apple/Google Calendar — every event with reminders, already built for you.</div></div>
+  </div>
+
+  <!-- HANDBOOK -->
+  <div id="handbook" class="hide">
+    <div class="card"><h2>📖 TBR InLife Dream 2027 — Welcome Kit</h2>
+      <p class="cap">The official handbook, distilled. Your program is <b>Beginner 2</b> (see Plan tab for how I bridged you into it).</p>
+      <div id="hbSections"></div>
+    </div>
+    <div class="card"><h2>🏃 Official Beginner 2 Program (20 weeks)</h2>
+      <p class="cap">Sep 28 2026 → Feb 14 2027. Time-based. Weekend long run is the no-miss session.</p>
+      <table class="t2"><thead><tr><th>Wk</th><th>Dates</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody id="hbB2"></tbody></table>
+    </div>
+    <div class="card"><h2>🐢 Beginner 1 (the lighter option)</h2>
+      <p class="cap">If the hamstring flares or you miss a chunk of the bridge, drop to this — no shame. TBR: "Still unsure? Start with Beginner 1."</p>
+      <div id="hbB1"></div>
+    </div>
   </div>
 
   <p class="legend" style="text-align:center;margin:8px 0 20px">Saves on this device. · <span id="resetLink" style="color:var(--teal);cursor:pointer;text-decoration:underline">reset my logs</span></p>
@@ -320,13 +349,38 @@ small.dim{color:var(--mut);font-size:11px}
 <script>
 const STRAVA="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__list_activities";
 const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week 0 Monday = Aug 31 2026
-// index = week number (0–23). Long run km, weekly volume km, easy-run km, quality-run km
-const LONG   =[ 6,  8, 10, 12,  8, 14, 16, 18, 12, 20, 22, 24, 16, 25, 27, 29, 20, 30, 32, 22, 32, 24, 16,  8];
-const WEEKLY =[18, 21, 24, 27, 21, 30, 34, 36, 28, 40, 43, 46, 35, 48, 52, 54, 41, 56, 58, 45, 58, 45, 33, 20];
-const EASYKM =[ 4,  4,  5,  5,  4,  5,  6,  6,  5,  6,  7,  7,  6,  8,  8,  8,  7,  9,  9,  7,  9,  7,  6,  5];
-// Marathon-pace work inside the long run (km at MP), from week 13
-const MPKM   =[ 0,0,0,0,0, 0,0,0,0, 0,0,0,0, 5, 6, 8, 0, 10, 8, 0, 10, 6, 0, 0];
-const RACESIM={17:"RACE REHEARSAL #1",20:"RACE REHEARSAL #2"};
+// ── OFFICIAL TBR BEGINNER 2 PROGRAM (20 weeks, Sep 28 2026 → Feb 14 2027) ──
+// Weeks are indexed 1–20 here. Weeks 0 and below = my "Bridge" phase (Sep 1–27).
+// wd1 / wd2 = weekday maintenance runs · lr = weekend long run
+const TBR={
+ 1:{wd1:"45 min",wd2:"50 min",lr:"50 min"},
+ 2:{wd1:"45 min",wd2:"50 min · last 10 min higher intensity",lr:"1 hr"},
+ 3:{wd1:"45 min",wd2:"55 min · last 10 min higher intensity",lr:"1 hr"},
+ 4:{wd1:"60 min",wd2:"55 min · last 10 min higher intensity",lr:"1 hr 15 min"},
+ 5:{wd1:"60 min · last 10 min higher intensity",wd2:"60 min",lr:"1 hr 15 min"},
+ 6:{wd1:"60 min · last 15 min higher intensity",wd2:"Rest or XTrain",lr:"1 hr 45 min"},
+ 7:{wd1:"50 min",wd2:"60 min · last 15 min higher intensity",lr:"2 hrs"},
+ 8:{wd1:"60 min",wd2:"60 min · last 15 min higher intensity",lr:"2 hrs",note:"Divide into 2 × 60 min — aim for even splits",bull:"Bull Session 2 · Nov 22"},
+ 9:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 30 min",note:"Divide into 2 × 75 min — even splits"},
+ 10:{wd1:"50 min",wd2:"60 min",lr:"1 hr 30 min",bull:"Bull Session 3 · Dec 5"},
+ 11:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 40 min"},
+ 12:{wd1:"70 min · last 20 min higher intensity",wd2:"50 min",lr:"1 hr 30 min"},
+ 13:{wd1:"Rest or XTrain",wd2:"75 min",lr:"3 hrs 15 min or min 25 km",note:"Divide into 2 × 100 & 95 min — even splits",star:"⭐ Very important week — the first long run that gives you the range to reach the finish line.",bull:"Bull Session 4 · Dec 27"},
+ 14:{wd1:"70 min · last 25 min higher intensity",wd2:"60 min",lr:"1 hr 30 min"},
+ 15:{wd1:"60 min",wd2:"60 min",lr:"2 hrs",note:"Divide into 2 × 60 min — even splits",bull:"Bull Session 5 · Jan 10"},
+ 16:{wd1:"Rest or XTrain",wd2:"70 min · last 25 min higher intensity",lr:"1 hr 30 min"},
+ 17:{wd1:"75 min · last 25 min higher intensity",wd2:"45 min",lr:"3 hrs 50 min or min 30 km",star:"🚨 CRUCIAL WEEK. Final long run, then the 3-week taper begins. Protect this week!",bull:"Bull Session 6 · Jan 24"},
+ 18:{wd1:"Rest or XTrain",wd2:"60 min",lr:"1 hr 30 min",star:"Taper week 1 of 3"},
+ 19:{wd1:"50 min",wd2:"50 min",lr:"1 hr 30 min",note:"RACE REHEARSAL — divide into 2 × 45 min, even splits",star:"Taper week 2 of 3"},
+ 20:{wd1:"50 min",wd2:"50 min",lr:"🏁 RACE DAY — 42.2 km",star:"Take Thursday & Friday OFF and REST. No exertion. Rest body and mind for race day."}};
+// Bridge phase (my design) — Sep 1–27, to earn Beginner 2 by Sep 28
+const BRIDGE={
+ "-3":{wd1:"30 min",wd2:"30 min",lr:"45 min",star:"Bridge 1 — rebuild the habit. Everything easy."},
+ "-2":{wd1:"30 min",wd2:"35 min",lr:"60 min",star:"Bridge 2 — add a little time on feet."},
+ "-1":{wd1:"35 min",wd2:"35 min",lr:"75 min",star:"Bridge 3 — Bull Session 1 falls on Sun Sep 20. Go meet your batch!",bull:"Bull Session 1 · Sep 20"},
+ "0":{wd1:"35 min",wd2:"30 min",lr:"60 min",star:"Bridge 4 — easy week. Beginner 2 starts Mon Sep 28."}};
+const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
+const RUNWALK="3:1 (run 3 min · walk 1 min)";
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 // HR zones from YOUR Garmin data: max 196 (measured), resting ~62 → Karvonen
 const HRMAX=196, HRREST=62;
@@ -338,7 +392,23 @@ const HRTABLE=[["Recovery / walk-jog","<135","Very easy, nose-breathing"],
  ["🔥 Tempo / Threshold","168–180","Comfortably hard, few words"],
  ["⚡ Intervals","180–196","Hard. Short reps only"]];
 const SHIFTS=[["2026-08-24","2026-09-20","AP"],["2026-09-21","2026-10-18","NA"],["2026-10-19","2026-11-15","EU"],["2026-11-16","2026-12-13","AP"],["2026-12-14","2027-01-10","NA"],["2027-01-11","2027-02-07","EU"],["2027-02-08","2027-02-14","AP"]];
-const TBR=[["Sep 15","BC1","Welcome + Marathon 101 (webinar)"],["Oct 11","BS1","Form workshop + 1hr run"],["Nov 5","BC2","Fueling & Hydration (webinar)"],["Nov 16","BS2","Group run up to 2hr"],["Dec 3","BC3","Gear & Shoes (webinar)"],["Dec 14","BS3","2h40 run"],["Dec 28","BS4","RACE SIMULATION 24–28km"],["Jan 7","BC4","Strategy & Mental (webinar)"],["Jan 11","BS5","2hr run"],["Jan 25","BS6","30km long run"],["Feb 4","BC5","Course Briefing (webinar)"],["Feb 12","—","Send-off + race kit"]];
+const TBREVENTS=[
+ ["Wed Sep 16","Bull Circle 1","Zoom webinar, 8PM"],
+ ["Sun Sep 20","Bull Session 1","Run clinic · Filinvest City"],
+ ["Mon Sep 28","PROGRAM STARTS","TBR Week 1 · Dream Plus also begins"],
+ ["Oct (early)","🩺 Medical certificate","REQUIRED — no med cert, no race kit"],
+ ["Wed Nov 4","Bull Circle 2","Zoom webinar"],
+ ["Sun Nov 22","Bull Session 2","Week 8 long run · 2 hrs"],
+ ["Wed Dec 2","Bull Circle 3","Zoom webinar"],
+ ["Sat Dec 5","Bull Session 3","Run clinic"],
+ ["Sun Dec 27","Bull Session 4 ⭐","Week 13 · 3h15 or min 25 km"],
+ ["Wed Jan 6","Bull Circle 4","Zoom webinar"],
+ ["Sun Jan 10","Bull Session 5","Week 15 · 2 hrs"],
+ ["Sun Jan 24","Bull Session 6 🚨","Week 17 · 3h50 or min 30 km — PEAK"],
+ ["Wed Feb 3","Bull Circle 5","Zoom webinar"],
+ ["Thu Feb 11","Send Off Party","7PM · race kit claiming from 4PM"],
+ ["Sat Feb 13","TBR Together","3K/5K fun run · keep it easy"],
+ ["Sun Feb 14","🏁 RACE DAY","MIDNIGHT start · 8-hr cut-off"]];
 const XPW={main:50,protein:15,carbs:10,creatine:5,vitd:5,magnesium:5,hydration:10,sleep:15,bonus:10};
 const QUESTS=[
  {key:"main",label:"Complete today's session",sub:"The one that keeps your 🔥 streak",xp:50,grp:"big"},
@@ -357,6 +427,12 @@ const GARMIN_SEED=[{"date":"2026-06-01","rhr":56},{"date":"2026-06-05","rhr":63}
 
 // ---------- plan helpers ----------
 function keyOf(d){return d.toISOString().slice(0,10)}
+// TBR week number: 1–20 from Sep 28; 0 / -1 / -2 / -3 during the Bridge phase
+function tbrWeek(d){const mon=new Date(d);mon.setDate(mon.getDate()-((d.getDay()+6)%7));mon.setHours(0,0,0,0);
+ return Math.round((mon-PROGSTART)/(7*DAY))+1;}
+function weekPlan(d){const w=tbrWeek(d);
+ if(w>=1&&w<=20)return{w:w,p:TBR[w],phase:"TBR Beginner 2"};
+ const b=BRIDGE[String(w)];return{w:w,p:b||BRIDGE["-3"],phase:"Bridge"};}
 function weekNum(d){return Math.max(0,Math.min(23,Math.floor((d-START)/(7*DAY))))}
 function mondayOf(w){return new Date(START.getTime()+w*7*DAY)}
 function shiftFor(d){const k=keyOf(d);for(const[a,b,s]of SHIFTS)if(k>=a&&k<=b)return s;return "AP"}
@@ -364,28 +440,30 @@ function phaseFor(w){if(w===0)return"Re-entry";if(w<=8)return"Rebuild";if(w<=16)
 function phaseColor(p){return{"Re-entry":var_rest(),"Rebuild":"var(--base)","Build":"var(--build)","Peak":"var(--peak)","Taper":"var(--taper)"}[p]}
 function var_rest(){return "var(--rest)"}
 function runsPerWeek(w){return 4}
-function qualityKind(w){ // Wednesday session evolves with the phase
- if(w<=6) return {t:"Easy + strides",d:`Easy ${EASYKM[w]+1}km at ${HRZ.easy} bpm + 6 × 20s strides`,hard:false};
- if(w<=13)return {t:"Tempo intervals",d:`3–4 × 6 min at ${HRZ.tempo} bpm, 90s jog under 145`,hard:true};
- if(w<=20)return {t:"Marathon-pace reps",d:`2 × 15 min at ${HRZ.mp} bpm (marathon effort), 3 min jog`,hard:true};
- return {t:"Sharpener",d:`3 × 3 min at ${HRZ.tempo} bpm — short and sharp, stay fresh`,hard:true};}
+
 function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}
 
-// Mon LONG · Tue UPPER · Wed QUALITY · Thu LOWER · Fri EASY · Sat EASY · Sun REST
-function mission(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1){const km=LONG[w],mp=MPKM[w],sim=RACESIM[w];
-  let det=`Hold HR ${HRZ.easy} bpm`;
-  if(mp)det+=` · finish last ${mp}km at ${HRZ.mp} bpm (marathon effort)`;
-  else if(km>=18)det+=" · fuel: gels + electrolytes every 30–40 min";
-  else det+=" · conversational the whole way";
-  return{emo:sim?"🎽":"🐉",t:(sim?sim+" — ":"")+`Long Run ${km}km`,d:det,type:"long"};}
- if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart",type:"gym"};
- if(wd===3){const q=qualityKind(w);return{emo:"🏃",t:"Quality Run — "+q.t,d:q.d,type:q.hard?"quality":"easy"};}
+// TBR structure: Sun LONG · Mon REST · Tue gym · Wed WD1 run · Thu gym · Fri WD2 run · Sat rest/XTrain
+function mission(d){const wd=d.getDay(),{w,p}=weekPlan(d);
+ const isRace=(p.lr||"").indexOf("RACE DAY")>=0;
+ if(wd===0){ // Sunday = long run (matches Bull Sessions)
+  if(isRace)return{emo:"🏁",t:"RACE DAY — 42.2 km",d:"Midnight start. You built this.",type:"long"};
+  let det=`Run-walk ${RUNWALK} · HR ${HRZ.easy} bpm`;
+  if(p.note)det+=" · "+p.note;
+  return{emo:p.star?"⭐":"🐉",t:`Long Run — ${p.lr}`,d:det,type:"long"};}
+ if(wd===1)return{emo:"🛌",t:"Full Rest",d:"TBR rule: always take a full rest day after your long run.",type:"rest"};
+ if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart. Counts as cross-training.",type:"gym"};
+ if(wd===3){const s=p.wd1||"45 min";return rest_or_run(s,"Maintenance Run 1");}
  if(wd===4)return{emo:"🦵",t:"Lower Body (gym)",d:"Squat, hinge, single-leg + ankle & hamstring armor",type:"gym"};
- if(wd===5)return{emo:"🏃",t:`Easy Run ${EASYKM[w]}km`,d:`Easy — HR ${HRZ.easy} bpm. Podcast pace.`,type:"easy"};
- if(wd===6)return{emo:"🏃",t:`Easy Run ${EASYKM[w]}km`,d:`Relaxed volume — HR ${HRZ.easy} bpm. Drop this one first on a night-shift week.`,type:"easy"};
- return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook the week.",type:"rest"};
+ if(wd===5){const s=p.wd2||"45 min";return rest_or_run(s,"Maintenance Run 2");}
+ return{emo:"🛌",t:"Rest / XTrain + 🍱 prep",d:"Easy walk, bike or yoga if you want. Batch-cook for the week.",type:"rest"};
 }
+function rest_or_run(spec,label){
+ if(/rest/i.test(spec))return{emo:"🛌",t:"Rest or Cross-train",d:"TBR-scheduled recovery. Bike, swim, walk, weights or yoga — your call.",type:"rest"};
+ const hi=/higher intensity/i.test(spec);
+ return{emo:"🏃",t:`${label} — ${spec.split(" · ")[0]}`,
+  d:(hi?`Finish faster: ${spec.split("· ")[1]} at ${HRZ.mp} bpm. `:"")+`Otherwise easy — HR ${HRZ.easy} bpm. Run-walk ${RUNWALK}.`,
+  type:hi?"quality":"easy"};}
 const WORKOUTS={
  upper:{wu:["5 min easy bike/treadmill","Band pull-aparts 2×15","Arm circles + shoulder rolls"],
   main:[
@@ -409,29 +487,31 @@ const WORKOUTS={
    {ex:"Tibialis Raise",mc:"Wall or tib bar",sr:"3 × 20",tag:"Shin & ankle prehab"},
    {ex:"Plank / Side Plank",mc:"Mat",sr:"3 × 45s / 2 × 30s"}],
   cd:["5 min easy walk","Quad + hip-flexor stretch 30s/side","GENTLE hamstring stretch 30s/side","Calf stretch 30s/side"]}};
-function runWO(d){const wd=d.getDay(),w=weekNum(d);
- if(wd===1){const km=LONG[w],mp=MPKM[w],sim=RACESIM[w];
-  const main=[{ex:`Long run ${km}km — hold HR ${HRZ.easy} bpm`,note:"If HR drifts above 155, walk 60s. Run/walk is smart, not weak."}];
-  if(mp)main.push({ex:`Final ${mp}km at ${HRZ.mp} bpm (marathon effort)`,note:"Practising race pace on tired legs — this is the session that wins race day."});
-  main.push({ex:km>=18?"Fuel: 30–60g carbs/hr + electrolytes, sip every 15 min":"Water + electrolytes"});
-  if(sim)main.push({ex:"🎽 FULL DRESS REHEARSAL: race shoes, race kit, race breakfast, exact race fueling.",note:"Nothing new on race day — test it all here."});
-  return{wu:["First 1–2km very easy (HR under 140) — that IS your warm-up"],main:main,
-   cd:["Walk 5 min until HR under 120","Refuel within 45 min (protein + carbs)","Gentle stretch"]};}
- if(wd===3){const q=qualityKind(w);
-  if(!q.hard)return{wu:["5 min very easy"],main:[{ex:q.d}],cd:["Walk 3–5 min","Stretch"]};
-  return{wu:["WU 1.5km easy (HR under 145) + 4 × 20s strides"],
-   main:[{ex:q.d,note:"Hard but controlled — you should finish feeling you could do one more rep."}],
-   cd:["CD 1km easy, HR under 140","Stretch"]};}
- if(wd===5||wd===6)return{wu:["First 5 min very easy, let HR rise gradually"],
-  main:[{ex:`Easy ${EASYKM[w]}km — HR ${HRZ.easy} bpm`,note:"Conversational. If you can't speak a full sentence, slow down."},
-        {ex:wd===5?"Optional: 4 × 20s strides at the end":"Pure aerobic volume — resist going faster"}],
-  cd:["Walk 3–5 min","Calf + hamstring stretch"]};
+function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
+ if(wd===0){ // long run
+  if((p.lr||"").indexOf("RACE DAY")>=0)return{wu:["Nap in the afternoon. Kit laid out. Fuel packed."],
+   main:[{ex:"🏁 42.2 km — midnight gun start"},{ex:"Cut-offs: 21K by 4:00 AM · Finish by 8:00 AM"},{ex:`Run-walk ${RUNWALK} from the very first kilometre — walk BEFORE you tire`}],
+   cd:["Finisher shirt, medal, swag bag and breakfast. You're a marathoner."]};
+  const main=[{ex:`Long run — ${p.lr}`,note:`Run-walk ${RUNWALK}. Take walk breaks from the start, before fatigue. HR ${HRZ.easy} bpm.`}];
+  if(p.note)main.push({ex:p.note});
+  main.push({ex:"Fuel: over 75 min → 30–60g carbs/hr + electrolytes, sip every 15 min"});
+  if(p.bull)main.push({ex:"👥 "+p.bull+" — run this one with your batch at Filinvest City"});
+  return{wu:["First 10 min very easy — walk breaks from the beginning"],main:main,
+   cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch — full rest tomorrow"]};}
+ if(wd===3||wd===5){const spec=(wd===3?p.wd1:p.wd2)||"45 min";
+  if(/rest/i.test(spec))return null;
+  const hi=/higher intensity/i.test(spec);
+  const main=[{ex:`${spec.split(" · ")[0]} maintenance run`,note:`Purpose: HOLD the conditioning from the weekend long run. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
+  if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
+  return{wu:["5–10 min very easy to start"],main:main,cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  return null;}
 function workoutFor(d){const wd=d.getDay();
  if(wd===2)return WORKOUTS.upper;
  if(wd===4)return WORKOUTS.lower;
- if(wd===1||wd===3||wd===5||wd===6)return runWO(d);
- return{wu:["Move gently — no training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},{ex:"🍱 Prep day — batch-cook the week (Food tab)"},{ex:"Optional easy 20-min walk"}],cd:[]};
+ if(wd===0||wd===3||wd===5){const r=runWO(d);if(r)return r;}
+ return{wu:["Move gently — no hard training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},
+   {ex:wd===6?"🍱 Prep day — batch-cook the week (Food tab)":"Optional easy walk, bike, swim or yoga (XTrain)"},
+   {ex:wd===1?"Full rest after the long run — TBR's rule, and the one that keeps you healthy":"Keep it genuinely easy"}],cd:[]};
 }
 // ---------- food ----------
 const PREPWEEKS=[
@@ -532,7 +612,7 @@ const TODAY=new Date(2026,7,31);
 let cur=mission(TODAY),sessOff=0,prepView=-1;
 
 // ---------- render ----------
-function renderHero(o){o=o||state();const w=weekNum(TODAY);
+function renderHero(o){o=o||state();
  document.getElementById("sCount").textContent=Math.max(0,Math.round((RACE-new Date())/DAY));
  const xp=totalXP(o),li=levelInfo(xp);
  document.getElementById("sXP").textContent=xp;
@@ -540,10 +620,11 @@ function renderHero(o){o=o||state();const w=weekNum(TODAY);
  document.getElementById("sLevelL").textContent="Lvl "+li.lvl+" ▸";
  document.getElementById("xpLabel").textContent=li.isMax?"MAX 🏅":li.finalLocked?"🏁 Finish the race":"🔼 "+li.toNext+" XP to next";
  document.getElementById("sStreak").textContent=streak(o)+"🔥";
- document.getElementById("heroSub").textContent=`Paul · Wk ${w}/23 · ${phaseFor(w)} · ${shiftFor(TODAY)} shift`;
+ const wp=weekPlan(TODAY),lbl=wp.w>=1?`TBR Week ${wp.w}/20`:`Bridge ${4+wp.w}/4`;
+ document.getElementById("heroSub").textContent=`Paul · ${lbl} · ${wp.phase} · ${shiftFor(TODAY)} shift`;
  const pct=Math.max(0,Math.min(100,Math.round((TODAY-START)/(RACE-START)*100)));
  document.getElementById("fill").style.width=pct+"%";document.getElementById("runner").style.left=pct+"%";
- document.getElementById("raceL").textContent=`Week ${w} of 23 · ${phaseFor(w)}`;document.getElementById("raceR").textContent=pct+"% there";
+ document.getElementById("raceL").textContent=lbl+" · "+wp.phase;document.getElementById("raceR").textContent=pct+"% there";
  renderDots(o);}
 function renderDots(o){const c=document.getElementById("dots");const n=Math.round((RACE-START)/DAY)+1;let left=0,html="";
  for(let i=0;i<n;i++){const d=new Date(START.getTime()+i*DAY),log=o.logs[keyOf(d)];let cls="dot";
@@ -564,29 +645,28 @@ function renderSession(){const vd=new Date(TODAY.getTime()+sessOff*DAY),wo=worko
   else h+=`<ul>${wo.main.map(x=>`<li>${x.ex}${x.note?` — <small class="dim">${x.note}</small>`:""}</li>`).join("")}</ul>`;
   h+=`</div>`;
   if(wo.cd&&wo.cd.length)h+=`<div class="sect"><div class="sh">🧊 Cool-down</div><ul>${wo.cd.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
-  if(wd===1)h+=`<div class="totline">📏 Total ≈ ${LONG[w]} km — first 1–2km easy is your warm-up.</div>`;
-  else if(wd===5)h+=`<div class="totline">📏 ~30 min ≈ 3.5–4 km. Short on purpose — just go.</div>`;
+  {const wp=weekPlan(vd);
+   if(wd===0)h+=`<div class="totline">🐉 <b>${wp.p.lr}</b> — the no-miss session. Run-walk ${RUNWALK}.</div>`;
+   else if(wd===3||wd===5)h+=`<div class="totline">📏 ${(wd===3?wp.p.wd1:wp.p.wd2)} — holds your conditioning between long runs.</div>`;}
  }
  if(naDay(vd))h+=`<div class="totline" style="background:#fff3da;color:#9a6a00">🌙 NA shift — train <b>~2 hrs after waking, before your 10pm shift</b>.<br><span style="font-weight:400">7am finish → snack → 🕶️ blackout sleep 8am–3pm → wake &amp; eat → TRAIN → pre-shift meal → shift.</span></div>`;
  if(sessOff===0){const done=(state().logs[keyOf(TODAY)]||{}).main;h+=`<button class="btn ${done?'g':'p'}" id="sessDone" style="margin-top:12px;width:100%;padding:11px">${done?'✓ Session completed — tap to undo':'Mark session done ✓  (+50 XP, keeps your streak)'}</button>`;}
  else h+=`<div class="legend" style="margin-top:10px">👀 Previewing ahead — go back to Today to log it.</div>`;
  el.innerHTML=h;
  const b=document.getElementById("sessDone");if(b)b.onclick=()=>toggleQuest("main");}
-function renderMVW(o){const w=weekNum(TODAY),mon=mondayOf(w);let longDone=false,qDone=false,gymDone=0,km=0;
+function renderMVW(o){const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
+ let longDone=false,wd1=false,wd2=false,gym=0;
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l||!l.main)continue;
-  const t=mission(d).type,wd=d.getDay();
-  if(t==="long")longDone=true;
-  if(wd===3)qDone=true;
-  if(t==="gym")gymDone++;
-  if(wd===1)km+=LONG[w]; else if(wd===3)km+=EASYKM[w]+1; else if(wd===5||wd===6)km+=EASYKM[w];}
+  const wd=d.getDay();
+  if(wd===0)longDone=true; if(wd===3)wd1=true; if(wd===5)wd2=true;
+  if(wd===2||wd===4)gym++;}
  document.getElementById("mvwBox").innerHTML=
-  `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'pending'}</small></div>`+
-  `<div class="m ${qDone?'hit':''}"><span class="e">🏃</span>Quality run<br><small>${qDone?'DONE':'pending'}</small></div>`+
-  `<div class="m ${gymDone>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gymDone} done</small></div>`;
- const wk=document.getElementById("volBar");
- if(wk){const tgt=WEEKLY[w],pct=Math.min(100,Math.round(km/tgt*100));
-  wk.innerHTML=`<div class="cap" style="margin:8px 0 4px">Weekly volume: <b>${km} / ${tgt} km</b> (${pct}%)</div>
-   <div style="height:10px;background:#eef1f5;border-radius:20px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),#7CE0CF)"></div></div>`;}}
+  `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'NO-MISS'}</small></div>`+
+  `<div class="m ${(wd1||wd2)?'hit':''}"><span class="e">🏃</span>1+ weekday run<br><small>${(wd1?1:0)+(wd2?1:0)} of 2</small></div>`+
+  `<div class="m ${gym>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gym} done</small></div>`;
+ const wk=document.getElementById("volBar"),{w,p}=weekPlan(TODAY);
+ if(wk)wk.innerHTML=`<div class="note" style="margin-top:10px">📋 <b>This week (${w>=1?"TBR Week "+w:"Bridge"}):</b>
+   Long run <b>${p.lr}</b> · Wed <b>${p.wd1}</b> · Fri <b>${p.wd2}</b>${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}
 function renderQuests(log){const c=document.getElementById("quests");
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
@@ -623,9 +703,11 @@ function renderToday(){const o=state();cur=mission(TODAY);
   else if(ts>=4){rw.className="note adj";rw.innerHTML=`⚠️ <b>${ts} days in a row.</b> Plan a rest day in the next day or two.`}
   else rw.className="hide";}
  renderHero(o);renderWeek(o);}
-function renderWeek(o){o=o||state();const w=weekNum(TODAY);
- document.getElementById("weekCap").textContent="Week "+w+" · "+phaseFor(w)+" · long run "+LONG[w]+"km · "+runsPerWeek(w)+" runs";
- const mon=mondayOf(w),strip=document.getElementById("weekStrip");strip.innerHTML="";
+function renderWeek(o){o=o||state();
+ const wp=weekPlan(TODAY);
+ document.getElementById("weekCap").textContent=(wp.w>=1?"TBR Week "+wp.w:"Bridge")+" · long run "+wp.p.lr+" · 3 runs + 2 gym";
+ const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
+ const strip=document.getElementById("weekStrip");strip.innerHTML="";
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),log=o.logs[keyOf(d)];
   let cls="day";if(log&&completed(d,log))cls+=" done";if(log&&log.status==="missed")cls+=" miss";if(log&&log.status==="sick")cls+=" sick";
   if(keyOf(d)===keyOf(TODAY))cls+=" today";
@@ -640,7 +722,7 @@ document.getElementById("sickBtn").onclick=()=>setStatus("sick");
 document.getElementById("noteSave").onclick=()=>{const o=state(),k=keyOf(TODAY);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};
 document.getElementById("coachBtn").onclick=async()=>{const cb=document.getElementById("coachBox");cb.classList.remove("hide");cb.textContent="Coach is thinking…";
  if(!INAPP){cb.textContent="Coach is offline in the web version — but the mission is simple: "+cur.t+". Start with 20 minutes.";return}
- try{const o=state();const r=await window.cowork.askClaude("You are Paul's marathon coach. He restarted Sept 1 after months of inconsistency. Give 2-3 short, warm but FIRM sentences for TODAY only. Session: "+cur.t+" — "+cur.d+". Phase "+phaseFor(weekNum(TODAY))+", "+shiftFor(TODAY)+" shift. No lists.",[{streak:streak(o)}]);
+ try{const o=state();const r=await window.cowork.askClaude("You are Paul's marathon coach. He restarted Sept 1 after months of inconsistency. Give 2-3 short, warm but FIRM sentences for TODAY only. Session: "+cur.t+" — "+cur.d+". Phase "+weekPlan(TODAY).phase+", "+shiftFor(TODAY)+" shift. No lists.",[{streak:streak(o)}]);
   cb.textContent=(typeof r==="string"?r:(r&&r.text)||JSON.stringify(r))}catch(e){cb.textContent="Coach offline — but you know the mission: "+cur.t+". 20 minutes. Go."}};
 document.getElementById("levelTile").onclick=showLevels;
 document.getElementById("lvlClose").onclick=()=>document.getElementById("lvlModal").classList.add("hide");
@@ -745,7 +827,7 @@ function renderFood(){const cu=prepIdx(TODAY);if(prepView<0)prepView=cu;const pw
   `<div class="note">${PREP_STORE}</div>`;
  document.getElementById("prevWk").onclick=()=>{prepView=(prepView+PREPWEEKS.length-1)%PREPWEEKS.length;renderFood()};
  document.getElementById("nextWk").onclick=()=>{prepView=(prepView+1)%PREPWEEKS.length;renderFood()};
- const w=weekNum(TODAY),mon=mondayOf(w);let h="";
+ const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));let h="";
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),td=keyOf(d)===keyOf(TODAY),plan=dayPlan(d);
   h+=`<div class="dcard ${td?'dtoday':''}"><div class="dhead"><span class="dt">${WD[d.getDay()]} ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${td?' · TODAY':''}</span><span class="muted">${plan.type} · ≈${plan.target[0]} kcal</span></div>`+
    plan.slots.map(s=>`<div class="fslot"><div><b>${s.slot}</b>${naDay(d)?` <span class="natime">⏰ ${naTiming(s.slot)}</span>`:""} — ${s.food}${s.how?`<div class="muted" style="font-size:11px">${s.how}</div>`:""}${s.supp?`<div class="supp">💊 ${s.supp}</div>`:""}</div><div class="fk">${s.kcal}<br>${s.p}/${s.c}/${s.f}</div></div>`).join("")+`</div>`;}
@@ -758,46 +840,97 @@ async function loadRuns(){const body=document.getElementById("actBody");
  try{const r=await window.cowork.callMcpTool(STRAVA,{first:20});const data=r.structuredContent??JSON.parse(r.content[0].text);const acts=data.activities||[];
   const t0=new Date(TODAY),dfm=(t0.getDay()+6)%7,mon=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()-dfm),sun=new Date(mon.getTime()+7*DAY);let km=0,nr=0;
   acts.forEach(a=>{const dt=new Date(a.start_local);if(/run/i.test(a.sport_type)&&dt>=mon&&dt<sun){km+=a.summary.distance/1000;nr++}});
-  document.getElementById("wkKm").textContent=km.toFixed(1);document.getElementById("wkRuns").textContent=nr;document.getElementById("wkPlan").textContent=LONG[weekNum(mon)]+"km";
+  document.getElementById("wkKm").textContent=km.toFixed(1);document.getElementById("wkRuns").textContent=nr;document.getElementById("wkPlan").textContent=weekPlan(mon).p.lr;
   document.getElementById("wkRange").textContent="("+mon.toLocaleDateString("en-US",{month:"short",day:"numeric"})+"–"+new Date(sun-DAY).toLocaleDateString("en-US",{month:"short",day:"numeric"})+")";
   document.getElementById("stravaMsg").textContent="✅ Live from Strava.";
   body.innerHTML=acts.slice(0,12).map(a=>{const k=(a.summary.distance/1000).toFixed(2),t=Math.round(a.summary.moving_time/60),run=/run/i.test(a.sport_type);
    return `<tr><td>${new Date(a.start_local).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${a.name}<br><small class="dim">${a.sport_type}</small></td><td>${k} km</td><td>${t} min</td><td>${run?pace(a.summary.moving_time,a.summary.distance)+"/km":"—"}</td></tr>`}).join("")}
  catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="5">Unavailable.</td></tr>'}}
+// TL;DR + HANDBOOK
+const TLDR_CRIT=[
+ ["🌙","RACE STARTS AT MIDNIGHT","Feb 14, 12:00 AM at Filinvest City. Not a morning race — plan an afternoon nap, and do some late-night long runs in training. Your night-shift experience is an advantage here."],
+ ["🩺","MEDICAL CERTIFICATE IS MANDATORY","\"No Medical Certificate, No Race Kit.\" Get it in <b>October</b> — an early check-up also catches problems before the big weeks."],
+ ["⏱️","CUT-OFFS ARE ENFORCED","21K by <b>4:00 AM</b> (4 hrs) · Finish by <b>8:00 AM</b> (8 hrs). Your sub-6 target sits comfortably inside this."],
+ ["🐉","THE LONG RUN IS NO-MISS","Handbook: \"the weekend long run is a no-miss training.\" Miss a weekday run occasionally — fine. Never miss the long run."],
+ ["🎟️","RACE KIT AT SEND OFF ONLY","Thu Feb 11, doors 4PM, party 7PM, Botanical Gardens. Bring your med cert."]];
+const TLDR=[
+ ["🏃 Run-Walk Method",["TBR base is <b>2:1</b> (run 2 / walk 1). Beginner 1 targets <b>3:1</b>.","Galloway: a 2:00–2:30 half suits 3:1 or 4:1. <b>You ran 2:43 → start 3:1</b>, drop to 2:1 when tired.","Walk BEFORE you get tired — from the very first km.","Practise it on <i>every</i> run, not just race day.","Bull Sessions run in interval groups; a 'Run All The Way' group exists if you prefer continuous."]],
+ ["📈 Training principles",["<b>Overload + gradual build:</b> ask for slightly more than before; adapt in the 48h after.","<b>Time-based</b>, not distance — only the late long runs give a km target.","<b>2–3 runs/week</b>, max 4 running days. Cross-train or rest otherwise.","<b>Full rest day after the long run.</b>","<b>No tempo/intervals</b> — \"NOT NECESSARY FOR A FINISHER PROGRAM.\"","Avoid team sports (basketball/football) — injury risk."]],
+ ["🍽 Nutrition (their guidance)",["Balanced protein, healthy fats, carbs.","They advise <b>~1 g protein per kg</b> (≈78 g for you).","Don't overeat just because you're running; don't undereat either.","<i>My note:</i> since you're also lifting and leaning out, I keep you higher (~140–150 g) — that's better supported for muscle retention in a deficit. Their 1 g/kg is a floor, not a ceiling."]],
+ ["🎯 Their objectives",["Finish the marathon <b>comfortably</b> and enjoy it.","Stay <b>healthy and injury-free</b> — biggest risk is too much, too soon.","Fit training <b>into</b> your life, not take it over."]],
+ ["🎁 What's included",["Bull Sessions (run clinics) + Bull Circles (Zoom talks) — free, no pre-registration.","Dream Chasers, Support Zones, pacers, hydration/medical stations on race day.","Finisher shirt, medal, swag bag, post-race breakfast.","Batch 2027 Facebook group; TBR Dream Plus optional strength add-on (starts Sep 28).","Personal pacers available for a fee."]],
+ ["👥 Who to contact",["Coach Jaymie Spiers — founder · jaymie@tbrdream.com","Coach Morgan Ferrer-Aba — lead coach, Bull Sessions · morganferrer.fitness@gmail.com","Coach Nylah Bautista — run-walk method · nylahbautista@gmail.com","General help · help@tbrdream.com"]]];
+const HB_SECTIONS=[
+ ["Which program is for me?",["<b>Beginner 1</b> — relatively new to running · comfortable up to 15K · 4–5 hrs/week · history of injury or unsure.","<b>Beginner 2</b> — running regularly 1+ years · comfortable over 15K · no recurring injuries · 5+ hrs/week.","<b>Your call:</b> you're a hybrid — 21K done (B2) but a 5-month slump and a July hamstring strain (B1). The 4-week Bridge from Sep 1 is what earns you B2 by Sep 28."]],
+ ["The long run",["\"The long run IS the program and this is the part you cannot afford to miss.\"","Weekday runs exist only to HOLD conditioning between long runs.","Long runs are on the weekend — you'll need the time."]],
+ ["Recovery & restraint",["Recovery weeks are built in — take them.","\"As much as you'll exercise your muscles, you'll also need to exercise restraint.\"","Full rest day after every long run."]],
+ ["Race day logistics",["Feb 14, 2027 · <b>12:00 AM gun start</b> · Filinvest City.","21K cut-off 4:00 AM · Finish cut-off 8:00 AM (8 hours).","TBR Together 3K/5K on Feb 13, 6AM — treat as a shakeout or just spectate.","Send Off Party Feb 11, 7PM (kit claiming from 4PM)."]]];
+const B1=[["1–3","30 min","30 min","50 min → 1 hr"],["4–6","30–45 min","30–45 min","1 hr 10 → 1 hr 20"],["7–10","45 min","45 min","1 hr 30 → 2 hrs 20"],["11–14","45 min","45 min","2 hrs → 2 hrs 40"],["15–17","45 min","45 min","3 hrs 15 (min 28 km) → 3 hrs 30 (min 30 km)"],["18–20","45 min","45 min","Taper → 🏁 RACE DAY"]];
+function renderTLDR(){
+ document.getElementById("tldrCritical").innerHTML=TLDR_CRIT.map(([e,t,d])=>
+  `<div class="ritem"><b>${e} ${t}</b><div class="muted" style="font-size:12px">${d}</div></div>`).join("");
+ document.getElementById("tldrBody").innerHTML=TLDR.map(([h,items])=>
+  `<div class="rgroup"><div class="rgh">${h}</div>`+items.map(i=>`<div class="ritem">${i}</div>`).join("")+`</div>`).join("");
+ document.getElementById("tldrDates").innerHTML=TBREVENTS.map(([d,c,t])=>
+  `<div class="tbr"><span><b>${d}</b> · ${c}</span><span class="muted">${t}</span></div>`).join("");}
+function renderHandbook(){
+ document.getElementById("hbSections").innerHTML=HB_SECTIONS.map(([h,items])=>
+  `<div class="rgroup"><div class="rgh">${h}</div>`+items.map(i=>`<div class="ritem">${i}</div>`).join("")+`</div>`).join("");
+ const tb=document.getElementById("hbB2");tb.innerHTML="";
+ for(let k=1;k<=20;k++){const p=TBR[k],mo=new Date(PROGSTART.getTime()+(k-1)*7*DAY);
+  const su=new Date(mo.getTime()+6*DAY);
+  const tr=document.createElement("tr");if(k===weekPlan(TODAY).w)tr.style.outline="2px solid var(--teal)";
+  tr.innerHTML=`<td class="b">${k}</td><td><small>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}–${su.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</small></td>`+
+   `<td><small>${p.wd1}</small></td><td><small>${p.wd2}</small></td>`+
+   `<td class="b" style="color:var(--teal)">${p.lr}${p.note?`<br><small class="muted" style="font-weight:400">${p.note}</small>`:""}${p.star?`<br><small style="color:var(--bad)">${p.star}</small>`:""}${p.bull?`<br><small class="muted" style="font-weight:400">👥 ${p.bull}</small>`:""}</td>`;
+  tb.appendChild(tr)}
+ document.getElementById("hbB1").innerHTML=`<table class="t2"><thead><tr><th>Weeks</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody>`+
+  B1.map(r=>`<tr><td class="b">${r[0]}</td><td><small>${r[1]}</small></td><td><small>${r[2]}</small></td><td>${r[3]}</td></tr>`).join("")+
+  `</tbody></table><div class="legend">Beginner 1 targets a 3:1 run-walk. Key is TIME ON FEET.</div>`;}
 // PLAN
 function renderPlan(){
  document.getElementById("hrBody").innerHTML=HRTABLE.map(([u,b,f])=>`<tr><td><b>${u}</b></td><td class="b" style="color:var(--teal);white-space:nowrap">${b}</td><td><small>${f}</small></td></tr>`).join("");
  document.getElementById("planHow").innerHTML=`
- <div class="rgroup"><div class="rgh">Your week — 4 runs, 2 gym, 1 rest</div>
- <div class="ritem"><b>Mon</b> 🐉 LONG RUN — your day off, fresh legs after Sunday rest</div>
- <div class="ritem"><b>Tue</b> 💪 Upper gym — legs recover, no running stress</div>
- <div class="ritem"><b>Wed</b> 🏃 QUALITY RUN — 2 days after the long run, legs ready to work</div>
- <div class="ritem"><b>Thu</b> 🦵 Lower gym — 3 days clear of the next hard run</div>
- <div class="ritem"><b>Fri</b> 🏃 Easy run — flushes the legs</div>
- <div class="ritem"><b>Sat</b> 🏃 Easy run — cheap aerobic volume</div>
- <div class="ritem"><b>Sun</b> 🛌 Rest + 🍱 batch-cook</div></div>
- <div class="rgroup"><div class="rgh">The rules</div>
- <div class="ritem"><b>1. The long run is sacred.</b> Miss anything else first — it's the only session that can't be replaced.</div>
- <div class="ritem"><b>2. 80/20.</b> Roughly 80% of your running easy (135–152 bpm), 20% hard. Easy days easy is what makes hard days work.</div>
- <div class="ritem"><b>3. The 20-minute rule.</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div>
- <div class="ritem"><b>4. Minimum viable week.</b> Long run + quality run + 1 gym = the week counts.</div>
- <div class="ritem"><b>5. Night-shift weeks:</b> drop Saturday's easy run first, then Friday's. Survive, don't conquer.</div>
- <div class="ritem"><b>6. Pickleball is a bonus, never a substitute.</b> If you play, it goes <i>on top of</i> the plan — it doesn't replace a run.</div>
- <div class="ritem"><b>7. Volume beats heroics.</b> Weekly km matters more than one big Sunday. Build it ~10%/week, deload every 4th.</div></div>`;
- const w=weekNum(TODAY),mon=mondayOf(w);document.getElementById("wdTag").textContent="— Week "+w+"/23 · "+phaseFor(w)+" · "+shiftFor(TODAY)+" shift";
+ <div class="rgroup"><div class="rgh">Your week — official TBR structure (3 runs + 2 gym)</div>
+ <div class="ritem"><b>Sun</b> 🐉 LONG RUN — your day off, and when Bull Sessions happen</div>
+ <div class="ritem"><b>Mon</b> 🛌 FULL REST — TBR rule: always rest the day after the long run</div>
+ <div class="ritem"><b>Tue</b> 💪 Upper gym (counts as TBR cross-training)</div>
+ <div class="ritem"><b>Wed</b> 🏃 Maintenance run 1</div>
+ <div class="ritem"><b>Thu</b> 🦵 Lower gym</div>
+ <div class="ritem"><b>Fri</b> 🏃 Maintenance run 2</div>
+ <div class="ritem"><b>Sat</b> 🛌 Rest / XTrain + 🍱 batch-cook</div></div>
+ <div class="rgroup"><div class="rgh">TBR's rules (from the handbook)</div>
+ <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.</div>
+ <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
+ <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.</div>
+ <div class="ritem"><b>4. Time, not distance.</b> "The body does not inherently know distance." Only the late long runs carry a km target.</div>
+ <div class="ritem"><b>5. Max 4 running days.</b> Rest or cross-train otherwise. Avoid team sports (injury risk).</div>
+ <div class="ritem"><b>6. Full rest after the long run.</b> Non-negotiable — that's Monday.</div>
+ <div class="ritem"><b>7. Exercise restraint.</b> "One of the biggest causes of injury is doing too much, too soon." Trust the gradual build.</div>
+ <div class="ritem"><b>8. The 20-minute rule (mine).</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div></div>`;
+ const wp2=weekPlan(TODAY);const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
+ document.getElementById("wdTag").textContent="— "+(wp2.w>=1?"TBR Week "+wp2.w+"/20":"Bridge")+" · "+wp2.phase+" · "+shiftFor(TODAY)+" shift";
  let h="";
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),m=mission(d),wo=workoutFor(d),td=keyOf(d)===keyOf(TODAY);
   const doTxt=wo?wo.main.map(x=>x.ex).join(" · "):"—";const tg=dayPlan(d).target;
   h+=`<div class="dcard ${td?'dtoday':''}"><div class="dhead"><span class="dt">${WD[d.getDay()]} ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${td?' · TODAY':''}</span><span>${m.emo} ${m.t}</span></div><div class="dctx">${m.d}</div><div class="dmain"><b>Do:</b> ${doTxt}</div><div class="dnut">🍽 ≈${tg[0]} kcal · ${tg[1]}g protein</div></div>`;}
  document.getElementById("weekDetail").innerHTML=h;
- document.getElementById("tbrList").innerHTML=TBR.map(([d,c,t])=>`<div class="tbr"><span><b>${d}</b> · ${c}</span><span class="muted">${t}</span></div>`).join("");
+ document.getElementById("tbrList").innerHTML=TBREVENTS.map(([d,c,t])=>`<div class="tbr"><span><b>${d}</b> · ${c}</span><span class="muted">${t}</span></div>`).join("");
  const pb=document.getElementById("planBody");pb.innerHTML="";
- for(let k=0;k<=23;k++){const p=phaseFor(k),mo=mondayOf(k),s=shiftFor(mo);const tr=document.createElement("tr");if(k===w)tr.style.outline="2px solid var(--teal)";
-  let focus=RACESIM[k]?"🎽 "+RACESIM[k]:(MPKM[k]?`${MPKM[k]}km @ marathon pace`:(k===23?"🏁 RACE WEEK":qualityKind(k).t));
-  tr.innerHTML=`<td class="b">${k}</td><td><span class="pill" style="background:${phaseColor(p)}">${p}</span></td><td>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${s}</td><td class="b">${k===23?"42.2 🏁":LONG[k]+"km"}</td><td>${WEEKLY[k]}</td><td><small>${focus}</small></td>`;pb.appendChild(tr)}}
+ const curW=weekPlan(TODAY).w;
+ for(let k=-3;k<=20;k++){const p=(k>=1?TBR[k]:BRIDGE[String(k)]);if(!p)continue;
+  const mo=new Date(PROGSTART.getTime()+(k-1)*7*DAY),s=shiftFor(mo);
+  const tr=document.createElement("tr");if(k===curW)tr.style.outline="2px solid var(--teal)";
+  const ph=k>=1?"TBR "+k:"Bridge";
+  tr.innerHTML=`<td class="b">${ph}</td><td>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${s}</td>`+
+   `<td class="b" style="color:var(--teal)">${p.lr}</td><td><small>${p.wd1}</small></td><td><small>${p.wd2}</small></td>`+
+   `<td><small>${p.bull?"👥 "+p.bull.split(" · ")[0]:""}${p.star?" "+p.star.slice(0,42):""}</small></td>`;
+  pb.appendChild(tr)}}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
- ["today","recovery","progress","food","runs","plan"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
- if(t.dataset.t==="recovery")renderRecovery();if(t.dataset.t==="progress")renderProgress();if(t.dataset.t==="food")renderFood();if(t.dataset.t==="runs")loadRuns();if(t.dataset.t==="plan")renderPlan()});
+ ["today","recovery","progress","food","runs","plan","tldr","handbook"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
+ const v=t.dataset.t;
+ if(v==="recovery")renderRecovery();if(v==="progress")renderProgress();if(v==="food")renderFood();
+ if(v==="runs")loadRuns();if(v==="plan")renderPlan();if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook()});
 document.getElementById("scDate").value=keyOf(TODAY);
 renderToday();loadRuns();
 </script>
