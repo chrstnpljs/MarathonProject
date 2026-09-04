@@ -23,26 +23,20 @@ html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--fog);color:var(--ink);
   font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  font-size:16px;line-height:1.5;
-  padding-bottom:env(safe-area-inset-bottom);
+  font-size:16px;line-height:1.5;padding-bottom:env(safe-area-inset-bottom);
 }
 .wrap{max-width:720px;margin:0 auto;padding:0 16px}
 
-/* ---------- masthead + weight meter ---------- */
 header{
   position:sticky;top:0;z-index:20;background:var(--fog);
-  border-bottom:1px solid var(--rule);
-  padding-top:env(safe-area-inset-top);
+  border-bottom:1px solid var(--rule);padding-top:env(safe-area-inset-top);
 }
 .mast{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:12px 0 8px}
 .mast h1{font-size:17px;font-weight:650;margin:0;letter-spacing:-.01em}
 .mast .sub{font-size:12px;color:var(--soft);white-space:nowrap}
 .meter{padding-bottom:10px}
 .readout{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
-.kg{
-  font-size:38px;font-weight:700;line-height:1;letter-spacing:-.03em;
-  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;
-}
+.kg{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .kg small{font-size:15px;font-weight:500;color:var(--soft);letter-spacing:0}
 .readout .of{font-size:12.5px;color:var(--soft);margin-left:auto;text-align:right;line-height:1.35}
 .bar{height:7px;background:var(--rule);border-radius:99px;overflow:hidden;position:relative}
@@ -50,7 +44,6 @@ header{
 .fill.over{background:var(--rust)}
 .tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.35;left:85.7%}
 
-/* ---------- tabs ---------- */
 nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
 nav::-webkit-scrollbar{display:none}
 nav button{
@@ -61,27 +54,17 @@ nav button{
 nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--river)}
 nav button:focus-visible{outline:2px solid var(--river);outline-offset:2px;border-radius:4px}
 
-/* ---------- panels ---------- */
 main{padding:16px 0 64px}
 [role=tabpanel][hidden]{display:none}
-h2{
-  font-size:12.5px;font-weight:650;color:var(--soft);margin:26px 0 8px;
-  letter-spacing:.02em;
-}
+h2{font-size:12.5px;font-weight:650;color:var(--soft);margin:26px 0 8px;letter-spacing:.02em}
 h2:first-child{margin-top:0}
 h2 .n{color:var(--rule);font-weight:500;font-variant-numeric:tabular-nums}
 
 .group{background:var(--paper);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
-.row{
-  display:flex;align-items:flex-start;gap:12px;padding:11px 13px;
-  border-top:1px solid var(--rule);cursor:pointer;user-select:none;
-}
+.row{display:flex;align-items:flex-start;gap:12px;padding:11px 13px;border-top:1px solid var(--rule);cursor:pointer;user-select:none}
 .row:first-child{border-top:0}
 .row:active{background:var(--shade)}
-.box{
-  flex:0 0 auto;width:20px;height:20px;margin-top:1px;border-radius:6px;
-  border:1.5px solid var(--rule);display:grid;place-items:center;transition:.15s;
-}
+.box{flex:0 0 auto;width:20px;height:20px;margin-top:1px;border-radius:6px;border:1.5px solid var(--rule);display:grid;place-items:center;transition:.15s}
 .row.on .box{background:var(--moss);border-color:var(--moss)}
 .box svg{width:12px;height:12px;stroke:var(--paper);stroke-width:3;fill:none;opacity:0}
 .row.on .box svg{opacity:1}
@@ -89,36 +72,25 @@ h2 .n{color:var(--rule);font-weight:500;font-variant-numeric:tabular-nums}
 .name{font-size:15px;line-height:1.35}
 .row.on .name{color:var(--soft);text-decoration:line-through;text-decoration-thickness:1px}
 .note{font-size:12.5px;color:var(--soft);line-height:1.4;margin-top:2px}
-.g{
-  flex:0 0 auto;font-size:12.5px;color:var(--soft);
-  font-variant-numeric:tabular-nums;padding-top:2px;
-}
-.tag{
-  display:inline-block;font-size:10.5px;font-weight:650;padding:1px 6px;
-  border-radius:4px;margin-left:6px;vertical-align:1px;letter-spacing:.02em;
-}
+.g{flex:0 0 auto;font-size:12.5px;color:var(--soft);font-variant-numeric:tabular-nums;padding-top:2px}
+.tag{display:inline-block;font-size:10.5px;font-weight:650;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:1px;letter-spacing:.02em}
 .tag.wet{background:color-mix(in srgb,var(--river) 16%,transparent);color:var(--river)}
 .tag.crit{background:color-mix(in srgb,var(--rust) 16%,transparent);color:var(--rust)}
 .tag.worn{background:var(--shade);color:var(--soft)}
+.tag.swim{background:color-mix(in srgb,var(--moss) 18%,transparent);color:var(--moss)}
 
-/* ---------- timeline ---------- */
 .tl{position:relative;padding-left:22px}
 .tl::before{content:"";position:absolute;left:5px;top:6px;bottom:14px;width:2px;background:var(--rule)}
 .leg{position:relative;margin-bottom:20px}
-.leg::before{
-  content:"";position:absolute;left:-21px;top:6px;width:12px;height:12px;
-  border-radius:50%;background:var(--paper);border:2.5px solid var(--river);
-}
+.leg::before{content:"";position:absolute;left:-21px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2.5px solid var(--river)}
 .leg.warn::before{border-color:var(--rust)}
-.leg .when{font-size:12px;color:var(--soft);font-variant-numeric:tabular-nums}
+.leg.swim::before{border-color:var(--moss)}
+.leg .when{font-size:12px;color:var(--soft);font-variant-numeric:tabular-nums;font-weight:600}
 .leg .what{font-size:15.5px;font-weight:600;margin:1px 0 5px;letter-spacing:-.01em}
 .leg p{margin:0 0 6px;font-size:14px;line-height:1.55}
 .leg ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55}
 .leg li{margin-bottom:3px}
-.amt{
-  display:inline-block;background:var(--shade);border-radius:5px;padding:1px 6px;
-  font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
-}
+.amt{display:inline-block;background:var(--shade);border-radius:5px;padding:1px 6px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
 
 .card{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:14px 15px;margin-bottom:12px}
 .card h3{font-size:15px;margin:0 0 6px;font-weight:650;letter-spacing:-.01em}
@@ -127,21 +99,21 @@ h2 .n{color:var(--rule);font-weight:500;font-variant-numeric:tabular-nums}
 .card ul{margin:0 0 8px;padding-left:18px;font-size:14px;line-height:1.55}
 .card.flag{border-color:var(--rust);border-left-width:3px}
 .card.flag h3{color:var(--rust)}
+.card.quiet{background:none;border-style:dashed}
+.card.quiet h3,.card.quiet p{color:var(--soft)}
 
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
 th{font-size:12px;color:var(--soft);font-weight:600}
 td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.t{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--soft);width:1%}
 
 .foot{display:flex;gap:8px;margin:28px 0 0;flex-wrap:wrap;align-items:center}
-.btn{
-  font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;
-  border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;
-}
+.btn{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
 .btn:active{background:var(--shade)}
 .btn:focus-visible{outline:2px solid var(--river);outline-offset:2px}
 .status{font-size:12px;color:var(--soft)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -157,10 +129,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
         <div class="kg" id="kg">0.00<small> kg</small></div>
         <div class="of" id="of">nothing packed<br>target 6.0 kg base</div>
       </div>
-      <div class="bar"><div class="fill" id="fill"></div><div class="tick" title="6.0 kg target"></div></div>
+      <div class="bar"><div class="fill" id="fill"></div><div class="tick"></div></div>
     </div>
     <nav role="tablist" id="tabs">
       <button role="tab" aria-selected="true" data-p="pack">Pack</button>
+      <button role="tab" aria-selected="false" data-p="sched">Schedule</button>
       <button role="tab" aria-selected="false" data-p="water">Water</button>
       <button role="tab" aria-selected="false" data-p="food">Food</button>
       <button role="tab" aria-selected="false" data-p="brief">Brief</button>
@@ -171,74 +144,150 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <main class="wrap">
   <div role="tabpanel" id="p-pack"></div>
 
+  <!-- ================= SCHEDULE ================= -->
+  <div role="tabpanel" id="p-sched" hidden>
+    <div class="card quiet">
+      <h3>Organiser's itinerary</h3>
+      <p>Times are a guide, not a promise. Weather, group pacing and traffic move everything. The coordinator can adjust as needed.</p>
+    </div>
+
+    <h2>Day 0 <span class="n">/ Friday</span></h2>
+    <div class="card">
+      <table>
+        <tr><td class="t">8:00 PM</td><td>MOA Starbucks Ecom 1</td></tr>
+        <tr><td class="t">8:30 PM</td><td>Greenfield Parking, Mayflower</td></tr>
+        <tr><td class="t">9:30 PM</td><td>McDonald's Eton Centris — ETD to Ilocos Sur</td></tr>
+      </table>
+      <p style="margin-top:10px">Pick-ups along the way: SM San Fernando Pampanga, Dau Terminal, SM Rosales Pangasinan, San Fernando La Union.</p>
+    </div>
+
+    <h2>Day 1 <span class="n">/ Saturday &middot; ~8.5 hrs trekking</span></h2>
+    <div class="tl">
+      <div class="leg"><div class="when">6:00 AM</div><div class="what">Wake up, start trek to Brgy. Bagu</div></div>
+      <div class="leg"><div class="when">6:00 AM</div><div class="what">Sitio Caang — breakfast</div></div>
+      <div class="leg"><div class="when">9:00 AM</div><div class="what">Sitio Singa</div></div>
+      <div class="leg"><div class="when">11:00 AM</div><div class="what">Elementary school</div></div>
+      <div class="leg"><div class="when">12:00 PM</div><div class="what">Lunch along the trail</div></div>
+      <div class="leg swim"><div class="when">2:30 PM</div><div class="what">Arrive Bagu</div>
+        <p>Rest, wash, basketball, drone, falls hunting.</p></div>
+      <div class="leg"><div class="when">6:00 PM</div><div class="what">Early dinner, social onward</div></div>
+      <div class="leg"><div class="when">10:00 PM</div><div class="what">Lights off</div></div>
+    </div>
+
+    <h2>Day 2 <span class="n">/ Sunday &middot; ~7 hrs trekking</span></h2>
+    <div class="tl">
+      <div class="leg"><div class="when">6:00 AM</div><div class="what">Wake up, prepare</div></div>
+      <div class="leg"><div class="when">6:30 AM</div><div class="what">Breakfast</div></div>
+      <div class="leg"><div class="when">7:30 AM</div><div class="what">Start trek</div></div>
+      <div class="leg"><div class="when">9:30 AM</div><div class="what">Sitio Barbarit</div></div>
+      <div class="leg swim"><div class="when">11:00 AM</div><div class="what">Odasan Falls — last falls, swimming, lunch</div></div>
+      <div class="leg"><div class="when">12:30 PM</div><div class="what">Resume trek</div></div>
+      <div class="leg"><div class="when">2:00 PM</div><div class="what">Sitio Lamew — store</div>
+        <p>Only resupply point on the route. Worth knowing.</p></div>
+      <div class="leg"><div class="when">4:00 PM</div><div class="what">Arrive JOP, Brgy. Apang — wash, dinner</div></div>
+      <div class="leg"><div class="when">6:00 PM</div><div class="what">Travel back to Manila</div></div>
+      <div class="leg"><div class="when">12:00 AM</div><div class="what">Arrive Manila — end of tour</div></div>
+    </div>
+
+    <h2>Reading the schedule</h2>
+    <div class="card">
+      <ul>
+        <li>Both days are roughly 7–9 hours of trekking, not the 10–14 in the general brief. Kinder than expected, but 32 km and 2,650 m of gain still land somewhere.</li>
+        <li>Day 1 finishes at 2:30 PM. That afternoon at Bagu is the real reward — falls, rest, and the social. Save something for it.</li>
+        <li>Day 2's swim comes at 11:00 AM with five more hours of trekking after. Plan for that, not against it.</li>
+        <li>Sitio Lamew at 2:00 PM is your only store. Everything before it, you carry.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= WATER ================= -->
   <div role="tabpanel" id="p-water" hidden>
     <div class="card flag">
-      <h3>Carry 1.5 L, not 3 L</h3>
-      <p>You will sweat 0.5–0.8 L an hour in Bakun humidity under a pack. Over a 12-hour day that is 6–9 litres — more than anyone can carry. Three litres of water is three kilos and still runs out by early afternoon.</p>
-      <p>Carry 1.5 L and a squeeze filter instead. Same safety, 1.4 kg lighter, and this route crosses rivers and falls all day. Confirm with your guide where the reliable sources sit before you commit to the light load.</p>
+      <h3>Carry 1.5–2 L, not 3 L</h3>
+      <p>You'll sweat roughly half a litre an hour in Bakun humidity under a pack. Across an 8-hour day that's more than anyone carries. Three litres is three kilos and still runs dry by afternoon.</p>
+      <p>Carry less and refill instead — this route crosses rivers and falls all day. A squeeze filter costs about 100 g and saves well over a kilo. <strong>Confirm the reliable sources with your guide before you commit to a light load.</strong></p>
     </div>
     <div class="card">
       <h3>Where to fill</h3>
       <ul>
         <li>Fast-moving water only. Skip standing pools and anything warm.</li>
-        <li>Collect <em>above</em> villages, rice terraces and vegetable gardens. Benguet farms sit right on these watersheds.</li>
-        <li>A filter removes bacteria and protozoa. It does not remove pesticide or fertiliser runoff, so source selection matters more than the filter.</li>
+        <li>Collect <em>above</em> sitios, rice terraces and vegetable gardens. Benguet farms sit right on these watersheds.</li>
+        <li>A filter handles bacteria and protozoa, not pesticide or fertiliser runoff. Where you collect matters more than the filter itself.</li>
         <li>Falls and side tributaries beat the main river.</li>
       </ul>
     </div>
 
-    <h2>Day 1 <span class="n">/ drinking schedule</span></h2>
+    <h2>Day 1</h2>
     <div class="tl">
       <div class="leg">
         <div class="when">Night before, in the van</div>
         <div class="what">Pre-load</div>
-        <p><span class="amt">500 ml</span> with an electrolyte tab before you sleep. No alcohol. You cannot fix Day 1 dehydration on Day 1.</p>
+        <p><span class="amt">500 ml</span> with electrolytes before you sleep. No alcohol. You can't fix Day 1 dehydration on Day 1.</p>
       </div>
       <div class="leg">
-        <div class="when">60 min before start</div>
-        <div class="what">Top up, then stop</div>
-        <p><span class="amt">500 ml</span> with brunch, then stop drinking in bulk so you are not sloshing at the trailhead.</p>
+        <div class="when">6:00 AM &middot; Sitio Caang</div>
+        <div class="what">With breakfast</div>
+        <p><span class="amt">400 ml</span>, then stop drinking in bulk so you're not sloshing when you start moving.</p>
       </div>
       <div class="leg">
-        <div class="when">Hours 0–3 &middot; descent and river</div>
-        <div class="what">Hottest, lowest, sweatiest</div>
-        <p><span class="amt">600 ml/hr</span> — roughly 150 ml every 15 minutes. One electrolyte tab per litre.</p>
-        <p>Fill to full at the last good source before the climb starts. Ask the guide which one that is.</p>
-      </div>
-      <div class="leg">
-        <div class="when">Hours 3–7 &middot; assault</div>
-        <div class="what">Sip on a timer, not on thirst</div>
-        <p><span class="amt">500–700 ml/hr</span>. Thirst lags dehydration by about 2% body mass. Drink on schedule.</p>
+        <div class="when">6:00 – 9:00 AM &middot; to Sitio Singa</div>
+        <div class="what">Cool hours, easy pace</div>
+        <p><span class="amt">400 ml/hr</span> — about 100 ml every 15 minutes. One electrolyte tab per litre.</p>
       </div>
       <div class="leg warn">
-        <div class="when">Hours 7–10 &middot; ridge</div>
-        <div class="what">The trap</div>
-        <p>Cold air and wind switch off your thirst while you are still sweating hard. This is where people arrive at camp badly behind.</p>
-        <p>Force <span class="amt">400–500 ml/hr</span> even though you do not want it. Warm it in your mouth if the cold puts you off.</p>
+        <div class="when">9:00 AM – 12:00 PM</div>
+        <div class="what">Heat builds — the hardest stretch</div>
+        <p><span class="amt">500–600 ml/hr</span>. Sun is high and this is the bulk of the day's climbing.</p>
+        <p>Top up completely at the last good source before this section. Ask the guide which one that is.</p>
       </div>
       <div class="leg">
-        <div class="when">Camp, first 30 min</div>
+        <div class="when">12:00 – 2:30 PM &middot; to Bagu</div>
+        <div class="what">Final push</div>
+        <p><span class="amt">500 ml/hr</span>. Thirst lags dehydration, so drink on a schedule rather than on feel.</p>
+      </div>
+      <div class="leg">
+        <div class="when">2:30 PM &middot; arrival</div>
         <div class="what">Refill the tank</div>
-        <p><span class="amt">750 ml</span> with electrolytes on arrival, another <span class="amt">500 ml</span> with dinner.</p>
+        <p><span class="amt">750 ml</span> with electrolytes in the first 30 minutes. Do this <em>before</em> the falls and the basketball, not after.</p>
+      </div>
+      <div class="leg swim">
+        <div class="when">Afternoon &middot; falls</div>
+        <div class="what">Swimming still dehydrates</div>
+        <p>Cold water suppresses thirst completely while you keep losing fluid. Bring a bottle to the falls and drink from it.</p>
       </div>
       <div class="leg">
-        <div class="when">Before lights out</div>
-        <div class="what">Taper</div>
-        <p><span class="amt">250 ml</span>, then stop an hour before sleep. You want to wake up rested, not at 2 a.m. looking for the CR.</p>
+        <div class="when">6:00 PM &middot; dinner</div>
+        <div class="what">Top up</div>
+        <p><span class="amt">500 ml</span> through the meal, then <span class="amt">250 ml</span> and stop by 9:00 PM so you sleep through.</p>
       </div>
     </div>
 
     <h2>Day 2</h2>
     <div class="tl">
       <div class="leg">
-        <div class="when">On waking</div>
+        <div class="when">6:00 AM &middot; waking</div>
         <div class="what">Reset</div>
-        <p><span class="amt">500 ml</span> with electrolytes before coffee. Check your urine — pale straw means you are ready, dark amber means you start Day 2 in a hole.</p>
+        <p><span class="amt">500 ml</span> with electrolytes before coffee. Check your urine — pale straw means ready, dark amber means you start Day 2 already behind.</p>
       </div>
       <div class="leg">
-        <div class="when">On trail</div>
-        <div class="what">Same cadence</div>
-        <p>Repeat the Day 1 schedule. Day 2 legs are tired legs, and cramping arrives earlier when sodium is low.</p>
+        <div class="when">7:30 – 11:00 AM</div>
+        <div class="what">To Odasan Falls</div>
+        <p><span class="amt">400–500 ml/hr</span>. Day 2 legs are tired legs and cramp earlier when sodium is low.</p>
+      </div>
+      <div class="leg swim">
+        <div class="when">11:00 AM – 12:30 PM &middot; Odasan Falls</div>
+        <div class="what">Drink before you swim, not after</div>
+        <p><span class="amt">500 ml</span> with lunch. You have five hours of trekking left and this is your last real stop before Lamew.</p>
+      </div>
+      <div class="leg">
+        <div class="when">12:30 – 4:00 PM</div>
+        <div class="what">Final stretch</div>
+        <p><span class="amt">500 ml/hr</span>. The store at Sitio Lamew around 2:00 PM is your safety net if you've run low — bring cash.</p>
+      </div>
+      <div class="leg warn">
+        <div class="when">6:00 PM – midnight &middot; the van</div>
+        <div class="what">Don't skip this part</div>
+        <p>Six hours in aircon after a hard weekend dehydrates you further. <span class="amt">500 ml</span> before you sleep in the van. This is the difference between waking up fine on Monday and waking up wrecked.</p>
       </div>
     </div>
 
@@ -248,98 +297,109 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
         <tr><th>Signal</th><th>What it means</th></tr>
         <tr><td>Dark urine, or none in 4 hrs</td><td>Behind on fluid. Drink 500 ml now, then resume schedule.</td></tr>
         <tr><td>Cramping</td><td>Usually sodium, not water. Take salt, then drink.</td></tr>
-        <tr><td>Headache, nausea, sloshing after lots of plain water</td><td>Possible over-drinking without salt. Stop plain water, eat something salty, tell your guide.</td></tr>
-        <tr><td>Chills while still working hard</td><td>Stop, layer up, eat. Do not push through.</td></tr>
+        <tr><td>Headache, nausea, sloshing after lots of plain water</td><td>Possibly over-drinking without salt. Stop plain water, eat something salty, tell your guide.</td></tr>
+        <tr><td>Chills while still working hard</td><td>Stop, layer up, eat. Don't push through this one.</td></tr>
       </table>
     </div>
   </div>
 
+  <!-- ================= FOOD ================= -->
   <div role="tabpanel" id="p-food" hidden>
     <div class="card">
       <h3>The numbers</h3>
-      <p>A 10–14 hour day at this gain burns somewhere around 4,000–5,500 kcal. You will not eat that, and you should not try. Aim to cover roughly half while moving and accept the deficit.</p>
+      <p>An 8-hour day at this gain burns somewhere around 3,500–4,500 kcal. You won't eat that, and shouldn't try. Cover roughly half while moving and accept the deficit.</p>
       <ul>
-        <li><strong>200–300 kcal per hour</strong> on the move</li>
-        <li><strong>40–60 g carbs per hour</strong> — this is the number that actually matters</li>
+        <li><strong>200–250 kcal per hour</strong> on the move</li>
+        <li><strong>40–50 g carbs per hour</strong> — the number that actually matters</li>
         <li><strong>~500 mg sodium per hour</strong> in this heat</li>
-        <li>Eat every <strong>45–60 minutes</strong>, on a timer, from hour one</li>
+        <li>Eat every <strong>45–60 minutes</strong>, on a timer, from the first hour</li>
       </ul>
-      <p>The single most common mistake on a hike this long is not eating in the first three hours because you feel fine. By the time you feel bad, you are four hours behind and cannot catch up while climbing.</p>
+      <p>The commonest mistake on a day this long is not eating early because you feel fine. By the time you feel bad you're hours behind and can't catch up mid-climb.</p>
     </div>
 
     <h2>Day 1</h2>
     <div class="tl">
       <div class="leg">
-        <div class="when">Hosted brunch, Bakun</div>
-        <div class="what">Load carbs, go easy on grease</div>
-        <p>Rice and whatever protein is served. Skip anything heavily fried — fat sits in your stomach for hours and you are about to descend into heat.</p>
+        <div class="when">6:00 AM &middot; Sitio Caang</div>
+        <div class="what">Breakfast — load carbs</div>
+        <p>Rice and whatever protein is served. Go easy on anything heavily fried; fat sits in your stomach for hours.</p>
       </div>
       <div class="leg">
-        <div class="when">Start + 45 min</div>
-        <div class="what">First snack, whether you want it or not</div>
-        <p>Something simple and sweet. This one is habit-forming for the rest of the day.</p>
+        <div class="when">7:00 AM</div>
+        <div class="what">First snack, wanted or not</div>
+        <p>Something simple and sweet. This sets the habit for the rest of the day.</p>
       </div>
       <div class="leg">
         <div class="when">Every 45–60 min after</div>
         <div class="what">Alternate sweet and salty</div>
-        <p>Sweet then salty keeps flavour fatigue away — it is the reason people stop eating on long days. Rotate: gel, then crackers, then trail mix, then chocnut.</p>
+        <p>Rotating flavours keeps you eating. Flavour fatigue is the real reason people stop. Gel, then crackers, then trail mix, then chocolate.</p>
       </div>
       <div class="leg">
-        <div class="when">~Hour 5</div>
-        <div class="what">Packed lunch, half of it</div>
-        <p>Eat half, walk 30 minutes, eat the rest. A full stomach on a steep assault diverts blood you need in your legs.</p>
+        <div class="when">12:00 PM &middot; on the trail</div>
+        <div class="what">Lunch — half now, half later</div>
+        <p>Eat half, walk 30 minutes, finish it. A full stomach on a climb pulls blood away from your legs.</p>
       </div>
       <div class="leg">
-        <div class="when">Final 2 hours</div>
-        <div class="what">Fast sugar only</div>
-        <p>Gel or candy. Your gut is tired and will not process anything complicated.</p>
+        <div class="when">1:30 PM</div>
+        <div class="what">Last push — fast sugar</div>
+        <p>Gel or candy. Your gut is tired and won't handle anything complicated.</p>
       </div>
       <div class="leg">
-        <div class="when">Camp, first 30 min</div>
+        <div class="when">2:30 – 3:00 PM &middot; Bagu</div>
         <div class="what">Recovery window</div>
-        <p>Carbs plus protein while your muscles are still primed to absorb. Hosted dinner covers this — eat properly even if you feel too wrecked to be hungry. Day 2 is decided here.</p>
+        <p>Carbs and protein within 30 minutes of arriving, while your muscles still absorb well. Eat something even though dinner is at 6:00 and you're not hungry. Day 2 is decided here.</p>
       </div>
       <div class="leg">
-        <div class="when">Before sleep</div>
-        <div class="what">Small top-up</div>
-        <p>A bar or a few crackers. You are still repairing overnight at altitude and cold.</p>
+        <div class="when">6:00 PM</div>
+        <div class="what">Early dinner</div>
+        <p>Eat properly. Then a small top-up before lights off — you're still repairing overnight in the cold.</p>
       </div>
     </div>
 
     <h2>Day 2</h2>
     <div class="tl">
       <div class="leg">
-        <div class="when">Wake</div>
-        <div class="what">Coffee and carbs</div>
-        <p>Oatmeal sachet and your 3-in-1. Something in you before the hosted brunch.</p>
+        <div class="when">6:00 AM</div>
+        <div class="what">Coffee and something small</div>
+        <p>Oatmeal sachet before the 6:30 breakfast. Appetite is lowest on morning two — start it early.</p>
       </div>
       <div class="leg">
-        <div class="when">On trail</div>
+        <div class="when">7:30 – 11:00 AM</div>
         <div class="what">Same 45–60 min cadence</div>
-        <p>Appetite drops on day two. Set a phone alarm if you have to.</p>
+        <p>Set a phone alarm if you have to. Day 2 hunger cues are unreliable.</p>
+      </div>
+      <div class="leg swim">
+        <div class="when">11:00 AM &middot; Odasan Falls</div>
+        <div class="what">Eat before you swim</div>
+        <p>Cold water on an empty stomach is how people get shaky and cold-shocked. Lunch first, swim after, then something small before you resume at 12:30.</p>
+      </div>
+      <div class="leg">
+        <div class="when">2:00 PM &middot; Sitio Lamew</div>
+        <div class="what">Store — the top-up point</div>
+        <p>Cold drink and something salty if you want it. Bring small bills. Whatever you buy, carry the wrapper out.</p>
       </div>
       <div class="leg warn">
-        <div class="when">All day</div>
-        <div class="what">Reserve — do not touch</div>
-        <p>Two gels and one bar stay sealed and unopened until you are genuinely in trouble or the descent runs past dark. Circuits run long.</p>
+        <div class="when">Reserve</div>
+        <div class="what">Sealed until things go wrong</div>
+        <p>Two gels and one bar stay unopened. Circuits run long and the schedule is a guide, not a guarantee.</p>
       </div>
     </div>
 
-    <h2>What to pack <span class="n">/ ~2 kg for two days</span></h2>
+    <h2>What to pack <span class="n">/ ~1.5 kg for two days</span></h2>
     <div class="card">
       <table>
         <tr><th>Item</th><th class="num">kcal</th><th class="num">g</th></tr>
         <tr><td>Energy gels &times; 5</td><td class="num">500</td><td class="num">115</td></tr>
         <tr><td>Energy or protein bars &times; 3</td><td class="num">750</td><td class="num">180</td></tr>
         <tr><td>Trail mix, nuts and raisins</td><td class="num">1,100</td><td class="num">200</td></tr>
-        <tr><td>Skyflakes or Fita &times; 2 packs</td><td class="num">800</td><td class="num">180</td></tr>
+        <tr><td>Crackers &times; 2 packs</td><td class="num">800</td><td class="num">180</td></tr>
         <tr><td>Chocnut &times; 10</td><td class="num">500</td><td class="num">100</td></tr>
         <tr><td>Peanut butter sachets &times; 4</td><td class="num">400</td><td class="num">90</td></tr>
         <tr><td>Dried mangoes</td><td class="num">320</td><td class="num">100</td></tr>
-        <tr><td>Snickers &times; 2</td><td class="num">500</td><td class="num">105</td></tr>
+        <tr><td>Chocolate bars &times; 2</td><td class="num">500</td><td class="num">105</td></tr>
         <tr><td>Instant oatmeal &times; 2</td><td class="num">300</td><td class="num">80</td></tr>
         <tr><td>3-in-1 coffee &times; 3</td><td class="num">180</td><td class="num">60</td></tr>
-        <tr><td>Electrolyte or Gatorade sachets &times; 6</td><td class="num">300</td><td class="num">120</td></tr>
+        <tr><td>Electrolyte or sports drink sachets &times; 6</td><td class="num">300</td><td class="num">120</td></tr>
         <tr><td>Boiled eggs &times; 2 <em>(Day 1 only)</em></td><td class="num">160</td><td class="num">120</td></tr>
       </table>
     </div>
@@ -348,12 +408,13 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       <ul>
         <li>Chocnut melts into paste by noon. Bag it separately or accept the mess.</li>
         <li>Bananas and kakanin are excellent and heavy. One piece, not four.</li>
-        <li>Repack everything out of boxes into ziplocks — saves weight and gives you your trash bags.</li>
-        <li>Nothing that needs cooking. You will not want to.</li>
+        <li>Repack out of boxes into ziplocks — saves weight and gives you your trash bags.</li>
+        <li>Nothing that needs cooking. You won't want to.</li>
       </ul>
     </div>
   </div>
 
+  <!-- ================= BRIEF ================= -->
   <div role="tabpanel" id="p-brief" hidden>
     <div class="card">
       <h3>The route</h3>
@@ -362,7 +423,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
         <tr><td>Distance</td><td>~32 km circuit</td></tr>
         <tr><td>Gain</td><td>2,650 m</td></tr>
         <tr><td>Difficulty</td><td>Major climb, 8/9</td></tr>
-        <tr><td>Trek time</td><td>10–14 hrs per trekking day</td></tr>
         <tr><td>Trail class</td><td>Open trail, river trekking, technical, boulders, ridge, grassland, assault</td></tr>
         <tr><td>Fee</td><td>&#8369;4,800</td></tr>
       </table>
@@ -390,13 +450,19 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
       </ul>
     </div>
     <div class="card">
+      <h3>At the falls</h3>
+      <ul>
+        <li>Nobody swims alone, and nobody swims out of sight of the group.</li>
+        <li>Mountain water is colder than it looks and cramps come fast on tired legs. Get in gradually.</li>
+        <li>Don't jump from anything you haven't seen someone else clear first — depth changes with rainfall.</li>
+        <li>Currents run strongest after rain. If the guide says no, it's no.</li>
+        <li>Change out of wet clothes before moving on. Wet fabric on a windy ridge chills you fast.</li>
+      </ul>
+    </div>
+    <div class="card">
       <h3>Leave No Trace</h3>
       <p>Plan ahead and prepare. Dispose of waste properly. Leave what you find. Respect wildlife. Be considerate of other visitors.</p>
       <p>Leave nothing but footprints. Take nothing but pictures. Kill nothing but time.</p>
-    </div>
-    <div class="card">
-      <h3>What you'll see</h3>
-      <p>Countless falls, hanging bridge, rice terrace fields, the south face of Tenglawan, Mt. Libo-Libo, Mt. Baculangan, Mt. Namandiraan, Kabunian and Kayapa, Bakun, and the western side of Kibungan.</p>
     </div>
   </div>
 
@@ -408,105 +474,118 @@ td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 <script>
 const DATA=[
+ {h:"Before anything else",disclaimer:true,items:[]},
  {h:"Worn on the trail",note:"Not counted — this is on your body, not in the pack.",items:[
-  {n:"Trail shoes",d:"Merrell Agility Peak 5, non-GTX. Broken in before the 12th.",g:0,t:"worn"},
-  {n:"Toe socks + merino liner",d:"No cotton. Ever.",g:0,t:"worn"},
-  {n:"Synthetic or merino shirt",g:0,t:"worn"},
+  {n:"Trail shoes or hiking shoes",d:"Grippy sole, broken in beforehand. Wet rock and mud all day.",g:0,t:"worn"},
+  {n:"Hiking socks",d:"Synthetic or wool. Not cotton — it holds water and causes blisters.",g:0,t:"worn"},
+  {n:"Quick-dry shirt",g:0,t:"worn"},
   {n:"Quick-dry shorts or tights",g:0,t:"worn"},
   {n:"Cap",g:0,t:"worn"},
-  {n:"Phone in waterproof pouch",d:"Offline map downloaded before you leave signal.",g:0,t:"worn"}
+  {n:"Phone in waterproof pouch",d:"Download an offline map before you lose signal.",g:0,t:"worn"}
  ]},
  {h:"Pack and waterproofing",items:[
-  {n:"25–30 L pack",g:400},
-  {n:"Poncho",d:"Your call, and the right one — it vents where a jacket cooks you.",g:300,t:"wet"},
+  {n:"Daypack, 30–35 L",d:"One with a hipbelt if you have the option — it moves half the load off your shoulders.",g:790},
+  {n:"Poncho",d:"Vents better than a rain jacket in this heat.",g:300,t:"wet"},
   {n:"Waterproof pants",g:250,t:"wet"},
-  {n:"Dry bags / heavy ziplocks",d:"One for sleep clothes, one for electronics, one for food.",g:60,t:"wet"},
-  {n:"Pack liner",d:"A single trash bag inside the pack beats a rain cover on a river trek.",g:30,t:"wet"},
-  {n:"Trekking poles",d:"Not optional at 2,650 m of gain on wet ground. They save your knees on the descent.",g:450}
+  {n:"Dry bags or heavy ziplocks",d:"One for sleep clothes, one for electronics, one for food.",g:60,t:"wet"},
+  {n:"Pack liner",d:"A trash bag inside the pack beats a rain cover on a river trek.",g:30,t:"wet"},
+  {n:"Trekking poles",d:"Optional, but they save your knees over 2,650 m of descent on wet ground.",g:450}
  ]},
  {h:"Water",items:[
-  {n:"Water carried, 1.5 L",d:"Not 3 L. See the Water tab.",g:1500},
-  {n:"Squeeze filter",d:"Sawyer Squeeze or Katadyn BeFree.",g:100,t:"crit"},
+  {n:"Water carried, 1.5–2 L",d:"See the Water tab before deciding.",g:1750},
+  {n:"Squeeze water filter",d:"Optional, but it saves over a kilo on a route with this much running water.",g:100},
   {n:"Spare collapsible flask, 1 L",g:40},
-  {n:"Electrolyte tabs &times; 8",g:30,t:"crit"}
+  {n:"Electrolyte tablets or sachets",g:30,t:"crit"}
+ ]},
+ {h:"For the falls",note:"Falls hunting on Day 1 afternoon, and Odasan Falls on Day 2.",items:[
+  {n:"Swim shorts or rash guard",d:"Quick-dry. Can double as your hiking layer if you'd rather not carry both.",g:150,t:"swim"},
+  {n:"Slippers or sandals",d:"For camp and for wet rock at the falls. Bare feet on mossy stone is how ankles go.",g:250,t:"swim"},
+  {n:"Extra dry bag",d:"Odasan Falls is at 11:00 AM with five hours of trekking after. Somewhere dry to put wet things matters.",g:40,t:"swim"},
+  {n:"Quick-dry towel",g:100,t:"swim"}
  ]},
  {h:"Clothing carried",items:[
-  {n:"Insulating layer",d:"Light fleece or synthetic puffy. Down is useless once wet.",g:300,t:"crit"},
-  {n:"Sleep set: dry shirt + shorts",d:"Sealed in a ziplock. Never hiked in. This is your warm-and-dry insurance.",g:250,t:"crit"},
+  {n:"Light fleece or insulated jacket",d:"Something that still works when damp.",g:300,t:"crit"},
+  {n:"Sleep set: dry shirt and shorts",d:"Sealed in a ziplock, never hiked in. Your warm-and-dry insurance.",g:250,t:"crit"},
   {n:"Spare socks &times; 2",g:100},
-  {n:"Buff",g:30},
-  {n:"Light gloves",d:"For cold wet rock on the ridge.",g:50},
+  {n:"Buff or neck gaiter",g:30},
+  {n:"Light gloves",d:"Cold wet rock on the ridge.",g:50},
   {n:"Arm sleeves",g:60}
  ]},
  {h:"Sleep",note:"Barangay or school floor, indoors.",items:[
   {n:"Sleeping bag liner or light bag",g:500},
-  {n:"Inflatable pad",d:"Concrete floor at 1,400 m gets cold from below.",g:350},
-  {n:"Earplugs and eye mask",g:20}
+  {n:"Sleeping pad",d:"Concrete at 1,400 m pulls heat out of you from below.",g:350},
+  {n:"Earplugs and eye mask",d:"Lights off at 10:00 PM, social running until then.",g:20}
  ]},
- {h:"Foot care",note:"The most likely thing to end your hike. Treat this as core kit, not extras.",items:[
-  {n:"Leukotape or KT tape",d:"Tape hot spots before they blister, not after.",g:30,t:"crit"},
+ {h:"Foot care",note:"The most likely thing to end a hike this long. Core kit, not extras.",items:[
+  {n:"Athletic tape",d:"Tape hot spots before they blister, not after.",g:30,t:"crit"},
   {n:"Anti-chafe balm",g:40,t:"crit"},
   {n:"Blister plasters",g:20},
-  {n:"Small microfiber foot towel",d:"Dry your feet fully at camp and air them out.",g:50}
+  {n:"Small foot towel",d:"Dry your feet properly at Bagu and air them out.",g:50}
  ]},
  {h:"Safety and navigation",items:[
-  {n:"Headlamp + spare batteries",d:"Circuits run long. Assume you finish in the dark.",g:120,t:"crit"},
+  {n:"Headlamp and spare batteries",d:"Schedules slip. Assume you might finish in the dark.",g:120,t:"crit"},
   {n:"Whistle",g:10},
   {n:"First aid kit",g:200,t:"crit"},
   {n:"Emergency blanket",g:60},
-  {n:"Powerbank, 10,000 mAh",g:200},
+  {n:"Powerbank",g:200},
   {n:"Charging cable",g:30},
-  {n:"Valid ID + cash",d:"In a ziplock. Small bills.",g:50,t:"crit"}
+  {n:"Valid ID and cash",d:"In a ziplock. Small bills — there's a store at Sitio Lamew on Day 2.",g:50,t:"crit"}
  ]},
  {h:"Medication",items:[
   {n:"Personal medications",g:0,t:"crit"},
-  {n:"Paracetamol / ibuprofen",g:20},
+  {n:"Paracetamol or ibuprofen",g:20},
   {n:"Loperamide",g:5},
   {n:"Antihistamine",g:5},
   {n:"Oral rehydration salts &times; 2",g:20}
  ]},
  {h:"Toiletries",items:[
-  {n:"Toothbrush and small paste",g:40},
+  {n:"Insect repellent",d:"Leeches on wet forest sections, mosquitoes near the river.",g:60,t:"crit"},
+  {n:"Toothbrush and small toothpaste",g:40},
+  {n:"Lip balm with SPF",g:10},
+  {n:"Soap or shampoo sachets",g:30},
   {n:"Wet wipes",g:100},
-  {n:"Quick-dry towel",g:100},
   {n:"Sunblock",g:80},
-  {n:"Toilet paper in ziplock",g:50},
+  {n:"Toilet paper in a ziplock",g:50},
   {n:"Hand sanitiser",g:50},
   {n:"Trash bag &times; 2",d:"Required. One for your rubbish, one spare.",g:30,t:"crit"}
  ]},
  {h:"Food",note:"Full breakdown in the Food tab.",items:[
   {n:"Trail food, two days",g:1450},
-  {n:"Emergency reserve, sealed",d:"2 gels + 1 bar. Untouched unless things go wrong.",g:100,t:"crit"}
+  {n:"Emergency reserve, sealed",d:"2 gels and 1 bar. Untouched unless things go wrong.",g:100,t:"crit"}
  ]},
  {h:"Camera",note:"Optional. Every gram here is a choice.",items:[
-  {n:"Fujifilm X-T200 + XC15-45",g:505},
+  {n:"Camera and lens",d:"The lighter body wins on a day this long. Falls and river crossings are where cameras die.",g:505},
   {n:"Spare battery",g:45},
-  {n:"Dry bag for camera",d:"Neither body is weather sealed. This is not optional if you bring one.",g:50,t:"wet"},
+  {n:"Dry bag for the camera",d:"Not optional if you bring one.",g:50,t:"wet"},
   {n:"Chest clip or capture mount",d:"A camera swinging on a neck strap is a hazard on boulders and crossings.",g:85}
  ]},
  {h:"Left in the van",note:"Not counted.",items:[
   {n:"Change of clothes",g:0,t:"worn"},
-  {n:"Slippers",g:0,t:"worn"},
-  {n:"Towel for the victory meal",g:0,t:"worn"}
+  {n:"Slippers for the ride home",g:0,t:"worn"},
+  {n:"Towel",g:0,t:"worn"},
+  {n:"Snacks for the drive",d:"Six hours back to Manila after dinner.",g:0,t:"worn"}
  ]}
 ];
 
-const TARGET=6000, KEY="bagu-circuit-v1";
-let state={};
-let canStore=true;
-try{ state=JSON.parse(localStorage.getItem(KEY)||"{}"); }
-catch(e){ canStore=false; state={}; }
-
+const TARGET=6000, KEY="bagu-circuit-v2";
+let state={}, canStore=true;
+try{ state=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ canStore=false; state={}; }
 function save(){
   if(!canStore) return;
   try{ localStorage.setItem(KEY,JSON.stringify(state)); }
   catch(e){ canStore=false; document.getElementById("status").textContent="Checks won't persist in this viewer."; }
 }
 
-const TAGS={wet:"waterproof",crit:"critical",worn:"worn"};
+const TAGS={wet:"waterproof",crit:"don't skip",worn:"worn",swim:"falls"};
 const pack=document.getElementById("p-pack");
 let html="";
 DATA.forEach((sec,si)=>{
+  if(sec.disclaimer){
+    html+=`<div class="card quiet"><h3>This list is a suggestion, not a requirement</h3>
+    <p>The organiser's official list is short and covers what you actually need. Everything here is one hiker's version of it — bring what makes sense for you, skip what doesn't, and don't feel you need any of it to enjoy the trail.</p>
+    <p>Weights are rough estimates for planning. Your gear will differ.</p></div>`;
+    return;
+  }
   const total=sec.items.reduce((a,b)=>a+b.g,0);
   html+=`<h2>${sec.h}${total?` <span class="n">/ ${total} g</span>`:""}</h2>`;
   if(sec.note) html+=`<p class="note" style="margin:-4px 0 8px">${sec.note}</p>`;
@@ -527,47 +606,40 @@ pack.innerHTML=html;
 function update(){
   let g=0,done=0,all=0;
   pack.querySelectorAll(".row").forEach(r=>{
-    all++;
-    if(r.classList.contains("on")){ done++; g+=+r.dataset.g; }
+    all++; if(r.classList.contains("on")){ done++; g+=+r.dataset.g; }
   });
-  const kg=(g/1000).toFixed(2);
-  document.getElementById("kg").innerHTML=kg+'<small> kg</small>';
+  document.getElementById("kg").innerHTML=(g/1000).toFixed(2)+'<small> kg</small>';
   const f=document.getElementById("fill");
-  f.style.width=Math.min(100,g/TARGET*100*0.857)+"%";
+  f.style.width=Math.min(100,g/TARGET*85.7)+"%";
   f.classList.toggle("over",g>TARGET);
   document.getElementById("of").innerHTML=
     `${done} of ${all} packed<br>${g>TARGET?`<span style="color:var(--rust)">${((g-TARGET)/1000).toFixed(2)} kg over target</span>`:`target 6.0 kg base`}`;
 }
-
 function toggle(r){
   r.classList.toggle("on");
   const on=r.classList.contains("on");
   r.setAttribute("aria-checked",on);
-  state[r.dataset.id]=on;
-  save(); update();
+  state[r.dataset.id]=on; save(); update();
 }
 pack.addEventListener("click",e=>{const r=e.target.closest(".row"); if(r) toggle(r);});
 pack.addEventListener("keydown",e=>{
   if(e.key===" "||e.key==="Enter"){const r=e.target.closest(".row"); if(r){e.preventDefault(); toggle(r);}}
 });
-
 document.getElementById("reset").addEventListener("click",()=>{
   state={}; save();
   pack.querySelectorAll(".row").forEach(r=>{r.classList.remove("on");r.setAttribute("aria-checked","false");});
   update();
 });
-
 const tabs=document.getElementById("tabs");
 tabs.addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   tabs.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["pack","water","food","brief"].forEach(p=>{
+  ["pack","sched","water","food","brief"].forEach(p=>{
     document.getElementById("p-"+p).hidden=(p!==b.dataset.p);
   });
-  document.getElementById("reset").parentElement.style.display=(b.dataset.p==="pack")?"flex":"none";
+  document.querySelector(".foot").style.display=(b.dataset.p==="pack")?"flex":"none";
   window.scrollTo(0,0);
 });
-
 if(!canStore) document.getElementById("status").textContent="Checks won't persist in this viewer — they will once hosted.";
 update();
 </script>
