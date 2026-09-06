@@ -387,6 +387,49 @@ const BRIDGE={
  "0":{wd1:"35 min",wd2:"30 min",lr:"60 min",star:"Bridge 4 — easy week. Beginner 2 starts Mon Sep 28."}};
 const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
 const RUNWALK="3:1 (run 3 min · walk 1 min)";
+
+// ── One-off day overrides (Bagu Circuit hike week, Sep 12–13) ──
+const OVERRIDE={
+ "2026-09-08":{emo:"🦵",t:"Lower Gym — hike prep (LIGHT)",d:"Last safe leg loading before Bagu. NO Nordics, NO heavy RDL, NO heavy squats.",type:"gym"},
+ "2026-09-10":{emo:"🎒",t:"Gear Shakedown Walk 30–45 min",d:"In your ACTUAL hiking shoes + fully loaded pack. Find the hotspots now, not at km 8 in the rain.",type:"easy"},
+ "2026-09-11":{emo:"🛌",t:"Full Rest — pack & carb-load",d:"You travel tonight and will sleep badly. Bank the energy.",type:"rest"},
+ "2026-09-12":{emo:"🥾",t:"BAGU CIRCUIT — Day 1",d:"Your long run and then some. Poles out. Breathe, don't race.",type:"long"},
+ "2026-09-13":{emo:"🥾",t:"BAGU CIRCUIT — Day 2",d:"Day 2 on tired legs = real marathon rehearsal. Slow the last hour.",type:"long"}};
+const WO_OVERRIDE={
+ "2026-09-08":{wu:["5 min easy bike","Leg swings 10/side","Ankle circles + calf raises 2×15"],
+  main:[{ex:"Goblet Squat",mc:"DB, light",sr:"3 × 10",note:"MODERATE only. You should finish feeling you had 5 more reps."},
+        {ex:"Bulgarian Split Squat (bodyweight or light)",mc:"Bench",sr:"2 × 10/side (LEFT first)",tag:"Single-leg balance — the skill that saves you on wet descent"},
+        {ex:"Calf Raise",mc:"Seated/standing calf machine",sr:"3 × 15",tag:"Ankle & Achilles armor for 1,600m of descent"},
+        {ex:"Tibialis Raise",mc:"Wall or tib bar",sr:"3 × 20",tag:"Shin protection on downhill — do not skip"},
+        {ex:"Step-ups (low box)",mc:"Box/bench, bodyweight",sr:"2 × 12/side",note:"Movement rehearsal for climbing, not a workout."},
+        {ex:"Hip & ankle mobility",mc:"Mat",sr:"5–8 min"}],
+  cd:["Easy walk 5 min","Gentle calf + hip flexor stretch","NO deep hamstring stretching this week"]},
+ "2026-09-10":{wu:["Lace your hiking shoes exactly as you will on the trail"],
+  main:[{ex:"🎒 30–45 min walk — hiking shoes + FULLY loaded pack",note:"Include stairs or a hill if you can find one. Walk down them too."},
+        {ex:"CHECK: hotspots on heels/toes · pack rubbing shoulders or hips · sock bunching · lace pressure"},
+        {ex:"Fix anything you find TONIGHT — tape, lube, re-lace, adjust straps"}],
+  cd:["Inspect your feet properly","Pre-tape any hotspot you felt"]},
+ "2026-09-11":{wu:["No training today. Genuinely rest."],
+  main:[{ex:"🍚 Carb-load: extra rice/bread at lunch and dinner"},
+        {ex:"💧 Hydrate all day — you can't fix this on the trail"},
+        {ex:"🎒 PACK CHECK: dry sleeping layer SEALED in a dry/plastic bag · rain shell · warm layer · NO cotton"},
+        {ex:"🔦 Headlamp + spare batteries in a waterproof bag"},
+        {ex:"🩹 Petroleum jelly, tape, 2+ spare socks, blister kit"},
+        {ex:"🥾 Trekking poles — the single biggest injury reducer on descent"}],
+  cd:["Sleep as early as you can before travelling"]},
+ "2026-09-12":{wu:["Lube your feet before you start","Poles adjusted, pack fitted on the hips not the shoulders"],
+  main:[{ex:"🥾 Bagu Circuit Day 1 — steady all day"},
+        {ex:"⬆️ CLIMBS: manage by breathing, not ego. Can't speak a short sentence → slow down. Use the rest-step."},
+        {ex:"⬇️ DESCENT: short quick steps, knees soft, land flat. Step ON rocks, not between. Zig-zag steep mud."},
+        {ex:"🍚 Eat every hour, sip electrolytes constantly — don't wait to feel hungry or thirsty"},
+        {ex:"🛑 TURN-BACK RULE: any ankle twinge or hamstring pull → you stop. February outranks the summit."}],
+  cd:["Camp: change into DRY clothes immediately","Something hot to drink","Re-lube feet, fresh socks, tape hotspots","Sleep — Day 2 on no sleep is when people get hurt"]},
+ "2026-09-13":{wu:["Fresh socks, re-lube feet, tape anything sore","Eat properly before moving"],
+  main:[{ex:"🥾 Bagu Circuit Day 2 — the marathon-rehearsal day"},
+        {ex:"Legs will be sore from yesterday's descent. That's normal. Keep moving steadily."},
+        {ex:"⚠️ SLOW DOWN in the last hour — fading concentration is when ankles go"},
+        {ex:"🏆 This is exactly what km 32 feels like in February. Remember how you handled it."}],
+  cd:["Refuel with protein + carbs within an hour","Expect 3–5 days of deep soreness — that's planned for","Next week = recovery. Easy walking only until it clears."]}};
 const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 // HR zones from YOUR Garmin data: max 196 (measured), resting ~62 → Karvonen
 const HRMAX=196, HRREST=62;
@@ -451,7 +494,8 @@ function runsPerWeek(w){return 4}
 function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}
 
 // TBR structure: Sun LONG · Mon REST · Tue gym · Wed WD1 run · Thu gym · Fri WD2 run · Sat rest/XTrain
-function mission(d){const wd=d.getDay(),{w,p}=weekPlan(d);
+function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
+ const wd=d.getDay(),{w,p}=weekPlan(d);
  const isRace=(p.lr||"").indexOf("RACE DAY")>=0;
  if(wd===0){ // Sunday = long run (matches Bull Sessions)
   if(isRace)return{emo:"🏁",t:"RACE DAY — 42.2 km",d:"Midnight start. You built this.",type:"long"};
@@ -512,7 +556,8 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
   return{wu:["5–10 min very easy to start"],main:main,cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  return null;}
-function workoutFor(d){const wd=d.getDay();
+function workoutFor(d){const ov=WO_OVERRIDE[keyOf(d)];if(ov)return ov;
+ const wd=d.getDay();
  if(wd===2)return WORKOUTS.upper;
  if(wd===4)return WORKOUTS.lower;
  if(wd===0||wd===3||wd===5){const r=runWO(d);if(r)return r;}
@@ -954,6 +999,11 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelect
  const v=t.dataset.t;
  if(v==="recovery")renderRecovery();if(v==="progress")renderProgress();if(v==="food")renderFood();
  if(v==="runs")loadRuns();if(v==="plan")renderPlan();if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook()});
+// One-time backfill: the completed restart week (Aug 31 – Sep 6). Runs once per device.
+(function(){const o=state();if(o.seeded_bridge1)return;
+ ["2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-05","2026-09-06"]
+  .forEach(k=>{o.logs[k]=Object.assign({},o.logs[k],{main:true});});
+ o.seeded_bridge1=true;S.set(o);})();
 document.getElementById("scDate").value=keyOf(TODAY);
 renderToday();loadRuns();
 </script>
