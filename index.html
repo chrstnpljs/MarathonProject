@@ -398,10 +398,10 @@ const OVERRIDE={
  // ── Recovery week after the hike (Sep 13–20) ──
  "2026-09-13":{emo:"🛌",t:"Total Rest — and rightly so",d:"1,278m of descent = real muscle damage. Lying in bed today was the correct training decision.",type:"rest"},
  "2026-09-14":{emo:"🛌",t:"Full Rest — DOMS peak",d:"Soreness peaks 24–48h after descent. No running, no gym, no legs. Eat and sleep.",type:"rest"},
- "2026-09-15":{emo:"🚶",t:"Recovery Walk 20–30 min",d:"Gentle, flat, easy. Movement clears soreness faster than lying still. No hills, no pace.",type:"rest"},
- "2026-09-16":{emo:"🚶",t:"Recovery Walk 30 min + mobility",d:"Still easy. 🎥 Bull Circle 1 webinar tonight 8PM — your first TBR event!",type:"rest"},
- "2026-09-17":{emo:"🏃",t:"Easy Run 20–25 min — ONLY if pain-free",d:"Test run. If walking still hurts or quads are sore going downstairs, walk instead. No ego here.",type:"easy"},
- "2026-09-18":{emo:"💪",t:"Upper Body only — light",d:"Legs stay off. Chest, back, shoulders. Nothing heavy — you're still repairing.",type:"gym"},
+ "2026-09-15":{emo:"🛌",t:"Rest — your body called it",d:"Readiness 25, Body Battery 16. You didn't skip; you crashed. That IS the session. Streak intact.",type:"rest"},
+ "2026-09-16":{emo:"🚶",t:"Easy 25–30 min — CHECK BATTERY FIRST",d:"Body Battery under 30 → walk. Over 40 → easy run, HR 135–152. 🎥 Bull Circle 1 tonight 8PM.",type:"easy"},
+ "2026-09-17":{emo:"🦵",t:"Lower Body — moderate",d:"Legs return. No heavy RDL/Nordic. Stop a set early if anything feels flat.",type:"gym"},
+ "2026-09-18":{emo:"🚶",t:"Rest or easy walk",d:"Deliberately light. Sunday is Bull Session 1 — arriving fresh matters more than one weekday session.",type:"rest"},
  "2026-09-19":{emo:"🛌",t:"Full Rest — fresh for tomorrow",d:"Bull Session 1 is tomorrow. Bank the legs.",type:"rest"},
  "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"}};
 const WO_OVERRIDE={
@@ -443,24 +443,31 @@ const WO_OVERRIDE={
   main:[{ex:"🛌 Full rest — DOMS usually peaks 24–48h after a big descent"},
         {ex:"Stairs will feel worst. That's quad eccentric damage, and it's normal."},
         {ex:"Keep protein high, keep sleeping"}],cd:[]},
- "2026-09-15":{wu:["Easy does it"],
-  main:[{ex:"🚶 20–30 min gentle walk, flat ground"},
-        {ex:"Active recovery clears soreness faster than lying still — but keep it genuinely easy"},
-        {ex:"No hills, no pace, no watch-checking"}],cd:["Gentle calf + quad stretch — nothing aggressive"]},
- "2026-09-16":{wu:["Easy"],
-  main:[{ex:"🚶 30 min easy walk"},{ex:"10 min mobility: hips, ankles, t-spine"},
-        {ex:"🎥 BULL CIRCLE 1 tonight, 8PM on Zoom — your first TBR event. Link was emailed."}],cd:[]},
- "2026-09-17":{wu:["5 min walk first — see how the legs feel"],
-  main:[{ex:"🏃 Easy 20–25 min at HR 135–152, run-walk 3:1"},
-        {ex:"⚠️ ONLY if walking is fully pain-free and stairs don't hurt. Otherwise walk 30 min instead — no ego."},
-        {ex:"This is a test run, not a training run. Short on purpose."}],cd:["Walk 5 min","Easy stretch"]},
- "2026-09-18":{wu:["5 min bike","Band pull-aparts 2×15"],
-  main:[{ex:"Incline Chest Press",mc:"Hammer Strength Incline",sr:"3 × 10",note:"Moderate. You're still repairing."},
-        {ex:"Lat Pulldown",mc:"Lat pulldown",sr:"3 × 10"},
-        {ex:"Chest-Supported Row",mc:"Iso-Row",sr:"3 × 12"},
-        {ex:"Face Pull",mc:"Cable + rope",sr:"3 × 15",tag:"Clavicle prehab"},
-        {ex:"❌ NO leg work at all this week",note:"Quads and calves are still rebuilding from 1,278m of descent."}],
-  cd:["Easy walk 5 min","Pec + lat stretch"]},
+ "2026-09-15":{wu:["Nothing. Today is rest."],
+  main:[{ex:"🛌 Your body enforced the rest day I should have prescribed"},
+        {ex:"Readiness 25 · Body Battery 16 · 'HIGH RECOVERY NEEDS' — the data was right"},
+        {ex:"🍚 EAT AT MAINTENANCE (~2,450 kcal) for the next 2–3 days, not your deficit",note:"You burned 3,451 kcal on Saturday. Under-fuelling on top of shift work is a likely cause of the crash."},
+        {ex:"🥩 Protein ~140g · 💧 3.5–4L · 😴 sleep as much as your shift allows"},
+        {ex:"⌚ WEAR THE WATCH TONIGHT — sleep and HRV are the two numbers that would have caught this"}],cd:[]},
+ "2026-09-16":{wu:["Open Garmin. Check Body Battery BEFORE deciding."],
+  main:[{ex:"🔋 Body Battery under 30 → 25–30 min easy WALK. That's the whole session."},
+        {ex:"🔋 Body Battery 40+ → easy run 25–30 min, HR 135–152, run-walk 3:1"},
+        {ex:"Either is a win today. Do not decide by ego or by how the legs feel — feel was wrong yesterday."},
+        {ex:"🎥 BULL CIRCLE 1 tonight, 8PM Zoom — your first TBR event. Link was emailed."}],
+  cd:["Walk 5 min","Easy stretch"]},
+ "2026-09-17":{wu:["5 min bike","Leg swings 10/side","Bodyweight squats 2×15","Glute bridges 2×12"],
+  main:[{ex:"Goblet / Back Squat",mc:"DB or barbell",sr:"3 × 10",note:"Moderate, RPE 7. First leg loading since the hike."},
+        {ex:"Bulgarian Split Squat",mc:"DBs, rear foot on bench",sr:"3 × 10/side (LEFT first)",tag:"Left-leg balance (Evolt)"},
+        {ex:"Leg Press",mc:"45° leg press",sr:"3 × 12"},
+        {ex:"Calf Raise",mc:"Seated/standing calf",sr:"4 × 15",tag:"Ankle & Achilles armor"},
+        {ex:"Tibialis Raise",mc:"Wall or tib bar",sr:"3 × 20",tag:"Shin prehab"},
+        {ex:"❌ Still NO heavy RDL or Nordic curls",note:"Hamstring is 10 weeks post-strain. Those return in October, deliberately."},
+        {ex:"🛑 If you feel flat or heavy, stop a set early. No heroics this week."}],
+  cd:["Walk 5 min","Quad + hip flexor stretch","GENTLE hamstring stretch only"]},
+ "2026-09-18":{wu:["Light day by design"],
+  main:[{ex:"🚶 Rest, or an easy 20–30 min walk if you feel like moving"},
+        {ex:"Optional: 10 min mobility"},
+        {ex:"🎯 Sunday is Bull Session 1 — your first run with your batch. Arriving fresh beats one more weekday session."}],cd:[]},
  "2026-09-19":{wu:["Rest day"],
   main:[{ex:"🛌 Full rest — Bull Session 1 is tomorrow"},{ex:"Lay out kit tonight, hydrate, eat well"}],cd:[]},
  "2026-09-20":{wu:["Arrive early, say hello to people — that's half the point"],
@@ -1015,7 +1022,17 @@ function renderPlan(){
  <div class="ritem"><b>5. Max 4 running days.</b> Rest or cross-train otherwise. Avoid team sports (injury risk).</div>
  <div class="ritem"><b>6. Full rest after the long run.</b> Non-negotiable — that's Monday.</div>
  <div class="ritem"><b>7. Exercise restraint.</b> "One of the biggest causes of injury is doing too much, too soon." Trust the gradual build.</div>
- <div class="ritem"><b>8. The 20-minute rule (mine).</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div></div>`;
+ <div class="ritem"><b>8. The 20-minute rule (mine).</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div></div>
+ <div class="rgroup"><div class="rgh">👥 Bull Session pacing — read before every one</div>
+ <div class="ritem"><b>Run YOUR pace, not the group's.</b> Bull Session 1 (Sep 20): HR climbed 143 → 178 across 5.7km. The last 2km were threshold effort on what should have been an easy run.</div>
+ <div class="ritem"><b>The fix:</b> join a <b>slower interval group</b>, or let them go and run your own 3:1. Pacers exist for several speeds — ask Coach Morgan which group matches HR 135–152.</div>
+ <div class="ritem"><b>Why it matters:</b> running above your trained intensity is the single best-supported trigger for exercise cramps — better supported than dehydration or salt.</div>
+ <div class="ritem">Social run ≠ race. You get nothing from beating your batchmates to a lamp post.</div></div>
+ <div class="rgroup"><div class="rgh">⌚ TBR plan vs Garmin Coach — how to use both</div>
+ <div class="ritem"><b>This plan decides WHAT and WHEN.</b> Which session, how long, which week. It's built around your race, your Bull Sessions, run-walk, your hamstring and your gym days. Garmin knows none of that.</div>
+ <div class="ritem"><b>Garmin decides HOW HARD today.</b> Check readiness/Body Battery before the session: 🟢 do it as written · 🟡 cut 20–30% · 🔴 walk or rest. Then use the HR zones live during the run.</div>
+ <div class="ritem"><b>⚠️ Never run both plans at once.</b> Garmin doesn't know Bull Session Sundays are your long runs — follow both and you'll double up and get hurt. When they disagree on the session, <b>this plan wins</b>.</div>
+ <div class="ritem"><b>Garmin's daily suggestion is still useful as a second opinion.</b> If it says "recovery 20 min" while the plan says 45 easy, that's real information — take the gentler one.</div></div>`;
  const wp2=weekPlan(TODAY);const mon=new Date(TODAY);mon.setDate(mon.getDate()-((TODAY.getDay()+6)%7));
  document.getElementById("wdTag").textContent="— "+(wp2.w>=1?"TBR Week "+wp2.w+"/20":"Bridge")+" · "+wp2.phase+" · "+shiftFor(TODAY)+" shift";
  let h="";
@@ -1049,6 +1066,20 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelect
   .forEach(k=>{o.logs[k]=Object.assign({},o.logs[k],{main:true});});
  o.logs["2026-09-12"].bonus=true;          // the hike earns the bonus quest
  o.seeded_bridge2=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_sep14)return;   // Mon 14 = prescribed full rest, taken
+ o.logs["2026-09-14"]=Object.assign({},o.logs["2026-09-14"],{main:true});
+ o.seeded_sep14=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_sep15)return;   // Tue 15 = body-enforced rest. Streak protected.
+ o.logs["2026-09-15"]=Object.assign({},o.logs["2026-09-15"],{status:"rest"});
+ o.seeded_sep15=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_sep16)return;   // Wed 16 = 3.1km / 27min run, confirmed on Garmin
+ o.logs["2026-09-16"]=Object.assign({},o.logs["2026-09-16"],{main:true});
+ o.seeded_sep16=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_bs1)return;     // Sep 17-20 incl. Bull Session 1
+ ["2026-09-17","2026-09-18","2026-09-19","2026-09-20"]
+  .forEach(k=>{o.logs[k]=Object.assign({},o.logs[k],{main:true});});
+ o.logs["2026-09-20"].bonus=true;
+ o.seeded_bs1=true;S.set(o);})();
 document.getElementById("scDate").value=keyOf(TODAY);
 renderToday();loadRuns();
 </script>
