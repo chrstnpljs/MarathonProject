@@ -341,7 +341,8 @@ small.dim{color:var(--mut);font-size:11px}
     </div>
     <div class="card"><h2>🏃 Official Beginner 2 Program (20 weeks)</h2>
       <p class="cap">Sep 28 2026 → Feb 14 2027. Time-based. Weekend long run is the no-miss session.</p>
-      <table class="t2"><thead><tr><th>Wk</th><th>Dates</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody id="hbB2"></tbody></table>
+      <table class="t2"><thead><tr><th>Wk</th><th>Dates</th><th>Wk total</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody id="hbB2"></tbody></table>
+      <div class="note">⏱ <b>Track minutes, not kilometres.</b> TBR: "the body does not inherently know distance." As you get fitter the same minutes cover more ground — distance is an <i>output</i>, not a target. "Wk total" includes your added Wednesday run.</div>
     </div>
     <div class="card"><h2>🐢 Beginner 1 (the lighter option)</h2>
       <p class="cap">If the hamstring flares or you miss a chunk of the bridge, drop to this — no shame. TBR: "Still unsure? Start with Beginner 1."</p>
@@ -403,7 +404,13 @@ const OVERRIDE={
  "2026-09-17":{emo:"🦵",t:"Lower Body — moderate",d:"Legs return. No heavy RDL/Nordic. Stop a set early if anything feels flat.",type:"gym"},
  "2026-09-18":{emo:"🚶",t:"Rest or easy walk",d:"Deliberately light. Sunday is Bull Session 1 — arriving fresh matters more than one weekday session.",type:"rest"},
  "2026-09-19":{emo:"🛌",t:"Full Rest — fresh for tomorrow",d:"Bull Session 1 is tomorrow. Bank the legs.",type:"rest"},
- "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"}};
+ "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"},
+ // ── RACE WEEK (TBR: "Take Thursday and Friday OFF AND REST. No exertion.") ──
+ "2027-02-10":{emo:"🏃",t:"Last easy shakeout — 20 min",d:"Very easy, just to keep the legs awake. Then nothing until race night.",type:"easy"},
+ "2027-02-11":{emo:"🎉",t:"REST + SEND OFF PARTY",d:"No exertion. Kit claiming from 4PM, party 7PM, Botanical Gardens. BRING YOUR MEDICAL CERTIFICATE.",type:"rest"},
+ "2027-02-12":{emo:"🛌",t:"REST — total",d:"TBR's instruction: no exertion. Rest your body AND your mind. Carb-load, hydrate, lay out your kit.",type:"rest"},
+ "2027-02-13":{emo:"😴",t:"RACE TONIGHT — nap all afternoon",d:"TBR Together 3K/5K at 6AM = watch or jog it very easy. Then SLEEP in the afternoon. Gun start is midnight.",type:"rest"},
+ "2027-02-14":{emo:"🏁",t:"RACE DAY — TBR InLife Dream Marathon",d:"12:00 AM gun start. Run-walk 3:1 from km 1. Cut-offs: 21K by 4AM, finish by 8AM. You'll never forget your first.",type:"long"}};
 const WO_OVERRIDE={
  "2026-09-08":{wu:["5 min easy bike","Leg swings 10/side","Ankle circles + calf raises 2×15"],
   main:[{ex:"Goblet Squat",mc:"DB, light",sr:"3 × 10",note:"MODERATE only. You should finish feeling you had 5 more reps."},
@@ -540,7 +547,18 @@ function runsPerWeek(w){return 4}
 
 function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})}
 
-// TBR structure: Sun LONG · Mon REST · Tue gym · Wed WD1 run · Thu gym · Fri WD2 run · Sat rest/XTrain
+// RUN-FOCUSED structure (gym paused until after the marathon):
+// Sun LONG · Mon REST · Tue WD1+prehab · Wed 4th easy run · Thu WD2+prehab · Fri rest · Sat rest
+function extraRun(w){return w<=4?"30 min":w<=10?"35 min":w<=16?"40 min":"35 min"}
+// Parse a TBR duration string → minutes. "The body does not inherently know distance."
+function specMins(s){if(!s||/rest/i.test(s))return 0;
+ if(/RACE DAY/i.test(s))return 0;
+ const t=s.split("·")[0].split(" or ")[0];
+ let m=0;const h=t.match(/(\d+)\s*hrs?/i);if(h)m+=parseInt(h[1])*60;
+ const mm=t.match(/(\d+)\s*min/i);if(mm)m+=parseInt(mm[1]);
+ return m;}
+function weekMins(w){const p=(w>=1?TBR[w]:BRIDGE[String(w)]);if(!p)return 0;
+ return specMins(p.wd1)+specMins(p.wd2)+specMins(p.lr)+specMins(extraRun(w));}
 function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
  const wd=d.getDay(),{w,p}=weekPlan(d);
  const isRace=(p.lr||"").indexOf("RACE DAY")>=0;
@@ -550,12 +568,19 @@ function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
   if(p.note)det+=" · "+p.note;
   return{emo:p.star?"⭐":"🐉",t:`Long Run — ${p.lr}`,d:det,type:"long"};}
  if(wd===1)return{emo:"🛌",t:"Full Rest",d:"TBR rule: always take a full rest day after your long run.",type:"rest"};
- if(wd===2)return{emo:"💪",t:"Upper Body (gym)",d:"Chest, back, shoulders, arms — clavicle-smart. Counts as cross-training.",type:"gym"};
- if(wd===3){const s=p.wd1||"45 min";return rest_or_run(s,"Maintenance Run 1");}
- if(wd===4)return{emo:"🦵",t:"Lower Body (gym)",d:"Squat, hinge, single-leg + ankle & hamstring armor",type:"gym"};
- if(wd===5){const s=p.wd2||"45 min";return rest_or_run(s,"Maintenance Run 2");}
- return{emo:"🛌",t:"Rest / XTrain + 🍱 prep",d:"Easy walk, bike or yoga if you want. Batch-cook for the week.",type:"rest"};
+ if(wd===2){const m=rest_or_run(p.wd1||"45 min","Run 1");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
+ if(wd===3)return{emo:"🏃",t:`Easy Run ${extraRun(w)} — added volume`,d:`Pure easy aerobic. HR ${HRZ.easy} bpm, run-walk ${RUNWALK}. Drop this one first on a night-shift week.`,type:"easy"};
+ if(wd===4){const m=rest_or_run(p.wd2||"45 min","Run 2");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
+ if(wd===5)return{emo:"🛌",t:"Rest or easy walk",d:"Optional 20–30 min walk. Nothing hard — Sunday's long run is the priority.",type:"rest"};
+ return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook for the week.",type:"rest"};
 }
+const PREHAB={wu:["2 min easy movement — you've just run, you're warm"],
+ main:[{ex:"Nordic Curl (assisted) or Hamstring Bridge Slide",mc:"Couch/bench, or sliders on floor",sr:"3 × 6–8",note:"3–4s lowering. START ASSISTED — this is the one that protects your hamstring.",tag:"#1 evidence-based hamstring re-injury prevention"},
+  {ex:"Single-Leg Calf Raise",mc:"Step or flat floor",sr:"3 × 15/side",tag:"Ankle & Achilles armor — 2 prior sprains"},
+  {ex:"Tibialis Raise",mc:"Back against wall, heels out",sr:"3 × 20",tag:"Shin & ankle prehab"},
+  {ex:"Single-Leg Step-Down",mc:"Stair or low box",sr:"2 × 10/side (LEFT first)",tag:"Left-leg imbalance (Evolt)"},
+  {ex:"Side Plank",mc:"Mat",sr:"2 × 30s/side",tag:"Hip stability for late-run form"}],
+ cd:["Gentle calf + hip flexor stretch","Total: ~15 min, no gym required"]};
 function rest_or_run(spec,label){
  if(/rest/i.test(spec))return{emo:"🛌",t:"Rest or Cross-train",d:"TBR-scheduled recovery. Bike, swim, walk, weights or yoga — your call.",type:"rest"};
  const hi=/higher intensity/i.test(spec);
@@ -596,18 +621,22 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   if(p.bull)main.push({ex:"👥 "+p.bull+" — run this one with your batch at Filinvest City"});
   return{wu:["First 10 min very easy — walk breaks from the beginning"],main:main,
    cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch — full rest tomorrow"]};}
- if(wd===3||wd===5){const spec=(wd===3?p.wd1:p.wd2)||"45 min";
+ if(wd===2||wd===4){const spec=(wd===2?p.wd1:p.wd2)||"45 min";
   if(/rest/i.test(spec))return null;
   const hi=/higher intensity/i.test(spec);
-  const main=[{ex:`${spec.split(" · ")[0]} maintenance run`,note:`Purpose: HOLD the conditioning from the weekend long run. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
+  const main=[{ex:`${spec.split(" · ")[0]} run`,note:`Purpose: HOLD the conditioning from Sunday's long run. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
   if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
-  return{wu:["5–10 min very easy to start"],main:main,cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
+  main.push({ex:"🛡️ THEN: 15-min prehab (see below) — hamstring, calves, ankles",note:"Non-negotiable. This replaces the gym."});
+  return{wu:["5–10 min very easy to start"],main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
+ if(wd===3){const w=weekNum(d),{w:tw}=weekPlan(d);
+  return{wu:["First 5 min very easy, let HR rise gradually"],
+   main:[{ex:`Easy ${extraRun(tw)} · HR ${HRZ.easy} bpm · run-walk ${RUNWALK}`,note:"Added aerobic volume on top of TBR. Pure easy — this run only works if it stays easy."},
+         {ex:"If HR won't stay under 152, walk more. Slower is the point."}],
+   cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  return null;}
 function workoutFor(d){const ov=WO_OVERRIDE[keyOf(d)];if(ov)return ov;
  const wd=d.getDay();
- if(wd===2)return WORKOUTS.upper;
- if(wd===4)return WORKOUTS.lower;
- if(wd===0||wd===3||wd===5){const r=runWO(d);if(r)return r;}
+ if(wd===0||wd===2||wd===3||wd===4){const r=runWO(d);if(r)return r;}
  return{wu:["Move gently — no hard training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},
    {ex:wd===6?"🍱 Prep day — batch-cook the week (Food tab)":"Optional easy walk, bike, swim or yoga (XTrain)"},
    {ex:wd===1?"Full rest after the long run — TBR's rule, and the one that keeps you healthy":"Keep it genuinely easy"}],cd:[]};
@@ -758,12 +787,12 @@ function renderMVW(o){const mon=new Date(VIEW);mon.setDate(mon.getDate()-((VIEW.
  let longDone=false,wd1=false,wd2=false,gym=0;
  for(let i=0;i<7;i++){const d=new Date(mon.getTime()+i*DAY),l=o.logs[keyOf(d)];if(!l||!l.main)continue;
   const wd=d.getDay();
-  if(wd===0)longDone=true; if(wd===3)wd1=true; if(wd===5)wd2=true;
-  if(wd===2||wd===4)gym++;}
+  if(wd===0)longDone=true; if(wd===2)wd1=true; if(wd===4)wd2=true;
+  if(wd===2||wd===3||wd===4)gym++;}
  document.getElementById("mvwBox").innerHTML=
   `<div class="m ${longDone?'hit':''}"><span class="e">🐉</span>Long run<br><small>${longDone?'DONE':'NO-MISS'}</small></div>`+
-  `<div class="m ${(wd1||wd2)?'hit':''}"><span class="e">🏃</span>1+ weekday run<br><small>${(wd1?1:0)+(wd2?1:0)} of 2</small></div>`+
-  `<div class="m ${gym>=1?'hit':''}"><span class="e">💪</span>1+ gym<br><small>${gym} done</small></div>`;
+  `<div class="m ${(wd1&&wd2)?'hit':''}"><span class="e">🏃</span>2 TBR runs<br><small>${(wd1?1:0)+(wd2?1:0)} of 2</small></div>`+
+  `<div class="m ${gym>=3?'hit':''}"><span class="e">🛡️</span>Weekday runs<br><small>${gym} of 3</small></div>`;
  const wk=document.getElementById("volBar"),{w,p}=weekPlan(VIEW);
  if(wk)wk.innerHTML=`<div class="note" style="margin-top:10px">📋 <b>This week (${w>=1?"TBR Week "+w:"Bridge"}):</b>
    Long run <b>${p.lr}</b> · Wed <b>${p.wd1}</b> · Fri <b>${p.wd2}</b>${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}
@@ -995,7 +1024,9 @@ function renderHandbook(){
  for(let k=1;k<=20;k++){const p=TBR[k],mo=new Date(PROGSTART.getTime()+(k-1)*7*DAY);
   const su=new Date(mo.getTime()+6*DAY);
   const tr=document.createElement("tr");if(k===weekPlan(TODAY).w)tr.style.outline="2px solid var(--teal)";
+  const tm=weekMins(k),hh=Math.floor(tm/60),mm2=tm%60;
   tr.innerHTML=`<td class="b">${k}</td><td><small>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}–${su.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</small></td>`+
+   `<td class="b" style="color:var(--navy);white-space:nowrap">${k===20?"🏁":(hh?hh+"h":"")+(mm2?mm2+"m":"")}</td>`+
    `<td><small>${p.wd1}</small></td><td><small>${p.wd2}</small></td>`+
    `<td class="b" style="color:var(--teal)">${p.lr}${p.note?`<br><small class="muted" style="font-weight:400">${p.note}</small>`:""}${p.star?`<br><small style="color:var(--bad)">${p.star}</small>`:""}${p.bull?`<br><small class="muted" style="font-weight:400">👥 ${p.bull}</small>`:""}</td>`;
   tb.appendChild(tr)}
@@ -1006,14 +1037,24 @@ function renderHandbook(){
 function renderPlan(){
  document.getElementById("hrBody").innerHTML=HRTABLE.map(([u,b,f])=>`<tr><td><b>${u}</b></td><td class="b" style="color:var(--teal);white-space:nowrap">${b}</td><td><small>${f}</small></td></tr>`).join("");
  document.getElementById("planHow").innerHTML=`
- <div class="rgroup"><div class="rgh">Your week — official TBR structure (3 runs + 2 gym)</div>
- <div class="ritem"><b>Sun</b> 🐉 LONG RUN — your day off, and when Bull Sessions happen</div>
+ <div class="rgroup"><div class="rgh">Your week — RUN-FOCUSED (4 runs · gym paused until after Feb 14)</div>
+ <div class="ritem"><b>Sun</b> 🐉 LONG RUN — the no-miss session, and when Bull Sessions happen</div>
  <div class="ritem"><b>Mon</b> 🛌 FULL REST — TBR rule: always rest the day after the long run</div>
- <div class="ritem"><b>Tue</b> 💪 Upper gym (counts as TBR cross-training)</div>
- <div class="ritem"><b>Wed</b> 🏃 Maintenance run 1</div>
- <div class="ritem"><b>Thu</b> 🦵 Lower gym</div>
- <div class="ritem"><b>Fri</b> 🏃 Maintenance run 2</div>
- <div class="ritem"><b>Sat</b> 🛌 Rest / XTrain + 🍱 batch-cook</div></div>
+ <div class="ritem"><b>Tue</b> 🏃 Run 1 (TBR) <b>+ 🛡️ 15-min prehab</b></div>
+ <div class="ritem"><b>Wed</b> 🏃 Easy run — added aerobic volume on top of TBR</div>
+ <div class="ritem"><b>Thu</b> 🏃 Run 2 (TBR) <b>+ 🛡️ 15-min prehab</b></div>
+ <div class="ritem"><b>Fri</b> 🛌 Rest or easy walk</div>
+ <div class="ritem"><b>Sat</b> 🛌 Rest + 🍱 batch-cook</div></div>
+ <div class="rgroup"><div class="rgh">🛡️ The 15-minute prehab — this is NOT optional</div>
+ <div class="ritem">You've paused the gym to focus on running. Fine. But these five movements stay, twice a week, at home, no equipment:</div>
+ <div class="ritem"><b>Nordic curl / bridge slide</b> 3×6–8 — hamstring re-injury prevention (you strained it in July)</div>
+ <div class="ritem"><b>Single-leg calf raise</b> 3×15 · <b>Tibialis raise</b> 3×20 — ankle armor (two prior sprains)</div>
+ <div class="ritem"><b>Single-leg step-down</b> 2×10 — left/right imbalance · <b>Side plank</b> 2×30s</div>
+ <div class="ritem">⚠️ You're <i>adding</i> running volume. That's exactly when these injuries surface. 15 minutes is the cheapest insurance in this whole plan.</div></div>
+ <div class="rgroup"><div class="rgh">🍽 Nutrition shift — stop chasing a deficit</div>
+ <div class="ritem">Your long runs go from 50 min to <b>3h50</b>. Energy expenditure climbs steeply from here.</div>
+ <div class="ritem"><b>Eat at maintenance (~2,450 kcal). The deficit will happen on its own.</b> Manufacturing one on top is how you crashed on Sep 15.</div>
+ <div class="ritem"><b>Protein ~140g stays non-negotiable</b> — without lifting, it's now your main defence against losing more muscle.</div></div>
  <div class="rgroup"><div class="rgh">TBR's rules (from the handbook)</div>
  <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.</div>
  <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
