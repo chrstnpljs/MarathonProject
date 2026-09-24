@@ -349,7 +349,7 @@ small.dim{color:var(--mut);font-size:11px}
       </div>
       <div class="caldow" id="calDow"></div>
       <div class="calgrid" id="calGrid"></div>
-      <div class="legend">🟢 done · 🔴 missed · 🟡 sick · teal outline = today · navy dot = TBR event. <span id="calToday" style="color:var(--teal);cursor:pointer;text-decoration:underline;font-weight:700">jump to today</span></div>
+      <div class="legend">🐉 long run · 🏃 easy · ⚡ higher-intensity finish · 🛌 rest · 🟢 done · 🔴 missed · navy dot = TBR event. <span id="calToday" style="color:var(--teal);cursor:pointer;text-decoration:underline;font-weight:700">jump to today</span></div>
     </div>
     <div class="card"><div id="calDetail"></div></div>
   </div>
@@ -592,6 +592,19 @@ function specMins(s){if(!s||/rest/i.test(s))return 0;
  return m;}
 function weekMins(w){const p=(w>=1?TBR[w]:BRIDGE[String(w)]);if(!p)return 0;
  return specMins(p.wd1)+specMins(p.wd2)+specMins(p.lr)+specMins(extraRun(w));}
+// How many run-walk repeats to program into the watch for a given day
+function sessionMins(d){const m=mission(d),{w,p}=weekPlan(d),wd=d.getDay();
+ let spec=wd===0?p.lr:wd===2?p.wd1:wd===3?extraRun(w):wd===5?p.wd2:"";
+ let mins=specMins(spec);
+ if(!mins)mins=specMins(m.t);          // fallback: parse the card title (override days)
+ return mins;}
+function runwalkLine(d){const m=mission(d);
+ if(["long","easy","quality"].indexOf(m.type)<0)return "";
+ const mins=sessionMins(d);if(!mins)return "";
+ return `<div class="totline" style="background:#eef3f8;color:var(--navy)">⏱ <b>Watch setup</b> for ${mins} min —
+  <b>3:1 → ${Math.round(mins/4)} repeats</b> (3 min run + 1 min walk) &nbsp;·&nbsp;
+  <b>4:1 → ${Math.round(mins/5)} repeats</b> (4 min run + 1 min walk)
+  <br><small style="font-weight:400">Easier: use Garmin's built-in <b>Run/Walk alert</b> (Run ▸ Settings ▸ Run/Walk) — set the times once and it repeats for the whole run. No counting.</small></div>`;}
 function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
  const wd=d.getDay(),{w,p}=weekPlan(d);
  const isRace=(p.lr||"").indexOf("RACE DAY")>=0;
@@ -617,7 +630,7 @@ const PREHAB={wu:["2 min easy movement — you've just run, you're warm"],
 function rest_or_run(spec,label){
  if(/rest/i.test(spec))return{emo:"🛌",t:"Rest or Cross-train",d:"TBR-scheduled recovery. Bike, swim, walk, weights or yoga — your call.",type:"rest"};
  const hi=/higher intensity/i.test(spec);
- return{emo:"🏃",t:`${label} — ${spec.split(" · ")[0]}`,
+ return{emo:hi?"⚡":"🏃",t:`${label} — ${spec.split(" · ")[0]}${hi?" ⚡":""}`,
   d:(hi?`Finish faster: ${spec.split("· ")[1]} at ${HRZ.mp} bpm. `:"")+`Otherwise easy — HR ${HRZ.easy} bpm. Run-walk ${RUNWALK}.`,
   type:hi?"quality":"easy"};}
 const WORKOUTS={
@@ -808,8 +821,9 @@ function renderSession(){const vd=new Date(VIEW.getTime()+sessOff*DAY),wo=workou
   h+=`</div>`;
   if(wo.cd&&wo.cd.length)h+=`<div class="sect"><div class="sh">🧊 Cool-down</div><ul>${wo.cd.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
   {const wp=weekPlan(vd);
-   if(wd===0)h+=`<div class="totline">🐉 <b>${wp.p.lr}</b> — the no-miss session. Run-walk ${RUNWALK}.</div>`;
-   else if(wd===3||wd===5)h+=`<div class="totline">📏 ${(wd===3?wp.p.wd1:wp.p.wd2)} — holds your conditioning between long runs.</div>`;}
+   if(wd===0)h+=`<div class="totline">🐉 <b>${wp.p.lr}</b> — the no-miss session.</div>`;
+   else if(wd===2||wd===5)h+=`<div class="totline">📏 ${(wd===2?wp.p.wd1:wp.p.wd2)} — holds your conditioning between long runs.</div>`;
+   h+=runwalkLine(vd);}
  }
  if(naDay(vd))h+=`<div class="totline" style="background:#fff3da;color:#9a6a00">🌙 NA shift — train <b>~2 hrs after waking, before your 10pm shift</b>.<br><span style="font-weight:400">7am finish → snack → 🕶️ blackout sleep 8am–3pm → wake &amp; eat → TRAIN → pre-shift meal → shift.</span></div>`;
  if(sessOff===0){const done=(state().logs[keyOf(VIEW)]||{}).main;h+=`<button class="btn ${done?'g':'p'}" id="sessDone" style="margin-top:12px;width:100%;padding:11px">${done?'✓ Session completed — tap to undo':'Mark session done ✓  (+50 XP, keeps your streak)'}</button>`;}
@@ -1090,6 +1104,7 @@ function renderCalDetail(){
   h+=`</div>`;
   if(wo.cd&&wo.cd.length)h+=`<div class="sect"><div class="sh">🧊 Cool-down</div><ul>${wo.cd.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
  }
+ h+=runwalkLine(d);
  const wm=weekMins(wp.w);
  if(wm)h+=`<div class="totline">⏱ That week totals <b>${Math.floor(wm/60)}h${String(wm%60).padStart(2,"0")}</b> of running</div>`;
  h+=`<div class="totline" style="background:#f6f8fa;color:var(--ink)">🍽 ${plan.type} · ≈${plan.target[0]} kcal · ${plan.target[1]}g protein · ${plan.target[2]}g carbs</div>`;
