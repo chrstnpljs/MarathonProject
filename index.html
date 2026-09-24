@@ -135,6 +135,20 @@ small.dim{color:var(--mut);font-size:11px}
 .mvw .m{border:1.5px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;font-size:11.5px;font-weight:700}
 .mvw .m.hit{background:var(--base);border-color:var(--good)}
 .mvw .m .e{font-size:19px;display:block}
+.caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.caldow div{text-align:center;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calcell{border:1px solid var(--line);border-radius:8px;min-height:48px;padding:3px 2px;text-align:center;cursor:pointer;background:#fff;position:relative;overflow:hidden}
+.calcell.out{background:#f7f9fb;border-color:transparent;cursor:default}
+.calcell .cn{font-size:10.5px;color:var(--mut);font-weight:700;line-height:1.1}
+.calcell .ce{font-size:17px;line-height:1.15}
+.calcell.done{background:var(--base);border-color:var(--good)}
+.calcell.miss{background:#fbe6df;border-color:var(--bad)}
+.calcell.sick{background:#fff1cf;border-color:#d9a300}
+.calcell.caltoday{outline:2px solid var(--teal);outline-offset:-2px}
+.calcell.calsel{box-shadow:inset 0 0 0 2px var(--navy)}
+.calcell .cev{position:absolute;top:3px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--navy)}
+.evbanner{background:var(--yel);border-radius:8px;padding:7px 10px;font-size:12.5px;font-weight:700;margin-top:8px}
 </style>
 </head>
 <body>
@@ -165,6 +179,7 @@ small.dim{color:var(--mut);font-size:11px}
     <div class="tab" data-t="food">Food</div>
     <div class="tab" data-t="runs">Runs</div>
     <div class="tab" data-t="plan">Plan</div>
+    <div class="tab" data-t="cal">📅 Calendar</div>
     <div class="tab" data-t="tldr">TL;DR</div>
     <div class="tab" data-t="handbook">Handbook</div>
   </div>
@@ -320,6 +335,23 @@ small.dim{color:var(--mut);font-size:11px}
       <p class="legend">Bull Sessions = group long runs. Swap your Monday long run to these when you want company.</p></div>
     <div class="card"><h2>23-week map</h2>
       <table class="t2"><thead><tr><th>Week</th><th>Starts</th><th>Shift</th><th>Sun Long Run</th><th>Wed</th><th>Fri</th><th>Notes</th></tr></thead><tbody id="planBody"></tbody></table></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="cal" class="hide">
+    <div class="card">
+      <h2>📅 Training Calendar</h2>
+      <p class="cap">Tap any day — past or future — to see the full planned session.</p>
+      <div class="sessnav">
+        <button id="calPrev" class="navb">◀ prev</button>
+        <span id="calLabel" class="b"></span>
+        <button id="calNext" class="navb">next ▶</button>
+      </div>
+      <div class="caldow" id="calDow"></div>
+      <div class="calgrid" id="calGrid"></div>
+      <div class="legend">🟢 done · 🔴 missed · 🟡 sick · teal outline = today · navy dot = TBR event. <span id="calToday" style="color:var(--teal);cursor:pointer;text-decoration:underline;font-weight:700">jump to today</span></div>
+    </div>
+    <div class="card"><div id="calDetail"></div></div>
   </div>
 
   <!-- TL;DR -->
@@ -991,6 +1023,82 @@ async function loadRuns(){const body=document.getElementById("actBody");
   body.innerHTML=acts.slice(0,12).map(a=>{const k=(a.summary.distance/1000).toFixed(2),t=Math.round(a.summary.moving_time/60),run=/run/i.test(a.sport_type);
    return `<tr><td>${new Date(a.start_local).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${a.name}<br><small class="dim">${a.sport_type}</small></td><td>${k} km</td><td>${t} min</td><td>${run?pace(a.summary.moving_time,a.summary.distance)+"/km":"—"}</td></tr>`}).join("")}
  catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="5">Unavailable.</td></tr>'}}
+// ── CALENDAR ──
+const TBRDATES={
+ "2026-09-16":"🎥 Bull Circle 1 — Zoom webinar, 8PM",
+ "2026-09-20":"👥 Bull Session 1 — Filinvest City",
+ "2026-09-28":"🚀 TBR 20-week program starts (Week 1)",
+ "2026-11-04":"🎥 Bull Circle 2 — Zoom webinar",
+ "2026-11-22":"👥 Bull Session 2 — Filinvest City",
+ "2026-12-02":"🎥 Bull Circle 3 — Zoom webinar",
+ "2026-12-05":"👥 Bull Session 3 — Filinvest City",
+ "2026-12-27":"👥 Bull Session 4 ⭐ — the big one (3h15 / min 25km)",
+ "2027-01-06":"🎥 Bull Circle 4 — Zoom webinar",
+ "2027-01-10":"👥 Bull Session 5 — Filinvest City",
+ "2027-01-24":"👥 Bull Session 6 🚨 — PEAK long run (3h50 / min 30km)",
+ "2027-02-03":"🎥 Bull Circle 5 — race briefing",
+ "2027-02-11":"🎉 Send Off Party — race kit claiming (bring med cert!)",
+ "2027-02-13":"🏃 TBR Together 3K/5K — keep it easy, race is tonight",
+ "2027-02-14":"🏁 RACE DAY — midnight gun start"};
+let calMonth=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+let calSel=new Date(TODAY);
+function renderCal(){
+ const y=calMonth.getFullYear(),mo=calMonth.getMonth(),o=state();
+ document.getElementById("calLabel").textContent=calMonth.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+ document.getElementById("calDow").innerHTML=WD.map(x=>`<div>${x}</div>`).join("");
+ const lead=new Date(y,mo,1).getDay(),days=new Date(y,mo+1,0).getDate();
+ let h="";
+ for(let i=0;i<lead;i++)h+=`<div class="calcell out"></div>`;
+ for(let dd=1;dd<=days;dd++){
+  const d=new Date(y,mo,dd),k=keyOf(d),inProg=(d>=START&&d<=RACE);
+  let cls="calcell";if(!inProg)cls+=" out";
+  const log=o.logs[k];
+  if(inProg){
+   if(log&&log.status==="missed")cls+=" miss";
+   else if(log&&log.status==="sick")cls+=" sick";
+   else if(d<=TODAY&&completed(d,log))cls+=" done";
+  }
+  if(k===keyOf(TODAY))cls+=" caltoday";
+  if(k===keyOf(calSel))cls+=" calsel";
+  const m=inProg?mission(d):null;
+  h+=`<div class="${cls}" ${inProg?`data-d="${k}"`:""}><div class="cn">${dd}</div><div class="ce">${m?m.emo:""}</div>${TBRDATES[k]?'<span class="cev"></span>':""}</div>`;
+ }
+ document.getElementById("calGrid").innerHTML=h;
+ document.querySelectorAll("#calGrid .calcell[data-d]").forEach(el=>el.onclick=()=>{
+  const[a,b,c]=el.dataset.d.split("-").map(Number);calSel=new Date(a,b-1,c);renderCal();});
+ renderCalDetail();
+}
+function renderCalDetail(){
+ const d=calSel,el=document.getElementById("calDetail");
+ if(d<START||d>RACE){el.innerHTML=`<h2>${fmtDate(d)}</h2><p class="muted">Outside the training block.</p>`;return;}
+ const m=mission(d),wo=workoutFor(d),wp=weekPlan(d),plan=dayPlan(d),k=keyOf(d);
+ const log=state().logs[k],past=d<=TODAY,gym=!!(wo&&wo.main[0]&&wo.main[0].mc);
+ let status="";
+ if(k===keyOf(TODAY))status=" · <b style='color:var(--teal)'>TODAY</b>";
+ else if(past)status=completed(d,log)?" · ✅ completed":(log&&log.status==="missed"?" · ❌ missed":" · not logged");
+ else{const away=Math.round((d-TODAY)/DAY);status=` · in ${away} day${away>1?"s":""}`;}
+ let h=`<h2>${fmtDate(d)}</h2>`;
+ h+=`<p class="cap">${wp.w>=1?"TBR Week "+wp.w+" of 20":"Bridge phase"} · ${shiftFor(d)} shift${status}</p>`;
+ if(TBRDATES[k])h+=`<div class="evbanner">${TBRDATES[k]}</div>`;
+ h+=`<div class="mission" style="margin-top:10px"><div class="emo">${m.emo}</div><div><div class="t">${m.t}</div><div class="d">${m.d}</div></div></div>`;
+ if(wo){
+  if(wo.wu&&wo.wu.length)h+=`<div class="sect"><div class="sh">🔥 Warm-up</div><ul>${wo.wu.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+  h+=`<div class="sect"><div class="sh">💥 Main</div>`;
+  if(gym)h+=`<table class="ex"><thead><tr><th>Exercise</th><th>Station</th><th>Sets × Reps</th></tr></thead><tbody>`+
+   wo.main.map(x=>`<tr><td><b>${x.ex}</b>${x.note?`<br><small class="dim">${x.note}</small>`:""}${x.tag?`<br><span class="tag">🎯 ${x.tag}</span>`:""}</td><td>${x.mc||""}</td><td class="b">${x.sr||""}</td></tr>`).join("")+`</tbody></table>`;
+  else h+=`<ul>${wo.main.map(x=>`<li>${x.ex}${x.note?` — <small class="dim">${x.note}</small>`:""}${x.tag?`<br><span class="tag">🎯 ${x.tag}</span>`:""}</li>`).join("")}</ul>`;
+  h+=`</div>`;
+  if(wo.cd&&wo.cd.length)h+=`<div class="sect"><div class="sh">🧊 Cool-down</div><ul>${wo.cd.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+ }
+ const wm=weekMins(wp.w);
+ if(wm)h+=`<div class="totline">⏱ That week totals <b>${Math.floor(wm/60)}h${String(wm%60).padStart(2,"0")}</b> of running</div>`;
+ h+=`<div class="totline" style="background:#f6f8fa;color:var(--ink)">🍽 ${plan.type} · ≈${plan.target[0]} kcal · ${plan.target[1]}g protein · ${plan.target[2]}g carbs</div>`;
+ if(!past)h+=`<div class="legend" style="margin-top:8px">👀 Planned session — assumes you've followed the plan up to here. Long runs and Bull Sessions are fixed; weekday sessions adapt if you miss time.</div>`;
+ el.innerHTML=h;
+}
+document.getElementById("calPrev").onclick=()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);renderCal()};
+document.getElementById("calNext").onclick=()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);renderCal()};
+document.getElementById("calToday").onclick=()=>{calMonth=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);calSel=new Date(TODAY);renderCal()};
 // TL;DR + HANDBOOK
 const TLDR_CRIT=[
  ["🌙","RACE STARTS AT MIDNIGHT","Feb 14, 12:00 AM at Filinvest City. Not a morning race — plan an afternoon nap, and do some late-night long runs in training. Your night-shift experience is an advantage here."],
@@ -1095,10 +1203,11 @@ function renderPlan(){
    `<td><small>${p.bull?"👥 "+p.bull.split(" · ")[0]:""}${p.star?" "+p.star.slice(0,42):""}</small></td>`;
   pb.appendChild(tr)}}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
- ["today","recovery","progress","food","runs","plan","tldr","handbook"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
+ ["today","recovery","progress","food","runs","plan","cal","tldr","handbook"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
  const v=t.dataset.t;
  if(v==="recovery")renderRecovery();if(v==="progress")renderProgress();if(v==="food")renderFood();
- if(v==="runs")loadRuns();if(v==="plan")renderPlan();if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook()});
+ if(v==="runs")loadRuns();if(v==="plan")renderPlan();if(v==="cal")renderCal();
+ if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook()});
 // One-time backfill: completed days, verified against Strava/Garmin. Runs once per device.
 (function(){const o=state();if(o.seeded_bridge1)return;
  ["2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-05","2026-09-06"]
