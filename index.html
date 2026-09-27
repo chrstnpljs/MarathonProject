@@ -138,7 +138,9 @@ small.dim{color:var(--mut);font-size:11px}
 .caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
 .caldow div{text-align:center;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.calcell{border:1px solid var(--line);border-radius:8px;min-height:48px;padding:3px 2px;text-align:center;cursor:pointer;background:#fff;position:relative;overflow:hidden}
+.calcell{border:1px solid var(--line);border-radius:8px;min-height:60px;padding:3px 1px;text-align:center;cursor:pointer;background:#fff;position:relative;overflow:hidden}
+.calcell .cs{font-size:8.5px;line-height:1.1;color:var(--mut);font-weight:700;margin-top:1px;white-space:nowrap}
+.calcell.done .cs,.calcell.miss .cs{color:var(--ink)}
 .calcell.out{background:#f7f9fb;border-color:transparent;cursor:default}
 .calcell .cn{font-size:10.5px;color:var(--mut);font-weight:700;line-height:1.1}
 .calcell .ce{font-size:17px;line-height:1.15}
@@ -1271,6 +1273,16 @@ const TBRDATES={
  "2027-02-11":"🎉 Send Off Party — race kit claiming (bring med cert!)",
  "2027-02-13":"🏃 TBR Together 3K/5K — keep it easy, race is tonight",
  "2027-02-14":"🏁 RACE DAY — midnight gun start"};
+// Compact one-line summary under each calendar cell
+function calLabel(d){const k=keyOf(d),m=mission(d);
+ if(/RACE DAY/i.test(m.t))return "42.2km";
+ if(m.type==="rest"){
+  if(d.getDay()===4){const wp=weekPlan(d);return "🚲"+xbike(wp.w).replace(" min","m");}
+  return "";}
+ const mins=sessionMins(d);if(!mins)return "";
+ const hr=(m.type==="quality")?168:152;
+ const dur=mins<60?mins+"m":Math.floor(mins/60)+"h"+(mins%60?String(mins%60).padStart(2,"0"):"");
+ return dur+" · "+hr;}
 let calMonth=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
 let calSel=new Date(TODAY);
 function renderCal(){
@@ -1292,7 +1304,7 @@ function renderCal(){
   if(k===keyOf(TODAY))cls+=" caltoday";
   if(k===keyOf(calSel))cls+=" calsel";
   const m=inProg?mission(d):null;
-  h+=`<div class="${cls}" ${inProg?`data-d="${k}"`:""}><div class="cn">${dd}</div><div class="ce">${m?m.emo:""}</div>${TBRDATES[k]?'<span class="cev"></span>':""}</div>`;
+  h+=`<div class="${cls}" ${inProg?`data-d="${k}"`:""}><div class="cn">${dd}</div><div class="ce">${m?m.emo:""}</div><div class="cs">${inProg?calLabel(d):""}</div>${TBRDATES[k]?'<span class="cev"></span>':""}</div>`;
  }
  document.getElementById("calGrid").innerHTML=h;
  document.querySelectorAll("#calGrid .calcell[data-d]").forEach(el=>el.onclick=()=>{
