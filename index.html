@@ -16,7 +16,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans
 .hero{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;border-radius:16px;padding:16px 18px}
 .hero h1{margin:0 0 2px;font-size:18px}
 .hero .sub{opacity:.85;font-size:12px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:7px;margin-top:12px}
 .stat{background:rgba(255,255,255,.13);border-radius:11px;padding:8px 6px;text-align:center}
 .stat .n{font-size:20px;font-weight:800;line-height:1}
 .stat .n.lvlname{font-size:13px;line-height:1.15}
@@ -161,6 +161,7 @@ small.dim{color:var(--mut);font-size:11px}
       <div class="stat" id="levelTile" style="cursor:pointer"><div class="n lvlname" id="sLevel">—</div><div class="l" id="sLevelL">Level ▸</div></div>
       <div class="stat"><div class="n" id="sXP">0</div><div class="l" id="xpLabel">Total XP</div></div>
       <div class="stat"><div class="n" id="sStreak">0🔥</div><div class="l">Streak</div></div>
+      <div class="stat" id="predTile" style="cursor:pointer;background:rgba(255,255,255,.2)"><div class="n" id="sPred">—</div><div class="l">🏁 Feb 14 ▸</div></div>
     </div>
     <div class="race">
       <div class="racelabel"><span id="raceL">Week 0</span><span id="raceR">0%</span></div>
@@ -171,6 +172,7 @@ small.dim{color:var(--mut);font-size:11px}
   </div>
 
   <div id="lvlModal" class="modal hide"><div class="modalcard"><div class="modalhead"><b>🏆 Rank Ladder</b><span id="lvlClose" style="cursor:pointer;font-size:18px">✕</span></div><div id="lvlList"></div></div></div>
+  <div id="predModal" class="modal hide"><div class="modalcard"><div class="modalhead"><b>🏁 Race Prediction</b><span id="predClose" style="cursor:pointer;font-size:18px">✕</span></div><div id="predBody"></div></div></div>
 
   <div class="tabs">
     <div class="tab on" data-t="today">Today</div>
@@ -317,6 +319,25 @@ small.dim{color:var(--mut);font-size:11px}
       </div>
       <p class="cap" id="stravaMsg" style="margin-top:10px"></p>
     </div>
+    <div class="card">
+      <h2>📈 Aerobic Efficiency <small class="dim">— the number that actually matters</small></h2>
+      <p class="cap">What pace you'd hold at <b>HR 150</b>. Raw pace lies — heat, hills and walk breaks move it. This doesn't. When this line drops, you are becoming a faster runner at the same effort.</p>
+      <div class="macro" id="effStats"></div>
+      <div class="chart-box"><canvas id="effChart"></canvas></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn p" id="efSync">⬇ Auto-sync runs</button>
+        <span class="muted" id="efMsg" style="align-self:center;font-size:12px"></span>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <div><label>Date</label><input type="date" id="efDate"></div>
+        <div><label>Distance (km)</label><input type="number" step="0.01" id="efKm" placeholder="5.0"></div>
+        <div><label>Duration (min)</label><input type="number" step="0.1" id="efMin" placeholder="45"></div>
+        <div><label>Avg HR</label><input type="number" id="efHR" placeholder="148"></div>
+        <button class="btn p" id="efAdd">Add run</button>
+      </div>
+      <div id="effNote"></div>
+      <div class="legend">Outdoor runs only — treadmill readings flatter the number and distort the trend.</div>
+    </div>
     <div class="card"><h2>Recent activities <small class="dim">(live from Strava)</small></h2>
       <table class="t2"><thead><tr><th>Date</th><th>Activity</th><th>Dist</th><th>Time</th><th>Pace</th></tr></thead><tbody id="actBody"><tr><td colspan="5">Loading…</td></tr></tbody></table>
     </div>
@@ -356,6 +377,11 @@ small.dim{color:var(--mut);font-size:11px}
 
   <!-- TL;DR -->
   <div id="tldr" class="hide">
+    <div class="card" style="border-color:var(--teal)">
+      <h2>🎯 Your race goals — A / B / C</h2>
+      <p class="cap">One goal is a pass/fail test. Three goals means you can have a good day at several levels.</p>
+      <div id="raceGoals"></div>
+    </div>
     <div class="card" style="border-color:var(--bad)">
       <h2>🚨 The 5 things you cannot forget</h2>
       <div id="tldrCritical"></div>
@@ -373,8 +399,8 @@ small.dim{color:var(--mut);font-size:11px}
     </div>
     <div class="card"><h2>🏃 Official Beginner 2 Program (20 weeks)</h2>
       <p class="cap">Sep 28 2026 → Feb 14 2027. Time-based. Weekend long run is the no-miss session.</p>
-      <table class="t2"><thead><tr><th>Wk</th><th>Dates</th><th>Wk total</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody id="hbB2"></tbody></table>
-      <div class="note">⏱ <b>Track minutes, not kilometres.</b> TBR: "the body does not inherently know distance." As you get fitter the same minutes cover more ground — distance is an <i>output</i>, not a target. "Wk total" includes your added Wednesday run.</div>
+      <table class="t2"><thead><tr><th>Wk</th><th>Dates</th><th>Time</th><th>~km</th><th>Weekday 1</th><th>Weekday 2</th><th>Long Run</th></tr></thead><tbody id="hbB2"></tbody></table>
+      <div class="note">⏱ <b>Time is the target; km is the by-product.</b> TBR: "the body does not inherently know distance." The ~km column assumes your easy pace improves from <b>9:30/km today to ~8:24/km by January</b> at the same heart rate — so if you hit the minutes, the distance takes care of itself. Totals include your added Wednesday run.</div>
     </div>
     <div class="card"><h2>🐢 Beginner 1 (the lighter option)</h2>
       <p class="cap">If the hamstring flares or you miss a chunk of the bridge, drop to this — no shame. TBR: "Still unsure? Start with Beginner 1."</p>
@@ -419,7 +445,7 @@ const BRIDGE={
  "-1":{wd1:"35 min",wd2:"35 min",lr:"75 min",star:"Bridge 3 — Bull Session 1 falls on Sun Sep 20. Go meet your batch!",bull:"Bull Session 1 · Sep 20"},
  "0":{wd1:"35 min",wd2:"30 min",lr:"60 min",star:"Bridge 4 — easy week. Beginner 2 starts Mon Sep 28."}};
 const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
-const RUNWALK="3:1 (run 3 min · walk 1 min)";
+const RUNWALK="4:1 (run 4 min · walk 1 min)";   // moved up from 3:1 on Sep 30 — PJ adapted
 
 // ── One-off day overrides (Bagu Circuit hike week, Sep 12–13) ──
 const OVERRIDE={
@@ -438,12 +464,34 @@ const OVERRIDE={
  "2026-09-19":{emo:"🛌",t:"Full Rest — fresh for tomorrow",d:"Bull Session 1 is tomorrow. Bank the legs.",type:"rest"},
  "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"},
  // ── RACE WEEK (TBR: "Take Thursday and Friday OFF AND REST. No exertion.") ──
+ // ── 🌙 MIDNIGHT RACE REHEARSALS — none of the three plans cover this ──
+ "2026-12-13":{emo:"🌙",t:"NIGHT LONG RUN — start 9PM",d:"Race starts at MIDNIGHT. First rehearsal: run in the dark, after a normal day, with a headlamp. 2h40.",type:"long"},
+ "2027-01-17":{emo:"🌙",t:"NIGHT LONG RUN — start 9–10PM",d:"Second rehearsal. Nap in the afternoon first, exactly like race day. 1h30.",type:"long"},
+ "2027-01-31":{emo:"🌙",t:"NIGHT LONG RUN — full dress rehearsal",d:"Afternoon nap → race kit → race breakfast timing → 1h30 from 10PM. Last chance to test everything.",type:"long"},
  "2027-02-10":{emo:"🏃",t:"Last easy shakeout — 20 min",d:"Very easy, just to keep the legs awake. Then nothing until race night.",type:"easy"},
  "2027-02-11":{emo:"🎉",t:"REST + SEND OFF PARTY",d:"No exertion. Kit claiming from 4PM, party 7PM, Botanical Gardens. BRING YOUR MEDICAL CERTIFICATE.",type:"rest"},
  "2027-02-12":{emo:"🛌",t:"REST — total",d:"TBR's instruction: no exertion. Rest your body AND your mind. Carb-load, hydrate, lay out your kit.",type:"rest"},
  "2027-02-13":{emo:"😴",t:"RACE TONIGHT — nap all afternoon",d:"TBR Together 3K/5K at 6AM = watch or jog it very easy. Then SLEEP in the afternoon. Gun start is midnight.",type:"rest"},
  "2027-02-14":{emo:"🏁",t:"RACE DAY — TBR InLife Dream Marathon",d:"12:00 AM gun start. Run-walk 3:1 from km 1. Cut-offs: 21K by 4AM, finish by 8AM. You'll never forget your first.",type:"long"}};
 const WO_OVERRIDE={
+ "2026-12-13":{wu:["Eat a normal day's food. Headlamp charged. Reflective gear on."],
+  main:[{ex:"🌙 2h40 long run starting ~9PM",note:"Race day is a MIDNIGHT start. First time running long in the dark, on a normal day's sleep."},
+        {ex:"Test: headlamp, reflective kit, night visibility, and how your stomach handles fuel late at night"},
+        {ex:"Fuel: 45g carbs/hr from 45 min onward + electrolytes"},
+        {ex:"Note how you feel at 11PM–midnight — that is your race start window"}],
+  cd:["Refuel within 45 min","Expect disrupted sleep after — that's part of the lesson","Monday is full rest"]},
+ "2027-01-17":{wu:["🛌 NAP in the afternoon first — 60–90 min. This is rehearsal, not laziness."],
+  main:[{ex:"🌙 1h30 starting 9–10PM, after an afternoon nap"},
+        {ex:"Eat your intended race 'breakfast' ~2.5 hrs before the start"},
+        {ex:"Full race kit — shoes, socks, shorts, belt, everything"},
+        {ex:"Fuel exactly as you plan to on race day"}],
+  cd:["Log what worked and what chafed","Adjust before the final rehearsal"]},
+ "2027-01-31":{wu:["🛌 Afternoon nap, then race breakfast at the exact race-day interval."],
+  main:[{ex:"🌙 FULL DRESS REHEARSAL — 1h30 from 10PM"},
+        {ex:"Nothing new after tonight. Whatever works here is what you use on Feb 14."},
+        {ex:"Shoes, socks, kit, belt, gels, salt, headlamp, watch settings, run-walk alert — all of it"},
+        {ex:"Run-walk 3:1 from the very first minute"}],
+  cd:["Write down the exact timings that worked — nap, meal, start","Two weeks to race day"]},
  "2026-09-08":{wu:["5 min easy bike","Leg swings 10/side","Ankle circles + calf raises 2×15"],
   main:[{ex:"Goblet Squat",mc:"DB, light",sr:"3 × 10",note:"MODERATE only. You should finish feeling you had 5 more reps."},
         {ex:"Bulgarian Split Squat (bodyweight or light)",mc:"Bench",sr:"2 × 10/side (LEFT first)",tag:"Single-leg balance — the skill that saves you on wet descent"},
@@ -582,7 +630,10 @@ function fmtDate(d){return d.toLocaleDateString("en-US",{weekday:"long",month:"s
 // RUN-FOCUSED structure (gym paused until after the marathon):
 // Sun LONG · Mon REST · Tue WD1+prehab · Wed 4th easy run · Thu REST · Fri WD2+prehab · Sat REST
 // Runs are spread (one back-to-back pair, not three in a row) while adapting to 4x/week.
-function extraRun(w){return w<=4?"30 min":w<=10?"35 min":w<=16?"40 min":"35 min"}
+// Wednesday run — the volume dial. Grows in 4-week blocks, drops on TBR's own
+// deload weeks (6, 10, 12, 16). Long runs stay fixed by TBR / Bull Sessions.
+const WEDMIN=[30,35,45,30, 45,50,55,40, 60,60,60,45, 60,60,60,40, 60,30,35,20];
+function extraRun(w){return (WEDMIN[w-1]||30)+" min"}
 // Parse a TBR duration string → minutes. "The body does not inherently know distance."
 function specMins(s){if(!s||/rest/i.test(s))return 0;
  if(/RACE DAY/i.test(s))return 0;
@@ -592,6 +643,12 @@ function specMins(s){if(!s||/rest/i.test(s))return 0;
  return m;}
 function weekMins(w){const p=(w>=1?TBR[w]:BRIDGE[String(w)]);if(!p)return 0;
  return specMins(p.wd1)+specMins(p.wd2)+specMins(p.lr)+specMins(extraRun(w));}
+// Projected easy pace (min/km, INCLUDING walk breaks) as the aerobic base builds.
+// Today you're ~9:30/km at HR 143-148. Expect ~8:24/km at the same HR by January.
+function paceFor(w){return w<=4?9.5:w<=8?9.2:w<=12?8.9:w<=16?8.6:8.4}
+function weekKm(w){const m=weekMins(w);if(!m&&w!==20)return 0;
+ if(w===20)return (50+20)/paceFor(20)+42.2;      // race week: Tue 50min + Wed shakeout + the marathon
+ return m/paceFor(w);}
 // How many run-walk repeats to program into the watch for a given day
 function sessionMins(d){const m=mission(d),{w,p}=weekPlan(d),wd=d.getDay();
  let spec=wd===0?p.lr:wd===2?p.wd1:wd===3?extraRun(w):wd===5?p.wd2:"";
@@ -616,17 +673,45 @@ function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
  if(wd===1)return{emo:"🛌",t:"Full Rest",d:"TBR rule: always take a full rest day after your long run.",type:"rest"};
  if(wd===2){const m=rest_or_run(p.wd1||"45 min","Run 1");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
  if(wd===3)return{emo:"🏃",t:`Easy Run ${extraRun(w)} — added volume`,d:`Pure easy aerobic. HR ${HRZ.easy} bpm, run-walk ${RUNWALK}. Drop this one first on a night-shift week.`,type:"easy"};
- if(wd===4)return{emo:"🛌",t:"Rest — mid-week recovery",d:"Deliberate gap between your back-to-back days and Friday's run. Optional easy walk.",type:"rest"};
+ if(wd===4)return{emo:"🚲",t:"Rest — or optional cross-train",d:`Running rest. Optional: gym bike ${xbike(w)} at HR 130–145, or a 30–45 min walk under HR 125.`,type:"rest"};
  if(wd===5){const m=rest_or_run(p.wd2||"45 min","Run 2");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
- return{emo:"🛌",t:"Rest + 🍱 prep",d:"Full recovery. Batch-cook for the week.",type:"rest"};
+ return{emo:"🛌",t:"Rest + 🍱 prep",d:"Batch-cook the week. Long run tomorrow — gentle walk at most, no bike session today.",type:"rest"};
 }
+function xbike(w){return w<=4?"30 min":w<=10?"40 min":w<=16?"50 min":"30 min"}
+const XTRAIN={wu:["5 min easy spin / stroll to warm up"],
+ main:[
+  {ex:"🚲 GYM BIKE — the real aerobic session",mc:"Upright or recumbent",sr:"see duration below",
+   note:"HR 130–145 · cadence 85–95 rpm · moderate resistance. Conversational the whole way.",
+   tag:"Cycling HR runs ~5–10 bpm below running for the same effort — 130–145 here ≈ your 135–152 running zone"},
+  {ex:"Duration by phase",note:"Wk 1–4: 30 min · Wk 5–10: 40 min · Wk 11–16: 50 min · Wk 17+: back to 30 (taper). Build it like a run, don't jump."},
+  {ex:"❌ NOT intervals. Steady state only.",note:"The point is easy aerobic volume with no impact. Hard bike sessions cost recovery you need for Friday's run."},
+  {ex:"🚶 WALK — active recovery, not training",mc:"Flat ground",sr:"30–45 min",
+   note:"HR under 125. Brisk but easy. This is for blood flow, joint mobility and daily step count — it is not an aerobic stimulus.",
+   tag:"Also supports the recomp: walking is the cheapest way to raise daily energy expenditure without touching recovery"},
+  {ex:"📅 THURSDAY is the cross-training day",note:"Saturday sits the day before your long run — keep Saturday to a gentle walk at most, or nothing."},
+  {ex:"🛑 Never a substitute for a run",note:"Cycling builds aerobic fitness but not running-specific durability. Never trade a scheduled run for a bike session."},
+  {ex:"Cap it",note:"Max 2 cross-training sessions a week. If you're tired, sore or short on sleep, skip it — it's a bonus, not a requirement."}],
+ cd:["Easy spin down 3–5 min","Light stretch","Refuel normally — this doesn't earn extra food"]};
 const PREHAB={wu:["2 min easy movement — you've just run, you're warm"],
- main:[{ex:"Nordic Curl (assisted) or Hamstring Bridge Slide",mc:"Couch/bench, or sliders on floor",sr:"3 × 6–8",note:"3–4s lowering. START ASSISTED — this is the one that protects your hamstring.",tag:"#1 evidence-based hamstring re-injury prevention"},
+ main:[{ex:"HAMSTRING — pick ONE (see options below)",mc:"No machine needed",sr:"3 × 6–10",note:"Eccentric (lowering) focus, 3–4 seconds down. This is the single most important item here.",tag:"Hamstring re-injury prevention — you strained it in July"},
   {ex:"Single-Leg Calf Raise",mc:"Step or flat floor",sr:"3 × 15/side",tag:"Ankle & Achilles armor — 2 prior sprains"},
   {ex:"Tibialis Raise",mc:"Back against wall, heels out",sr:"3 × 20",tag:"Shin & ankle prehab"},
   {ex:"Single-Leg Step-Down",mc:"Stair or low box",sr:"2 × 10/side (LEFT first)",tag:"Left-leg imbalance (Evolt)"},
   {ex:"Side Plank",mc:"Mat",sr:"2 × 30s/side",tag:"Hip stability for late-run form"}],
  cd:["Gentle calf + hip flexor stretch","Total: ~15 min, no gym required"]};
+const HAMOPTS=[
+ ["🥇 Single-Leg Romanian Deadlift","One dumbbell, kettlebell, or even a water jug","3 × 8/side",
+  "Stand on one leg, hinge at the hip, let the weight lower toward the floor over 3–4s while the back leg rises behind you. Feel the stretch in the hamstring of the standing leg. Come up under control.",
+  "Trains the hamstring at LONG muscle length — exactly where strains happen. Evidence for strain prevention is as strong as Nordics, and it doubles as your single-leg balance work."],
+ ["🥈 Sliding Leg Curl","A towel on tile, or furniture sliders. Zero equipment.","3 × 8–10",
+  "Lie on your back, heels on the towel, knees bent. Bridge your hips up. Slowly slide both heels away from you over 3–4s while keeping hips HIGH. Pull back in. Start two-legged; progress to one leg as it gets easy.",
+  "The closest movement pattern to a Nordic. Fully scalable — if your hips drop, you've gone too far."],
+ ["🥉 Anchored Nordic — no machine needed","Heavy couch, bed frame, a partner, or a loaded barbell across your ankles","3 × 5–6",
+  "Kneel on a cushion, ankles hooked under something solid. Lower your torso forward as slowly as you can, catch yourself with your hands, push back up. Start with most of the work on your hands.",
+  "Gym hack: kneel at the LAT PULLDOWN and tuck your ankles under the thigh pads — that's a free Nordic bench."],
+ ["Machine option","Prone leg curl machine, if you use one","3 × 8",
+  "Curl up with BOTH legs, then lower with ONE leg over 3–4 seconds. Alternate sides.",
+  "Eccentric overload without needing a Nordic setup at all."]];
 function rest_or_run(spec,label){
  if(/rest/i.test(spec))return{emo:"🛌",t:"Rest or Cross-train",d:"TBR-scheduled recovery. Bike, swim, walk, weights or yoga — your call.",type:"rest"};
  const hi=/higher intensity/i.test(spec);
@@ -672,8 +757,11 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   const hi=/higher intensity/i.test(spec);
   const main=[{ex:`${spec.split(" · ")[0]} run`,note:`Purpose: HOLD the conditioning from Sunday's long run. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
   if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
-  main.push({ex:"🛡️ THEN: 15-min prehab (see below) — hamstring, calves, ankles",note:"Non-negotiable. This replaces the gym."});
-  return{wu:["5–10 min very easy to start"],main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
+  main.push({ex:"🛡️ AFTER the run: 15-min prehab — hamstring, calves, ankles",note:"Order matters. Eccentric work causes temporary strength loss and muscle damage — never run on freshly-loaded hamstrings. You're also already warm. If the run leaves you wrecked, move the prehab to Thursday instead of skipping it."});
+  return{wu:["⚡ 2-min activation FIRST: 10 glute bridges · 10 leg swings/side · 10 ankle circles/side",
+             "Then 5–10 min very easy running to start",
+             "(Activation ≠ strength work. Primes the muscles without fatiguing them — the loading work comes AFTER the run.)"],
+    main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  if(wd===3){const w=weekNum(d),{w:tw}=weekPlan(d);
   return{wu:["First 5 min very easy, let HR rise gradually"],
    main:[{ex:`Easy ${extraRun(tw)} · HR ${HRZ.easy} bpm · run-walk ${RUNWALK}`,note:"Added aerobic volume on top of TBR. Pure easy — this run only works if it stays easy."},
@@ -683,6 +771,7 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
 function workoutFor(d){const ov=WO_OVERRIDE[keyOf(d)];if(ov)return ov;
  const wd=d.getDay();
  if(wd===0||wd===2||wd===3||wd===5){const r=runWO(d);if(r)return r;}
+ if(wd===4)return XTRAIN;
  return{wu:["Move gently — no hard training today"],main:[{ex:"10-min mobility: hips, hamstrings, ankles, t-spine"},
    {ex:wd===6?"🍱 Prep day — batch-cook the week (Food tab)":"Optional easy walk, bike, swim or yoga (XTrain)"},
    {ex:wd===1?"Full rest after the long run — TBR's rule, and the one that keeps you healthy":"Keep it genuinely easy"}],cd:[]};
@@ -800,7 +889,7 @@ function renderHero(o){o=o||state();
  const pct=Math.max(0,Math.min(100,Math.round((TODAY-START)/(RACE-START)*100)));
  document.getElementById("fill").style.width=pct+"%";document.getElementById("runner").style.left=pct+"%";
  document.getElementById("raceL").textContent=lbl+" · "+wp.phase;document.getElementById("raceR").textContent=pct+"% there";
- renderDots(o);}
+ renderPred();renderDots(o);}
 function renderDots(o){const c=document.getElementById("dots");const n=Math.round((RACE-START)/DAY)+1;let left=0,html="";
  for(let i=0;i<n;i++){const d=new Date(START.getTime()+i*DAY),log=o.logs[keyOf(d)];let cls="dot";
   if(d<=TODAY){if(log&&log.status==="missed")cls+=" r";else if(log&&log.status==="sick")cls+=" y";else if(completed(d,log))cls+=" g"}else left++;
@@ -841,8 +930,13 @@ function renderMVW(o){const mon=new Date(VIEW);mon.setDate(mon.getDate()-((VIEW.
   `<div class="m ${(wd1&&wd2)?'hit':''}"><span class="e">🏃</span>2 TBR runs<br><small>${(wd1?1:0)+(wd2?1:0)} of 2</small></div>`+
   `<div class="m ${gym>=3?'hit':''}"><span class="e">🛡️</span>Weekday runs<br><small>${gym} of 3</small></div>`;
  const wk=document.getElementById("volBar"),{w,p}=weekPlan(VIEW);
- if(wk)wk.innerHTML=`<div class="note" style="margin-top:10px">📋 <b>This week (${w>=1?"TBR Week "+w:"Bridge"}):</b>
-   Long run <b>${p.lr}</b> · Wed <b>${p.wd1}</b> · Fri <b>${p.wd2}</b>${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}
+ if(wk){const tm=weekMins(w),prev=w>1?weekMins(w-1):0;
+  const delta=prev?Math.round((tm-prev)/prev*100):0;
+  const dl=prev&&tm<prev*0.9;
+  wk.innerHTML=`<div class="note" style="margin-top:10px">📋 <b>This week (${w>=1?"TBR Week "+w+"/20":"Bridge"}):</b>
+   Long run <b>${p.lr}</b> · Tue <b>${p.wd1}</b> · Wed <b>${extraRun(w)}</b> · Fri <b>${p.wd2}</b>
+   <br>⏱ Total <b>${Math.floor(tm/60)}h${String(tm%60).padStart(2,"0")}</b> ≈ ${Math.round(tm/8.9)} km${prev?` · <b style="color:${dl?'var(--teal)':'inherit'}">${delta>0?"+":""}${delta}%</b> vs last week${dl?" — 🔻 DELOAD, take it":""}`:""}
+   ${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}}
 function renderQuests(log){const c=document.getElementById("quests");
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
@@ -1024,9 +1118,132 @@ function renderFood(){const cu=prepIdx(TODAY);if(prepView<0)prepView=cu;const pw
    plan.slots.map(s=>`<div class="fslot"><div><b>${s.slot}</b>${naDay(d)?` <span class="natime">⏰ ${naTiming(s.slot)}</span>`:""} — ${s.food}${s.how?`<div class="muted" style="font-size:11px">${s.how}</div>`:""}${s.supp?`<div class="supp">💊 ${s.supp}</div>`:""}</div><div class="fk">${s.kcal}<br>${s.p}/${s.c}/${s.f}</div></div>`).join("")+`</div>`;}
  document.getElementById("weekFood").innerHTML=h;
  document.getElementById("recipeBank").innerHTML=RECIPES.map(([g,items])=>`<div class="rgroup"><div class="rgh">${g}</div>`+items.map(([n,how,m])=>`<div class="ritem"><b>${n}</b> <span class="rm">${m}</span><div class="muted" style="font-size:11.5px">${how}</div></div>`).join("")+`</div>`).join("");}
+// ── AEROBIC EFFICIENCY ──
+// Seeded from your own Garmin history. Outdoor runs only (treadmills read too fast).
+const EFFSEED=[
+ {d:"2026-03-15",km:7.03,min:54.2,hr:166},
+ {d:"2026-03-29",km:10.01,min:74.1,hr:179},
+ {d:"2026-04-19",km:21.26,min:163.3,hr:176},
+ {d:"2026-06-24",km:6.82,min:73.1,hr:137},
+ {d:"2026-06-29",km:12.00,min:125.4,hr:137},
+ {d:"2026-07-06",km:7.00,min:73.6,hr:154},
+ {d:"2026-07-19",km:5.00,min:41.5,hr:176},
+ {d:"2026-08-16",km:5.00,min:43.2,hr:177},
+ {d:"2026-08-31",km:6.02,min:61.0,hr:141},
+ {d:"2026-09-16",km:3.10,min:27.0,hr:155},
+ {d:"2026-09-20",km:5.69,min:50.0,hr:161},
+ {d:"2026-09-22",km:3.82,min:35.0,hr:148},
+ {d:"2026-09-23",km:4.18,min:38.0,hr:157},
+ {d:"2026-09-25",km:3.11,min:30.0,hr:143},
+ {d:"2026-09-27",km:6.09,min:60.0,hr:149}];
+function effOf(r){return (r.km*1000/r.min)/r.hr}          // metres per minute, per heartbeat
+function paceAt(e,hr){const p=1000/(e*hr);return Math.floor(p)+":"+String(Math.round((p%1)*60)).padStart(2,"0")}
+function effRuns(){const o=state();
+ return EFFSEED.concat(o.eff||[]).slice().sort((a,b)=>a.d<b.d?-1:1);}
+let effChart;
+function renderEff(){const rs=effRuns();
+ if(!rs.length)return;
+ const vals=rs.map(effOf), last3=vals.slice(-3), first3=vals.slice(0,3);
+ const cur=last3.reduce((a,b)=>a+b,0)/last3.length;
+ const best=Math.max(...vals);
+ const apr=vals[2];                                        // the April half marathon
+ document.getElementById("effStats").innerHTML=[
+  ["Now (last 3)",paceAt(cur,150)+"/km"],
+  ["Your best",paceAt(best,150)+"/km"],
+  ["April half",paceAt(apr,150)+"/km"],
+  ["Runs logged",rs.length]
+ ].map(([k,v])=>`<div class="m"><div class="v" style="font-size:15px">${v}</div><div class="k">${k}</div></div>`).join("");
+ if(effChart)effChart.destroy();
+ effChart=new Chart(document.getElementById("effChart"),{type:"line",
+  data:{labels:rs.map(r=>r.d.slice(5)),datasets:[
+   {label:"Pace at HR 150 (min/km)",data:rs.map(r=>1000/(effOf(r)*150)),borderColor:"#0E7C7B",backgroundColor:"rgba(14,124,123,.12)",fill:true,tension:.3},
+   {label:"April half-marathon level",data:rs.map(()=>1000/(apr*150)),borderColor:"#d2563f",borderDash:[6,5],pointRadius:0}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   scales:{y:{reverse:true,title:{display:true,text:"min/km at HR 150 — LOWER IS BETTER"}}},
+   plugins:{legend:{display:false}}}});
+ const note=document.getElementById("effNote");
+ const delta=(cur-apr)/apr*100;
+ if(cur>=apr)note.innerHTML=`<div class="note">🔥 <b>You're at or above your April half-marathon efficiency.</b> The engine is back — what's left is durability, and that's exactly what the long runs build.</div>`;
+ else note.innerHTML=`<div class="note">📊 You're within <b>${Math.abs(delta).toFixed(0)}%</b> of your April half-marathon efficiency. This number improves through <b>easy volume over months</b>, not hard sessions. Watch it, not other people's Strava.</div>`;}
+// ── AUTO-SYNC: Garmin first (HR is in the activity list), Strava as fallback ──
+const STRAVA_PERF="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__get_activity_performance";
+function mergeRuns(rows){const o=state();o.eff=o.eff||[];
+ const have=new Set(EFFSEED.concat(o.eff).map(r=>r.d));let n=0;
+ rows.forEach(r=>{
+  if(!r.d||!r.km||!r.min||!r.hr)return;
+  if(/treadmill|indoor|virtual/i.test(r.type||""))return;   // treadmills read too fast
+  if(r.km<0.8||r.min<8||r.hr<90||r.hr>210)return;           // junk filter
+  if(have.has(r.d))return;
+  o.eff.push({d:r.d,km:+r.km.toFixed(2),min:+r.min.toFixed(1),hr:Math.round(r.hr)});have.add(r.d);n++;});
+ if(n)S.set(o);return n;}
+async function syncRuns(){const msg=document.getElementById("efMsg");
+ if(!INAPP){msg.innerHTML="📵 Auto-sync only works inside the Claude app — use the form below on the web version.";return}
+ msg.textContent="⏳ Pulling from Garmin…";
+ try{
+  const r=await window.cowork.callMcpTool("mcp__garmin__list_activities",{limit:30});
+  const d=r.structuredContent??JSON.parse(r.content[0].text);
+  const acts=Array.isArray(d)?d:(d.activities||[]);
+  if(!acts.length)throw new Error("no activities");
+  const n=mergeRuns(acts.filter(a=>/run/i.test(a.type||"")).map(a=>({
+   d:(a.start||"").slice(0,10),km:a.distance_km,min:a.duration_min,hr:a.avg_hr,type:a.type})));
+  msg.innerHTML=`✅ Synced from <b>Garmin</b> — ${n} new run${n===1?"":"s"}.`;renderEff();renderHero();return;
+ }catch(e){msg.textContent="Garmin unavailable, trying Strava…";}
+ try{
+  const r=await window.cowork.callMcpTool(STRAVA,{first:20});
+  const d=r.structuredContent??JSON.parse(r.content[0].text);
+  const runs=(d.activities||[]).filter(a=>/run/i.test(a.sport_type||"")).slice(0,10);
+  const rows=[];
+  for(const a of runs){                       // Strava needs a 2nd call per activity for HR
+   try{const p=await window.cowork.callMcpTool(STRAVA_PERF,{activity_id:String(a.id)});
+    const pd=p.structuredContent??JSON.parse(p.content[0].text);
+    if(pd.average_heartrate)rows.push({d:(a.start_local||"").slice(0,10),
+     km:a.summary.distance/1000,min:a.summary.moving_time/60,hr:pd.average_heartrate,type:a.sport_type});
+   }catch(_){}}
+  const n=mergeRuns(rows);
+  msg.innerHTML=`✅ Synced from <b>Strava</b> — ${n} new run${n===1?"":"s"}.`;renderEff();renderHero();
+ }catch(e){msg.innerHTML="⚠️ Couldn't reach Garmin or Strava. Add the run manually below.";}}
+document.getElementById("efSync").onclick=syncRuns;
+document.getElementById("efAdd").onclick=()=>{const o=state();
+ const d=document.getElementById("efDate").value||keyOf(TODAY);
+ const km=parseFloat(document.getElementById("efKm").value),
+       mn=parseFloat(document.getElementById("efMin").value),
+       hr=parseFloat(document.getElementById("efHR").value);
+ if(!km||!mn||!hr){alert("Need distance, duration and average HR.");return}
+ o.eff=(o.eff||[]).filter(r=>r.d!==d);o.eff.push({d:d,km:km,min:mn,hr:hr});S.set(o);
+ document.getElementById("efKm").value="";document.getElementById("efMin").value="";document.getElementById("efHR").value="";
+ renderEff()};
+// ── MARATHON PREDICTION ──
+// Anchor: your 19 Apr 2026 half marathon, 2:43:52 at efficiency 0.740.
+// Current fitness is scaled from that anchor by your recent efficiency, then
+// Riegel-extrapolated to 42.2km, then adjusted for how far your long runs have got.
+const ANCHOR_HALF=163.87, ANCHOR_EF=0.740, TARGET_EF=0.78;
+function riegel(halfMin){return halfMin*Math.pow(42.195/21.0975,1.06)}
+function fmtT(min){const h=Math.floor(min/60),m=Math.round(min%60);return h+":"+String(m).padStart(2,"0")}
+function currentEF(){const rs=effRuns();if(rs.length<3)return ANCHOR_EF;
+ const v=rs.slice(-4).map(effOf);return v.reduce((a,b)=>a+b,0)/v.length}
+function longestRecentKm(){const cut=keyOf(new Date(TODAY.getTime()-60*DAY));
+ const rs=effRuns().filter(r=>r.d>=cut);return rs.length?Math.max(...rs.map(r=>r.km)):5}
+function endurFactor(km){return km>=32?1.00:km>=28?1.02:km>=24?1.04:km>=20?1.07:km>=15?1.10:1.14}
+function predictToday(){const eq=ANCHOR_HALF*(ANCHOR_EF/currentEF());
+ return riegel(eq)*endurFactor(longestRecentKm())}
+function predictRaceDay(){return riegel(ANCHOR_HALF*(ANCHOR_EF/TARGET_EF))*1.00}
+function renderPred(){const el=document.getElementById("sPred");if(el)el.textContent=fmtT(predictRaceDay())}
+function showPred(){const now=predictToday(),race=predictRaceDay(),ef=currentEF(),lk=longestRecentKm();
+ document.getElementById("predBody").innerHTML=
+ `<div class="ritem"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>🏁 Projected for Feb 14</b><span class="b" style="color:var(--teal);font-size:20px">${fmtT(race)}</span></div>
+  <div class="muted" style="font-size:11.5px">If you complete the plan: efficiency back to your March level and long runs out past 30km.</div></div>
+ <div class="ritem"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>⏱ If you raced <i>today</i></b><span class="b" style="font-size:18px">${fmtT(now)}</span></div>
+  <div class="muted" style="font-size:11.5px">Current efficiency ${ef.toFixed(3)}, longest recent run ${lk.toFixed(1)}km. The gap between these two numbers <b>is</b> the value of the next 20 weeks.</div></div>
+ <div class="note" style="margin-top:10px"><b>How it's calculated:</b> your April half (2:43:52) is the anchor. Your recent 4 runs set a current-fitness multiplier, Riegel extrapolates half→full, then a penalty is applied for how short your long runs still are. That penalty shrinks to zero as the long runs build — which is why the Feb number is so much faster.</div>
+ <div class="note adj"><b>It will move.</b> Log outdoor runs in the Runs tab and this updates automatically. Expect it to look pessimistic now and improve sharply from November as the long runs stretch out.</div>
+ <div class="legend" style="margin-top:8px">Goals: 🥇 sub-5:30 · 🥈 sub-6:00 · 🥉 finish inside 8 hrs. Cut-offs: 21K by 4:00 AM, finish by 8:00 AM.</div>`;
+ document.getElementById("predModal").classList.remove("hide")}
+document.getElementById("predTile").onclick=showPred;
+document.getElementById("predClose").onclick=()=>document.getElementById("predModal").classList.add("hide");
+document.getElementById("predModal").onclick=e=>{if(e.target.id==="predModal")document.getElementById("predModal").classList.add("hide")};
 // RUNS
 function pace(sec,m){if(!m)return"—";const s=sec/(m/1000),mm=Math.floor(s/60),ss=Math.round(s%60);return mm+":"+String(ss).padStart(2,"0")}
-async function loadRuns(){const body=document.getElementById("actBody");
+async function loadRuns(){renderEff();const body=document.getElementById("actBody");
  if(!INAPP){document.getElementById("stravaMsg").textContent="📵 Live Strava sync only works inside the Claude app.";body.innerHTML='<tr><td colspan="5" class="muted">Open in the Claude app for live runs.</td></tr>';return}
  try{const r=await window.cowork.callMcpTool(STRAVA,{first:20});const data=r.structuredContent??JSON.parse(r.content[0].text);const acts=data.activities||[];
   const t0=new Date(TODAY),dfm=(t0.getDay()+6)%7,mon=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()-dfm),sun=new Date(mon.getTime()+7*DAY);let km=0,nr=0;
@@ -1134,7 +1351,20 @@ const HB_SECTIONS=[
  ["Recovery & restraint",["Recovery weeks are built in — take them.","\"As much as you'll exercise your muscles, you'll also need to exercise restraint.\"","Full rest day after every long run."]],
  ["Race day logistics",["Feb 14, 2027 · <b>12:00 AM gun start</b> · Filinvest City.","21K cut-off 4:00 AM · Finish cut-off 8:00 AM (8 hours).","TBR Together 3K/5K on Feb 13, 6AM — treat as a shakeout or just spectate.","Send Off Party Feb 11, 7PM (kit claiming from 4PM)."]]];
 const B1=[["1–3","30 min","30 min","50 min → 1 hr"],["4–6","30–45 min","30–45 min","1 hr 10 → 1 hr 20"],["7–10","45 min","45 min","1 hr 30 → 2 hrs 20"],["11–14","45 min","45 min","2 hrs → 2 hrs 40"],["15–17","45 min","45 min","3 hrs 15 (min 28 km) → 3 hrs 30 (min 30 km)"],["18–20","45 min","45 min","Taper → 🏁 RACE DAY"]];
+const GOALS=[
+ ["🥇 A-goal","Sub-5:30","7:49/km avg · run segments ~7:16/km",
+  "Everything goes right: you stay healthy, hit the long runs, and pace it perfectly. A genuine stretch — this is roughly your April half-marathon pace, sustained for twice the distance."],
+ ["🥈 B-goal","Sub-6:00","8:32/km avg · run segments ~8:13/km",
+  "The realistic target if you execute the plan. Comfortably inside the cut-offs, and a time you'd be proud of for a first marathon off a rebuild."],
+ ["🥉 C-goal","Finish inside 8 hrs","11:22/km avg — walk most of it and still make it",
+  "The one that actually matters. Cross the line and you are a marathoner, permanently, whatever the clock says. 21K cut-off is 4:00 AM, finish is 8:00 AM."]];
+function renderGoals(){
+ document.getElementById("raceGoals").innerHTML=
+  GOALS.map(([tier,time,pace,note])=>`<div class="ritem"><div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b>${tier}</b><span class="b" style="color:var(--teal);font-size:15px">${time}</span></div><div class="muted" style="font-size:11.5px">${pace}</div><div style="font-size:12px;margin-top:3px">${note}</div></div>`).join("")
+  +`<div class="note adj" style="margin-top:10px">⚠️ <b>On race day, pacing is worth more minutes than fitness.</b> Going out 30 sec/km too fast costs 30–60 minutes in the last 10km — a bigger swing than any training difference. Run the first half at your target pace or <i>slower</i>, take walk breaks from km 1, and let the second half be the fast one.</div>`
+  +`<div class="note">💡 <b>Why three goals:</b> a single time target makes race day pass/fail. With A/B/C you can have a hard day, miss the A, still hit the B, and walk away having genuinely succeeded. That's not lowering the bar — it's how experienced racers protect their own motivation.</div>`;}
 function renderTLDR(){
+ renderGoals();
  document.getElementById("tldrCritical").innerHTML=TLDR_CRIT.map(([e,t,d])=>
   `<div class="ritem"><b>${e} ${t}</b><div class="muted" style="font-size:12px">${d}</div></div>`).join("");
  document.getElementById("tldrBody").innerHTML=TLDR.map(([h,items])=>
@@ -1148,9 +1378,10 @@ function renderHandbook(){
  for(let k=1;k<=20;k++){const p=TBR[k],mo=new Date(PROGSTART.getTime()+(k-1)*7*DAY);
   const su=new Date(mo.getTime()+6*DAY);
   const tr=document.createElement("tr");if(k===weekPlan(TODAY).w)tr.style.outline="2px solid var(--teal)";
-  const tm=weekMins(k),hh=Math.floor(tm/60),mm2=tm%60;
+  const tm=weekMins(k),hh=Math.floor(tm/60),mm2=tm%60,km=weekKm(k);
   tr.innerHTML=`<td class="b">${k}</td><td><small>${mo.toLocaleDateString("en-US",{month:"short",day:"numeric"})}–${su.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</small></td>`+
-   `<td class="b" style="color:var(--navy);white-space:nowrap">${k===20?"🏁":(hh?hh+"h":"")+(mm2?mm2+"m":"")}</td>`+
+   `<td class="b" style="color:var(--navy);white-space:nowrap">${(hh?hh+"h":"")+(mm2?mm2+"m":"")}</td>`+
+   `<td class="b" style="color:var(--teal)">${Math.round(km)}${k===20?" 🏁":""}</td>`+
    `<td><small>${p.wd1}</small></td><td><small>${p.wd2}</small></td>`+
    `<td class="b" style="color:var(--teal)">${p.lr}${p.note?`<br><small class="muted" style="font-weight:400">${p.note}</small>`:""}${p.star?`<br><small style="color:var(--bad)">${p.star}</small>`:""}${p.bull?`<br><small class="muted" style="font-weight:400">👥 ${p.bull}</small>`:""}</td>`;
   tb.appendChild(tr)}
@@ -1172,10 +1403,14 @@ function renderPlan(){
  <div class="ritem"><small class="muted">Runs are spread so you only ever have ONE back-to-back pair (Tue/Wed) while adapting to 4×/week. Once that feels easy we can cluster them again — running on tired legs is marathon-specific, but it's earned, not assumed.</small></div></div>
  <div class="rgroup"><div class="rgh">🛡️ The 15-minute prehab — this is NOT optional</div>
  <div class="ritem">You've paused the gym to focus on running. Fine. But these five movements stay, twice a week, at home, no equipment:</div>
- <div class="ritem"><b>Nordic curl / bridge slide</b> 3×6–8 — hamstring re-injury prevention (you strained it in July)</div>
+ <div class="ritem"><b>Hamstring eccentric</b> 3×6–10 — pick any option from the box below (no machine needed)</div>
  <div class="ritem"><b>Single-leg calf raise</b> 3×15 · <b>Tibialis raise</b> 3×20 — ankle armor (two prior sprains)</div>
  <div class="ritem"><b>Single-leg step-down</b> 2×10 — left/right imbalance · <b>Side plank</b> 2×30s</div>
  <div class="ritem">⚠️ You're <i>adding</i> running volume. That's exactly when these injuries surface. 15 minutes is the cheapest insurance in this whole plan.</div></div>
+ <div class="rgroup"><div class="rgh">🦵 No Nordic bench? Pick any ONE of these</div>
+ ${HAMOPTS.map(([n,eq,sr,how,why])=>`<div class="ritem"><b>${n}</b> — <span class="b" style="color:var(--teal)">${sr}</span><div class="muted" style="font-size:11.5px"><b>Kit:</b> ${eq}<br><b>How:</b> ${how}<br><b>Why:</b> ${why}</div></div>`).join("")}
+ <div class="ritem"><b>Rule for all of them:</b> the <i>lowering</i> phase is the point — 3–4 seconds, controlled. Fast reps do nothing. Stop the set when you can no longer control the descent.</div>
+ <div class="ritem"><b>Start conservative.</b> You're 11 weeks post-strain. Week 1: easiest version, 2 sets. Add a set each week. Mild muscle soreness is fine; any sharp pull means stop and tell me.</div></div>
  <div class="rgroup"><div class="rgh">🍽 Nutrition shift — stop chasing a deficit</div>
  <div class="ritem">Your long runs go from 50 min to <b>3h50</b>. Energy expenditure climbs steeply from here.</div>
  <div class="ritem"><b>Eat at maintenance (~2,450 kcal). The deficit will happen on its own.</b> Manufacturing one on top is how you crashed on Sep 15.</div>
@@ -1183,12 +1418,33 @@ function renderPlan(){
  <div class="rgroup"><div class="rgh">TBR's rules (from the handbook)</div>
  <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.</div>
  <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
- <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.</div>
+ <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.<br><small class="muted">Moved up from 3:1 on Sep 30. <b>The test isn't comfort, it's heart rate:</b> if 4:1 keeps you under 152 on easy runs, it's working. If it pushes you to 155+, drop back to 3:1 — the extra running minute costs more than it gives. Long runs and race day use whatever ratio your HR says you can hold.</small></div>
  <div class="ritem"><b>4. Time, not distance.</b> "The body does not inherently know distance." Only the late long runs carry a km target.</div>
  <div class="ritem"><b>5. Max 4 running days.</b> Rest or cross-train otherwise. Avoid team sports (injury risk).</div>
  <div class="ritem"><b>6. Full rest after the long run.</b> Non-negotiable — that's Monday.</div>
  <div class="ritem"><b>7. Exercise restraint.</b> "One of the biggest causes of injury is doing too much, too soon." Trust the gradual build.</div>
  <div class="ritem"><b>8. The 20-minute rule (mine).</b> Unmotivated? Commit to 20 minutes. You can stop after. You won't.</div></div>
+ <div class="rgroup"><div class="rgh">🔍 Gaps none of the three plans covered — now fixed</div>
+ <div class="ritem"><b>🌙 1. The race starts at MIDNIGHT.</b> TBR's program doesn't address it and Garmin can't know. You now have <b>three night rehearsals</b>: Dec 13 (2h40 from 9PM), Jan 17 (after an afternoon nap), Jan 31 (full dress rehearsal from 10PM). Running long in the dark on a normal day's sleep is a skill — practise it three times, not zero.</div>
+ <div class="ritem"><b>🍬 2. Fueling was never progressive.</b> GI distress is one of the top causes of first-marathon blowups, and "eat gels" isn't a plan. Progression below.</div>
+ <div class="ritem"><b>👟 3. Cadence — PARKED until your easy runs are reliably easy.</b> Yours sits ~148–155 spm, which is normal for your pace and self-selected (therefore near-optimal for you right now). Forcing it higher measurably worsens running economy short-term — you burn more oxygen at the same speed, which is exactly why your HR spikes and your power stays in zone 1. <b>The rule if you ever do try it: PACE MUST NOT CHANGE.</b> Shorter steps, same speed. If you get faster, you've changed the wrong thing. Revisit in November, and only in 1–2 min bursts inside an easy run.</div>
+ <div class="ritem"><b>💧 4. Sweat rate is unknown.</b> Manila humidity means you may be losing far more than you replace. Test once: weigh yourself naked before and after a 60-min run with no drinking. <b>Each 1kg lost ≈ 1L sweat/hour.</b> That number sets your race hydration.</div>
+ <div class="ritem"><b>🩺 5. Medical certificate — October.</b> "No Medical Certificate, No Race Kit." Book it this month; an early check-up also catches problems before the hard weeks.</div>
+ </div>
+ <div class="rgroup"><div class="rgh">🍬 Fueling progression — practise it, don't improvise it</div>
+ <div class="ritem"><b>Under 75 min</b> — water only. No fuel needed.</div>
+ <div class="ritem"><b>75–120 min</b> — <b>30g carbs/hr</b>, starting at 45 min. One gel every ~40 min.</div>
+ <div class="ritem"><b>2–3 hrs</b> — <b>45g carbs/hr</b> + electrolytes every 15 min.</div>
+ <div class="ritem"><b>3 hrs+</b> (Bull Sessions 4 &amp; 6, race day) — <b>60g carbs/hr</b> + salt. This is the rate you must have rehearsed.</div>
+ <div class="ritem"><b>The rule:</b> use the EXACT products you'll race with. Your gut trains like a muscle — it adapts to absorbing carbs, and it only adapts if you practise. <b>Nothing new on race day.</b></div>
+ </div>
+ <div class="rgroup"><div class="rgh">↩️ If you miss sessions — the catch-up rules</div>
+ <div class="ritem"><b>Missed a weekday run?</b> Let it go. Do NOT add it to another day. TBR: "If you have to occasionally miss a weekday run, no issue."</div>
+ <div class="ritem"><b>Missed the long run?</b> Do it within 2 days if you can. If more than 2 days late, skip to the next week's — do <b>not</b> run two long runs close together.</div>
+ <div class="ritem"><b>Missed a whole week?</b> Repeat that week rather than jumping ahead. Losing a week is fine; jumping 2 weeks of long-run progression is how people get hurt.</div>
+ <div class="ritem"><b>Missed 2+ weeks (illness/injury)?</b> Drop back to the long run distance you last completed comfortably, then rebuild ~10%/week. Tell me and I'll rebuild the ramp.</div>
+ <div class="ritem"><b>Never double up to "catch up."</b> That's the single most common way a training block ends in injury.</div>
+ </div>
  <div class="rgroup"><div class="rgh">👥 Bull Session pacing — read before every one</div>
  <div class="ritem"><b>Run YOUR pace, not the group's.</b> Bull Session 1 (Sep 20): HR climbed 143 → 178 across 5.7km. The last 2km were threshold effort on what should have been an easy run.</div>
  <div class="ritem"><b>The fix:</b> join a <b>slower interval group</b>, or let them go and run your own 3:1. Pacers exist for several speeds — ask Coach Morgan which group matches HR 135–152.</div>
@@ -1239,6 +1495,10 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelect
 (function(){const o=state();if(o.seeded_sep15)return;   // Tue 15 = body-enforced rest. Streak protected.
  o.logs["2026-09-15"]=Object.assign({},o.logs["2026-09-15"],{status:"rest"});
  o.seeded_sep15=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_w4)return;
+ ["2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-26","2026-09-27"]
+  .forEach(k=>{o.logs[k]=Object.assign({},o.logs[k],{main:true});});
+ o.seeded_w4=true;S.set(o);})();
 (function(){const o=state();if(o.seeded_sep16)return;   // Wed 16 = 3.1km / 27min run, confirmed on Garmin
  o.logs["2026-09-16"]=Object.assign({},o.logs["2026-09-16"],{main:true});
  o.seeded_sep16=true;S.set(o);})();
@@ -1248,6 +1508,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelect
  o.logs["2026-09-20"].bonus=true;
  o.seeded_bs1=true;S.set(o);})();
 document.getElementById("scDate").value=keyOf(TODAY);
+document.getElementById("efDate").value=keyOf(TODAY);
 renderToday();loadRuns();
 </script>
 </body>
