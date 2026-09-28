@@ -466,6 +466,9 @@ const OVERRIDE={
  "2026-09-19":{emo:"🛌",t:"Full Rest — fresh for tomorrow",d:"Bull Session 1 is tomorrow. Bank the legs.",type:"rest"},
  "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"},
  // ── RACE WEEK (TBR: "Take Thursday and Friday OFF AND REST. No exertion.") ──
+ // ── 🎽 POKEMON RUN 5K — replaces Wk1 long run ──
+ "2026-10-04":{emo:"🎽",t:"POKÉMON RUN 5K — race effort",d:"4AM start. This REPLACES today's 50-min long run — do not do both. Warm up properly.",type:"quality"},
+ "2026-10-05":{emo:"🛌",t:"Full Rest — post-race",d:"You raced at 180–190 bpm. Complete rest today, no exceptions.",type:"rest"},
  // ── 🌙 MIDNIGHT RACE REHEARSALS — none of the three plans cover this ──
  "2026-12-13":{emo:"🌙",t:"NIGHT LONG RUN — start 9PM",d:"Race starts at MIDNIGHT. First rehearsal: run in the dark, after a normal day, with a headlamp. 2h40.",type:"long"},
  "2027-01-17":{emo:"🌙",t:"NIGHT LONG RUN — start 9–10PM",d:"Second rehearsal. Nap in the afternoon first, exactly like race day. 1h30.",type:"long"},
@@ -476,6 +479,21 @@ const OVERRIDE={
  "2027-02-13":{emo:"😴",t:"RACE TONIGHT — nap all afternoon",d:"TBR Together 3K/5K at 6AM = watch or jog it very easy. Then SLEEP in the afternoon. Gun start is midnight.",type:"rest"},
  "2027-02-14":{emo:"🏁",t:"RACE DAY — TBR InLife Dream Marathon",d:"12:00 AM gun start. Run-walk 3:1 from km 1. Cut-offs: 21K by 4AM, finish by 8AM. You'll never forget your first.",type:"long"}};
 const WO_OVERRIDE={
+ "2026-10-04":{wu:["🚨 WARM UP PROPERLY — this is the one thing that matters today.",
+   "1) 10–15 min EASY jog (yes, before a 5K — it's not wasted)",
+   "2) Dynamic drills: leg swings 10/side · high knees 20m · butt kicks 20m · lunges 5/side",
+   "3) 4 × 20 sec strides, building to race pace, full recovery between",
+   "4) Keep moving until ~5 min before the gun"],
+  main:[{ex:"🎽 Pokémon Run 5K — race effort",note:"4AM start. HR will hit 180–190. That's fine — it's 25–30 min, not a marathon."},
+        {ex:"⚠️ PACING: do NOT sprint the first km",note:"Going out too fast is the classic 5K error. Run km 1 slightly slower than target, build through km 2–3, empty the tank in the last km. You'll run a faster time AND enjoy it more."},
+        {ex:"This REPLACES your 50-min long run — do not do both"},
+        {ex:"📊 Log the result afterwards — a fresh 5K gives a far better marathon prediction than extrapolating from your April half."}],
+  cd:["10 min easy jog or walk — do not stop dead at the finish line",
+      "Refuel within 45 min","Gentle stretch","Tomorrow is FULL rest"]},
+ "2026-10-05":{wu:["No training. You raced yesterday."],
+  main:[{ex:"🛌 Complete rest"},
+        {ex:"An all-out 5K at 180–190 bpm is a real stimulus — respect it"},
+        {ex:"Eat well, hydrate, sleep. Tuesday's easy run will feel heavy and that's normal."}],cd:[]},
  "2026-12-13":{wu:["Eat a normal day's food. Headlamp charged. Reflective gear on."],
   main:[{ex:"🌙 2h40 long run starting ~9PM",note:"Race day is a MIDNIGHT start. First time running long in the dark, on a normal day's sleep."},
         {ex:"Test: headlamp, reflective kit, night visibility, and how your stomach handles fuel late at night"},
@@ -1428,7 +1446,8 @@ function renderPlan(){
  <div class="ritem"><b>Eat at maintenance (~2,450 kcal). The deficit will happen on its own.</b> Manufacturing one on top is how you crashed on Sep 15.</div>
  <div class="ritem"><b>Protein ~140g stays non-negotiable</b> — without lifting, it's now your main defence against losing more muscle.</div></div>
  <div class="rgroup"><div class="rgh">TBR's rules (from the handbook)</div>
- <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.</div>
+ <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.
+ <br><small class="muted"><b>And it CANNOT be split.</b> 3 × 30 min ≠ 90 min continuous. Only a continuous long run depletes glycogen (forcing fat-oxidation adaptation), loads connective tissue for sustained duration, teaches cardiac-drift management, and trains the mental skill of continuing while tired. Marathon results correlate more with long-run distance than with weekly mileage. A 30 km week WITH the long run beats a 46 km week without it.</small></div>
  <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
  <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.<br><small class="muted">Moved up from 3:1 on Sep 30. <b>The test isn't comfort, it's heart rate:</b> if 4:1 keeps you under 152 on easy runs, it's working. If it pushes you to 155+, drop back to 3:1 — the extra running minute costs more than it gives. Long runs and race day use whatever ratio your HR says you can hold.</small></div>
  <div class="ritem"><b>4. Time, not distance.</b> "The body does not inherently know distance." Only the late long runs carry a km target.</div>
