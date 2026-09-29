@@ -814,37 +814,37 @@ const PREP_STORE="📦 🧊 freeze (Thu–Sun portions, thaw overnight) · ❄�
 const ALT_BF="🔄 Shake-day swap: rolled oats (60g) + banana (120g) + fresh milk (250ml) + 1 scoop whey — ≈615 kcal · P44 C82 F14. (Oat milk? add ½ scoop whey to hold protein. Before a run, eat ~90 min prior.)";
 function altBF(slot){return /breakfast/i.test(slot)?`<div class="supp" style="background:#eef1f5;color:var(--navy)">${ALT_BF}</div>`:""}
 const DAYASSEMBLY={
- 0:{type:"rest day · no shake · 🍱 PREP DAY",target:NUT.rest,slots:[
+ 0:{type:"Saturday · rest + 🍱 PREP DAY · no shake",target:NUT.rest,slots:[
   {slot:"Breakfast 🥣 (make night before)",food:"Overnight oats + 2 eggs",how:"oats (50g) + Greek yogurt (100g) + chia (10g) + banana (60g) + milk (100ml); 2 eggs (100g)",kcal:480,p:33,c:52,f:16,supp:"Creatine 5g · Vitamin D3"},
   {slot:"AM snack",food:"Greek yogurt + almonds",how:"yogurt (170g) + almonds (12g)",kcal:230,p:20,c:14,f:9},
   {slot:"PM snack",food:"2 boiled eggs + apple",how:"2 eggs (100g) + apple (150g)",kcal:222,p:13,c:22,f:10},
   {slot:"Lunch",food:"{B}",how:"160g portion + rice (130g) + broccoli (120g)",kcal:450,p:53,c:38,f:8},
   {slot:"Dinner",food:"{A}",how:"160g portion + rice (120g) + 🥬 kimchi (80g)",kcal:440,p:52,c:36,f:8,supp:"Magnesium"}]},
- 1:{type:"LONG RUN day · shake",target:NUT.long,slots:[
+ 1:{type:"SUNDAY LONG RUN · shake",target:NUT.long,slots:[
   {slot:"Breakfast (≈90min pre-run)",food:"Bread + honey + banana",how:"3 slices (90g) + honey (35g) + banana (120g) + coffee",kcal:460,p:12,c:96,f:5},
   {slot:"During run",food:"Gels + electrolytes",how:"30–60g carbs/hr if over 75 min · sip every 15 min",kcal:200,p:0,c:50,f:0,supp:"Sodium 300–700mg/hr"},
   {slot:"Post-run 🥤",food:"Whey shake + rice + banana",how:"2 scoops whey (64g) + rice (150g) + banana (120g)",kcal:480,p:56,c:58,f:4,supp:"Creatine 5g"},
   {slot:"Lunch",food:"{A}",how:"180g portion + fried egg (50g) + rice (250g) + gulay (120g)",kcal:700,p:57,c:86,f:14},
   {slot:"Dinner",food:"{fish}",how:"fish (180g) + rice (200g) + ginisang veg (150g) + 2 tsp oil",kcal:660,p:46,c:58,f:20,supp:"Magnesium · Vitamin D3"}]},
- 2:{type:"Upper gym · shake",target:NUT.gym,slots:[
+ 2:{type:"Tuesday run day · shake",target:NUT.gym,slots:[
   {slot:"Breakfast",food:"3-egg veggie scramble + rice",how:"3 eggs (150g) + tomato/onion (90g) + 1 tsp oil + rice (140g)",kcal:440,p:30,c:44,f:15,supp:"Creatine 5g · Vitamin D3"},
   {slot:"Pre-workout",food:"Banana",how:"banana (120g) + coffee",kcal:110,p:1,c:27,f:0},
   {slot:"Post-workout 🥤",food:"Whey + banana",how:"1 scoop whey (32g) + banana (120g)",kcal:230,p:28,c:33,f:2},
   {slot:"Lunch",food:"{C}",how:"170g portion + rice (170g) + ginisang sayote (120g)",kcal:560,p:56,c:52,f:10},
   {slot:"Dinner",food:"{A}",how:"160g portion + rice (140g) + 🥬 kimchi (80g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]},
- 3:{type:"rest / quality run · no shake",target:NUT.quality,slots:[
+ 3:{type:"rest day · no shake",target:NUT.quality,slots:[
   {slot:"Breakfast 🥣 (make night before)",food:"Overnight oats + egg",how:"oats (50g) + yogurt (100g) + chia (10g) + banana (80g) + milk (100ml); 1 egg",kcal:470,p:26,c:62,f:12,supp:"Creatine 5g · Vitamin D3"},
   {slot:"Pre-run",food:"Banana + coffee",how:"banana (120g) — 45 min before",kcal:110,p:1,c:27,f:0},
   {slot:"Post-run 🍳",food:"3-egg fried rice",how:"3 eggs (150g) + day-old rice (150g) + kangkong (50g) + 1 tsp oil",kcal:430,p:24,c:54,f:12},
   {slot:"Lunch",food:"{B}",how:"170g portion + rice (190g) + cauliflower (120g)",kcal:620,p:55,c:62,f:10},
   {slot:"Dinner",food:"{fish} / tofu",how:"fish (150g) or tofu (200g) + rice (140g) + pinakbet (120g)",kcal:520,p:46,c:46,f:13,supp:"Magnesium"}]},
- 4:{type:"Lower gym · shake",target:NUT.gym,slots:[
+ 4:{type:"Friday run day · shake",target:NUT.gym,slots:[
   {slot:"Breakfast",food:"Egg tapsilog-style",how:"3 eggs (150g) + garlic rice (150g) + tomato (60g)",kcal:450,p:30,c:46,f:15,supp:"Creatine 5g · Vitamin D3"},
   {slot:"Pre-workout",food:"Bread + peanut butter",how:"2 slices (60g) + PB (12g)",kcal:225,p:9,c:33,f:7},
   {slot:"Post-workout 🥤",food:"Whey + banana",how:"1 scoop whey (32g) + banana (120g)",kcal:230,p:28,c:33,f:2},
   {slot:"Lunch",food:"{A}",how:"170g portion + rice (170g) + 🥬 kimchi (80g)",kcal:560,p:56,c:52,f:10},
   {slot:"Dinner",food:"{C}",how:"160g portion + rice (140g) + chopsuey (120g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]},
- 5:{type:"easy run · no shake",target:NUT.gym,slots:[
+ 5:{type:"Wednesday easy run · no shake",target:NUT.gym,slots:[
   {slot:"Breakfast 🥣",food:"Overnight oats + 2 eggs",how:"oats (50g) + yogurt (100g) + chia (10g) + banana (60g) + milk (100ml); 2 eggs",kcal:480,p:33,c:52,f:16,supp:"Creatine 5g · Vitamin D3"},
   {slot:"Pre-run",food:"Banana (optional)",how:"banana (120g) if hungry",kcal:110,p:1,c:27,f:0},
   {slot:"Post-run 🍳",food:"3 boiled eggs + fruit",how:"3 eggs (150g) + apple (150g)",kcal:310,p:19,c:24,f:15},
@@ -858,8 +858,20 @@ const DAYASSEMBLY={
   {slot:"Dinner",food:"{A}",how:"160g portion + rice (140g) + cauliflower (120g)",kcal:500,p:52,c:42,f:9,supp:"Magnesium"}]}};
 function prepIdx(d){return weekNum(d)%PREPWEEKS.length}
 function fillTokens(t,pw){return (t||"").replace("{A}",pw.A.n).replace("{B}",pw.B.n).replace("{C}",pw.C.n).replace("{fish}",pw.fish.n)}
-function dayPlan(d){const a=DAYASSEMBLY[d.getDay()],pw=PREPWEEKS[prepIdx(d)];
- return {type:a.type,target:a.target,slots:a.slots.map(s=>({slot:s.slot,food:fillTokens(s.food,pw),how:fillTokens(s.how,pw),kcal:s.kcal,p:s.p,c:s.c,f:s.f,supp:s.supp||""}))};}
+// Calories scale with training volume. Baseline = TBR Week 1 (175 min/wk).
+// Every extra weekly minute ≈ 10 kcal, spread across 7 days.
+function volAdjust(d){const {w}=weekPlan(d);if(w<1||w>20)return 0;
+ return Math.round((weekMins(w)-175)*10/7/10)*10;}
+// getDay() -> meal template. The templates were authored for the old week shape
+// (Mon long run, Tue/Thu gym); the week is now Sun long / Mon rest / Tue,Wed,Fri runs.
+const MEALDAY={0:1, 1:0, 2:2, 3:5, 4:0, 5:4, 6:0};   // 0 = the clean rest-day template
+function dayPlan(d){const a=DAYASSEMBLY[MEALDAY[d.getDay()]],pw=PREPWEEKS[prepIdx(d)];
+ const adj=volAdjust(d),t=a.target;
+ const target=[t[0]+adj,t[1],t[2]+Math.round(adj/4),t[3]];   // extra goes to carbs
+ let type=a.type;
+ if(MEALDAY[d.getDay()]===0) type = d.getDay()===6 ? "Saturday · rest + 🍱 PREP DAY" : "rest day · no shake";
+ return {type:type,target:target,adj:adj,
+  slots:a.slots.map(s=>({slot:s.slot,food:fillTokens(s.food,pw),how:fillTokens(s.how,pw),kcal:s.kcal,p:s.p,c:s.c,f:s.f,supp:s.supp||""}))};}
 function naDay(d){return shiftFor(d)==="NA" && [2,3,4,5,6].indexOf(d.getDay())>=0}
 function naTiming(slot){const s=(slot||"").toLowerCase();
  if(s.indexOf("breakfast")>=0)return "at wake (~30 min after)";
@@ -968,7 +980,8 @@ function renderMeals(log){const plan=dayPlan(VIEW),done=log.meals||{};
  document.getElementById("meals").innerHTML=plan.slots.map((m,i)=>{tk+=m.kcal;tp+=m.p;tc+=m.c;tf+=m.f;const dn=!!done[i];
   return `<div class="meal ${dn?'mdone':''}"><div class="top"><span class="slot">${m.slot}${naDay(VIEW)?` <span class="natime">⏰ ${naTiming(m.slot)}</span>`:""}</span><div class="right"><span class="kcal">${m.kcal} kcal<br>P${m.p} C${m.c} F${m.f}</span><button class="mcheck ${dn?'on':''}" data-i="${i}">${dn?'✓':'＋'}</button></div></div><div class="food">${m.food}${m.how?` <span class="muted" style="font-size:11px">— ${m.how}</span>`:""}</div>${m.supp?`<div class="supp">💊 ${m.supp}</div>`:""}${altBF(m.slot)}</div>`}).join("");
  document.getElementById("mealTotal").innerHTML=[["≈"+tk,"kcal"],[tp+"g","protein"],[tc+"g","carbs"],[tf+"g","fat"]].map(([v,k])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
- const tg=plan.target;document.getElementById("mealTarget").textContent=`≈${tg[0]} kcal · ${tg[1]}g P · ${tg[2]}g C · ${tg[3]}g F`;
+ const tg=plan.target;document.getElementById("mealTarget").innerHTML=`≈${tg[0]} kcal · ${tg[1]}g P · ${tg[2]}g C · ${tg[3]}g F`+
+  (plan.adj>0?` <span style="color:var(--teal)">(+${plan.adj} for training volume)</span>`:"");
  document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
 function renderToday(){const o=state();cur=mission(VIEW);renderDateNav();
  document.getElementById("todayDate").textContent=fmtDate(VIEW)+(keyOf(VIEW)===keyOf(TODAY)?"":"  ⏪ past day");
