@@ -138,12 +138,12 @@ small.dim{color:var(--mut);font-size:11px}
 .caldow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
 .caldow div{text-align:center;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.calcell{border:1px solid var(--line);border-radius:8px;min-height:60px;padding:3px 1px;text-align:center;cursor:pointer;background:#fff;position:relative;overflow:hidden}
+.calcell{border:1px solid var(--line);border-radius:8px;min-height:70px;padding:3px 1px;text-align:center;cursor:pointer;background:#fff;position:relative;overflow:hidden}
 .calcell .cs{font-size:8.5px;line-height:1.1;color:var(--mut);font-weight:700;margin-top:1px;white-space:nowrap}
 .calcell.done .cs,.calcell.miss .cs{color:var(--ink)}
 .calcell.out{background:#f7f9fb;border-color:transparent;cursor:default}
 .calcell .cn{font-size:10.5px;color:var(--mut);font-weight:700;line-height:1.1}
-.calcell .ce{font-size:17px;line-height:1.15}
+.calcell .ce{font-size:15px;line-height:1.15;letter-spacing:-1px}
 .calcell.done{background:var(--base);border-color:var(--good)}
 .calcell.miss{background:#fbe6df;border-color:var(--bad)}
 .calcell.sick{background:#fff1cf;border-color:#d9a300}
@@ -218,11 +218,6 @@ small.dim{color:var(--mut);font-size:11px}
     </div>
 
     <div class="card">
-      <h2>How hard was it? <small class="dim">(tap after you train)</small></h2>
-      <div class="eff" id="effRow"></div>
-    </div>
-
-    <div class="card">
       <h2>Today's meals <span class="muted" id="mealType"></span></h2>
       <p class="cap">Grams = cooked. <b>P</b> protein · <b>C</b> carbs · <b>F</b> fat. Tap ＋ per meal.</p>
       <div id="meals"></div>
@@ -231,9 +226,7 @@ small.dim{color:var(--mut);font-size:11px}
     </div>
 
     <div class="card">
-      <h2>Today's quests</h2>
-      <div id="quests"></div>
-      <div class="row">
+      <div class="row" style="margin-top:0">
         <button class="btn g" id="restBtn" style="background:#e3f0ff;color:#1F3A5F">🛌 Rest (planned)</button>
         <button class="btn g" id="injuryBtn" style="background:#fde8e0;color:#b03a1e">🩹 Injury mode</button>
         <button class="btn warn" id="missBtn">Missed</button>
@@ -242,12 +235,6 @@ small.dim{color:var(--mut);font-size:11px}
       </div>
       <div class="coachbox hide" id="coachBox"></div>
       <div class="note hide" id="guide"></div>
-    </div>
-
-    <div class="card">
-      <h2>Notes of the day 📝</h2>
-      <textarea id="noteBox" placeholder="How did it feel? Energy, niggles, sleep, mood…"></textarea>
-      <div class="row"><button class="btn p" id="noteSave">Save note</button><span class="muted" id="noteMsg" style="align-self:center;font-size:12px"></span></div>
     </div>
 
     <div class="card">
@@ -372,7 +359,7 @@ small.dim{color:var(--mut);font-size:11px}
       </div>
       <div class="caldow" id="calDow"></div>
       <div class="calgrid" id="calGrid"></div>
-      <div class="legend">🐉 long run · 🏃 easy · ⚡ higher-intensity finish · 🛌 rest · 🟢 done · 🔴 missed · navy dot = TBR event. <span id="calToday" style="color:var(--teal);cursor:pointer;text-decoration:underline;font-weight:700">jump to today</span></div>
+      <div class="legend">🐉 long run · 🏃 easy · ⚡ higher-intensity finish · 🏋️ strength/prehab · 🚲 cross-train · 🛌 rest · 🟢 done · 🔴 missed · navy dot = TBR event. <span id="calToday" style="color:var(--teal);cursor:pointer;text-decoration:underline;font-weight:700">jump to today</span></div>
     </div>
     <div class="card"><div id="calDetail"></div></div>
   </div>
@@ -455,14 +442,14 @@ const OVERRIDE={
  "2026-09-07":{emo:"🎒",t:"Gear Shakedown Walk 30–45 min",d:"In your ACTUAL hiking shoes + fully loaded pack. Low fatigue, high value — done today you get 4 days to fix whatever it finds.",type:"easy"},
  "2026-09-10":{emo:"🛌",t:"Full Rest",d:"Legs banked for Saturday. Gear already sorted on Monday. Nothing to do but recover.",type:"rest"},
  "2026-09-11":{emo:"🛌",t:"Full Rest — pack & carb-load",d:"You travel tonight and will sleep badly. Bank the energy.",type:"rest"},
- "2026-09-12":{emo:"🏔️",t:"ALILEM HIKE — DONE ✅",d:"17.2km · 1,278m ascent · 9h10 · avg HR 153 · 3,451 kcal. Biggest training day of your life.",type:"long"},
+ "2026-09-12":{emo:"🏔️",lab:"went<br>hiking",t:"ALILEM HIKE — DONE ✅",d:"17.2km · 1,278m ascent · 9h10 · avg HR 153 · 3,451 kcal. Biggest training day of your life.",type:"long"},
  // ── Recovery week after the hike (Sep 13–20) ──
  "2026-09-13":{emo:"🛌",t:"Total Rest — and rightly so",d:"1,278m of descent = real muscle damage. Lying in bed today was the correct training decision.",type:"rest"},
  "2026-09-14":{emo:"🛌",t:"Full Rest — DOMS peak",d:"Soreness peaks 24–48h after descent. No running, no gym, no legs. Eat and sleep.",type:"rest"},
  "2026-09-15":{emo:"🛌",t:"Rest — your body called it",d:"Readiness 25, Body Battery 16. You didn't skip; you crashed. That IS the session. Streak intact.",type:"rest"},
- "2026-09-16":{emo:"🚶",t:"Easy 25–30 min — CHECK BATTERY FIRST",d:"Body Battery under 30 → walk. Over 40 → easy run, HR 135–152. 🎥 Bull Circle 1 tonight 8PM.",type:"easy"},
- "2026-09-17":{emo:"🦵",t:"Lower Body — moderate",d:"Legs return. No heavy RDL/Nordic. Stop a set early if anything feels flat.",type:"gym"},
- "2026-09-18":{emo:"🚶",t:"Rest or easy walk",d:"Deliberately light. Sunday is Bull Session 1 — arriving fresh matters more than one weekday session.",type:"rest"},
+ "2026-09-16":{emo:"🏃",lab:"27m<br>155 bpm",t:"Easy Run 27 min",d:"Body Battery under 30 → walk. Over 40 → easy run, HR 135–152. 🎥 Bull Circle 1 tonight 8PM.",type:"easy"},
+ "2026-09-17":{emo:"🏋️",lab:"Leg day",t:"Leg Day — lower body",d:"Legs return. No heavy RDL/Nordic. Stop a set early if anything feels flat.",type:"gym"},
+ "2026-09-18":{emo:"🏃",lab:"Easy<br>run",t:"Easy Run",d:"Deliberately light. Sunday is Bull Session 1 — arriving fresh matters more than one weekday session.",type:"rest"},
  "2026-09-19":{emo:"🛌",t:"Full Rest — fresh for tomorrow",d:"Bull Session 1 is tomorrow. Bank the legs.",type:"rest"},
  "2026-09-20":{emo:"👥",t:"BULL SESSION 1 — meet your batch",d:"Filinvest City. Run-walk 3:1, easy and conversational. HR 135–152. This is a social run, not a test.",type:"long"},
  // ── RACE WEEK (TBR: "Take Thursday and Friday OFF AND REST. No exertion.") ──
@@ -689,12 +676,12 @@ function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
   if(isRace)return{emo:"🏁",t:"RACE DAY — 42.2 km",d:"Midnight start. You built this.",type:"long"};
   let det=`Run-walk ${RUNWALK} · HR ${HRZ.easy} bpm`;
   if(p.note)det+=" · "+p.note;
-  return{emo:p.star?"⭐":"🐉",t:`Long Run — ${p.lr}`,d:det,type:"long"};}
+  return{emo:"🐉",t:`Long Run — ${p.lr}`,d:det,type:"long"};}
  if(wd===1)return{emo:"🛌",t:"Full Rest",d:"TBR rule: always take a full rest day after your long run.",type:"rest"};
- if(wd===2){const m=rest_or_run(p.wd1||"45 min","Run 1");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
+ if(wd===2){const m=rest_or_run(p.wd1||"45 min","Run 1");if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
  if(wd===3)return{emo:"🏃",t:`Easy Run ${extraRun(w)} — added volume`,d:`Pure easy aerobic. HR ${HRZ.easy} bpm, run-walk ${RUNWALK}. Drop this one first on a night-shift week.`,type:"easy"};
  if(wd===4)return{emo:"🚲",t:"Rest — or optional cross-train",d:`Running rest. Optional: gym bike ${xbike(w)} at HR 130–145, or a 30–45 min walk under HR 125.`,type:"rest"};
- if(wd===5){const m=rest_or_run(p.wd2||"45 min","Run 2");if(m.type!=="rest")m.d+=" + 🛡️ 15-min prehab after.";return m;}
+ if(wd===5){const m=rest_or_run(p.wd2||"45 min","Run 2");if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
  return{emo:"🛌",t:"Rest + 🍱 prep",d:"Batch-cook the week. Long run tomorrow — gentle walk at most, no bike session today.",type:"rest"};
 }
 function xbike(w){return w<=4?"30 min":w<=10?"40 min":w<=16?"50 min":"30 min"}
@@ -969,7 +956,7 @@ function renderMVW(o){const mon=new Date(VIEW);mon.setDate(mon.getDate()-((VIEW.
    Long run <b>${p.lr}</b> · Tue <b>${p.wd1}</b> · Wed <b>${extraRun(w)}</b> · Fri <b>${p.wd2}</b>
    <br>⏱ Total <b>${Math.floor(tm/60)}h${String(tm%60).padStart(2,"0")}</b> ≈ ${Math.round(tm/8.9)} km${prev?` · <b style="color:${dl?'var(--teal)':'inherit'}">${delta>0?"+":""}${delta}%</b> vs last week${dl?" — 🔻 DELOAD, take it":""}`:""}
    ${p.star?`<br>${p.star}`:""}${p.bull?`<br>👥 ${p.bull}`:""}</div>`;}}
-function renderQuests(log){const c=document.getElementById("quests");
+function renderQuests(log){const c=document.getElementById("quests");if(!c)return;
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
  c.querySelectorAll(".qcheck").forEach(b=>b.onclick=()=>toggleQuest(b.dataset.k));}
@@ -988,11 +975,12 @@ function renderToday(){const o=state();cur=mission(VIEW);renderDateNav();
  document.getElementById("mEmo").textContent=cur.emo;document.getElementById("mTitle").textContent=cur.t;document.getElementById("mDetail").textContent=cur.d;
  const log=o.logs[keyOf(VIEW)]||{};
  renderSession();renderMVW(o);
- const er=document.getElementById("effRow");er.innerHTML="";
- EFFORTS.forEach(([e,lab,rpe])=>{const el=document.createElement("div");el.className="effb"+(log.rpe===rpe?" on":"");el.innerHTML=`<span class="e">${e}</span>${lab}`;
-  el.onclick=()=>{const o2=state(),k=keyOf(VIEW);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});
+ const er=document.getElementById("effRow");
+ if(er){er.innerHTML="";
+  EFFORTS.forEach(([e,lab,rpe])=>{const el=document.createElement("div");el.className="effb"+(log.rpe===rpe?" on":"");el.innerHTML=`<span class="e">${e}</span>${lab}`;
+   el.onclick=()=>{const o2=state(),k=keyOf(VIEW);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});}
  renderMeals(log);renderQuests(log);
- document.getElementById("noteBox").value=log.note||"";
+ {const nb=document.getElementById("noteBox");if(nb)nb.value=log.note||"";}
  const g=document.getElementById("guide");
  if(log.status==="missed"){g.className="note adj";g.innerHTML="<b>Missed — own it, move on.</b> One day is a blip; three is a pattern. Get the next one."}
  else if(log.status==="sick"){g.className="note adj";g.innerHTML="<b>🤒 Neck check:</b> above-neck (cold) → easy Z2 OK. Below-neck (chest/fever/aches) → REST until 24h symptom-free, then 50% volume 2–3 days."}
@@ -1034,7 +1022,7 @@ document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(VIEW);co
 document.getElementById("injuryBtn").onclick=()=>{const o=state();if(o.injured){o.injured=false}else{if(!confirm("Turn ON injury mode? Pauses running & leg work and protects your streak while you heal."))return;o.injured=true;o.injuryStart=keyOf(TODAY);}S.set(o);renderToday()};
 document.getElementById("missBtn").onclick=()=>{if(confirm("Mark today missed? Streak resets."))setStatus("missed")};
 document.getElementById("sickBtn").onclick=()=>setStatus("sick");
-document.getElementById("noteSave").onclick=()=>{const o=state(),k=keyOf(VIEW);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};
+{const ns=document.getElementById("noteSave");if(ns)ns.onclick=()=>{const o=state(),k=keyOf(VIEW);o.logs[k]=Object.assign({},o.logs[k],{note:document.getElementById("noteBox").value});S.set(o);const m=document.getElementById("noteMsg");m.textContent="Saved ✓";setTimeout(()=>m.textContent="",1500)};}
 document.getElementById("coachBtn").onclick=async()=>{const cb=document.getElementById("coachBox");cb.classList.remove("hide");cb.textContent="Coach is thinking…";
  if(!INAPP){cb.textContent="Coach is offline in the web version — but the mission is simple: "+cur.t+". Start with 20 minutes.";return}
  try{const o=state();const r=await window.cowork.askClaude("You are Paul's marathon coach. He restarted Sept 1 after months of inconsistency. Give 2-3 short, warm but FIRM sentences for TODAY only. Session: "+cur.t+" — "+cur.d+". Phase "+weekPlan(TODAY).phase+", "+shiftFor(TODAY)+" shift. No lists.",[{streak:streak(o)}]);
@@ -1305,15 +1293,16 @@ const TBRDATES={
  "2027-02-13":"🏃 TBR Together 3K/5K — keep it easy, race is tonight",
  "2027-02-14":"🏁 RACE DAY — midnight gun start"};
 // Compact one-line summary under each calendar cell
-function calLabel(d){const k=keyOf(d),m=mission(d);
+function calLabel(d){const k=keyOf(d),m=mission(d),ov=OVERRIDE[k];
+ if(ov&&ov.lab)return ov.lab;
  if(/RACE DAY/i.test(m.t))return "42.2km";
  if(m.type==="rest"){
-  if(d.getDay()===4){const wp=weekPlan(d);return "🚲"+xbike(wp.w).replace(" min","m");}
-  return "";}
+  if(d.getDay()===4){const wp=weekPlan(d);return "xtrain/rest<br>"+xbike(wp.w).replace(" min","m");}
+  return "Rest";}
  const mins=sessionMins(d);if(!mins)return "";
  const hr=(m.type==="quality")?168:152;
  const dur=mins<60?mins+"m":Math.floor(mins/60)+"h"+(mins%60?String(mins%60).padStart(2,"0"):"");
- return dur+" · "+hr;}
+ return dur+"<br>"+hr+" bpm";}
 let calMonth=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
 let calSel=new Date(TODAY);
 function renderCal(){
