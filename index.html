@@ -328,7 +328,8 @@ small.dim{color:var(--mut);font-size:11px}
       <div class="legend">Outdoor runs only — treadmill readings flatter the number and distort the trend.</div>
     </div>
     <div class="card"><h2>Recent activities <small class="dim">(live from Strava)</small></h2>
-      <table class="t2"><thead><tr><th>Date</th><th>Activity</th><th>Dist</th><th>Time</th><th>Pace</th></tr></thead><tbody id="actBody"><tr><td colspan="5">Loading…</td></tr></tbody></table>
+      <table class="t2"><thead><tr><th>Date</th><th>Activity</th><th>Dist</th><th>Time</th><th>Pace</th><th>Avg HR</th><th>Max HR</th></tr></thead><tbody id="actBody"><tr><td colspan="7">Loading…</td></tr></tbody></table>
+      <div class="legend">HR colour = your zones: <b style="color:#3b82f6">&lt;135 recovery</b> · <b style="color:#16a34a">135–152 easy</b> · <b style="color:#ca8a04">152–160 steady</b> · <b style="color:#ea580c">160–180 tempo</b> · <b style="color:#dc2626">180+ hard</b>. Max HR 196.</div>
     </div>
   </div>
 
@@ -402,6 +403,7 @@ small.dim{color:var(--mut);font-size:11px}
 
 <script>
 const STRAVA="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__list_activities";
+const STRAVA_PERF="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__get_activity_performance";
 const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week 0 Monday = Aug 31 2026
 // ── OFFICIAL TBR BEGINNER 2 PROGRAM (20 weeks, Sep 28 2026 → Feb 14 2027) ──
 // Weeks are indexed 1–20 here. Weeks 0 and below = my "Bridge" phase (Sep 1–27).
@@ -1206,7 +1208,6 @@ function renderEff(){const rs=effRuns();
  if(cur>=apr)note.innerHTML=`<div class="note">🔥 <b>You're at or above your April half-marathon efficiency.</b> The engine is back — what's left is durability, and that's exactly what the long runs build.</div>`;
  else note.innerHTML=`<div class="note">📊 You're within <b>${Math.abs(delta).toFixed(0)}%</b> of your April half-marathon efficiency. This number improves through <b>easy volume over months</b>, not hard sessions. Watch it, not other people's Strava.</div>`;}
 // ── AUTO-SYNC: Garmin first (HR is in the activity list), Strava as fallback ──
-const STRAVA_PERF="mcp__cf98c66c-4e50-475d-b66a-2f86dc169ec2__get_activity_performance";
 function mergeRuns(rows){const o=state();o.eff=o.eff||[];
  const have=new Set(EFFSEED.concat(o.eff).map(r=>r.d));let n=0;
  rows.forEach(r=>{
@@ -1284,7 +1285,7 @@ document.getElementById("predModal").onclick=e=>{if(e.target.id==="predModal")do
 // RUNS
 function pace(sec,m){if(!m)return"—";const s=sec/(m/1000),mm=Math.floor(s/60),ss=Math.round(s%60);return mm+":"+String(ss).padStart(2,"0")}
 async function loadRuns(){renderEff();const body=document.getElementById("actBody");
- if(!INAPP){document.getElementById("stravaMsg").textContent="📵 Live Strava sync only works inside the Claude app.";body.innerHTML='<tr><td colspan="5" class="muted">Open in the Claude app for live runs.</td></tr>';return}
+ if(!INAPP){document.getElementById("stravaMsg").textContent="📵 Live Strava sync only works inside the Claude app.";body.innerHTML='<tr><td colspan="7" class="muted">Open in the Claude app for live runs.</td></tr>';return}
  try{const r=await window.cowork.callMcpTool(STRAVA,{first:20});const data=r.structuredContent??JSON.parse(r.content[0].text);const acts=data.activities||[];
   const t0=new Date(TODAY),dfm=(t0.getDay()+6)%7,mon=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()-dfm),sun=new Date(mon.getTime()+7*DAY);let km=0,nr=0;
   acts.forEach(a=>{const dt=new Date(a.start_local);if(/run/i.test(a.sport_type)&&dt>=mon&&dt<sun){km+=a.summary.distance/1000;nr++}});
@@ -1292,8 +1293,25 @@ async function loadRuns(){renderEff();const body=document.getElementById("actBod
   document.getElementById("wkRange").textContent="("+mon.toLocaleDateString("en-US",{month:"short",day:"numeric"})+"–"+new Date(sun-DAY).toLocaleDateString("en-US",{month:"short",day:"numeric"})+")";
   document.getElementById("stravaMsg").textContent="✅ Live from Strava.";
   body.innerHTML=acts.slice(0,12).map(a=>{const k=(a.summary.distance/1000).toFixed(2),t=Math.round(a.summary.moving_time/60),run=/run/i.test(a.sport_type);
-   return `<tr><td>${new Date(a.start_local).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${a.name}<br><small class="dim">${a.sport_type}</small></td><td>${k} km</td><td>${t} min</td><td>${run?pace(a.summary.moving_time,a.summary.distance)+"/km":"—"}</td></tr>`}).join("")}
- catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="5">Unavailable.</td></tr>'}}
+   return `<tr><td>${new Date(a.start_local).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</td><td>${a.name}<br><small class="dim">${a.sport_type}</small></td><td>${k} km</td><td>${t} min</td><td>${run?pace(a.summary.moving_time,a.summary.distance)+"/km":"—"}</td><td id="ahr${a.id}" class="dim">·</td><td id="mhr${a.id}" class="dim">·</td></tr>`}).join("");
+  fillHR(acts.slice(0,12));}
+ catch(e){document.getElementById("stravaMsg").textContent="Couldn't reach Strava.";body.innerHTML='<tr><td colspan="7">Unavailable.</td></tr>'}}
+// HR isn't in the activity list payload — it needs one get_activity_performance call each.
+// Fired after the table is already on screen so nothing blocks, and sequentially so Strava isn't hammered.
+function hrColor(v){return v<135?"#3b82f6":v<152?"#16a34a":v<160?"#ca8a04":v<180?"#ea580c":"#dc2626"}
+async function fillHR(acts){
+ for(const a of acts){
+  const ac=document.getElementById("ahr"+a.id),mc=document.getElementById("mhr"+a.id);
+  if(!ac)continue;
+  try{const r=await window.cowork.callMcpTool(STRAVA_PERF,{activity_id:String(a.id)});
+   const d=r.structuredContent??JSON.parse(r.content[0].text);
+   if(d&&d.has_heartrate&&d.average_heartrate){
+    const av=Math.round(d.average_heartrate),mx=Math.round(d.max_heartrate||0);
+    ac.className="";ac.innerHTML=`<b style="color:${hrColor(av)}">${av}</b> <small class="dim">bpm</small>`;
+    mc.className="";mc.innerHTML=mx?`<b style="color:${hrColor(mx)}">${mx}</b> <small class="dim">bpm</small>`:"—";
+   }else{ac.textContent="—";mc.textContent="—"}
+  }catch(e){ac.textContent="—";mc.textContent="—"}
+ }}
 // ── CALENDAR ──
 const TBRDATES={
  "2026-09-16":"🎥 Bull Circle 1 — Zoom webinar, 8PM",
