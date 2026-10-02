@@ -424,7 +424,7 @@ const TBR={
  13:{wd1:"Rest or XTrain",wd2:"75 min",lr:"3 hrs 15 min or min 25 km",note:"Divide into 2 × 100 & 95 min — even splits",star:"⭐ Very important week — the first long run that gives you the range to reach the finish line.",bull:"Bull Session 4 · Dec 27"},
  14:{wd1:"70 min · last 25 min higher intensity",wd2:"60 min",lr:"1 hr 30 min"},
  15:{wd1:"60 min",wd2:"60 min",lr:"2 hrs 30 min",note:"Bull Session 5 runs 2 hrs — add ~30 min solo either side",bull:"Bull Session 5 · Jan 10"},
- 16:{wd1:"Rest or XTrain",wd2:"60 min",lr:"3 hrs 30 min",star:"🚨 PEAK LONG RUN — moved here from Jan 24 (family trip). Protect this week!",note:"Your biggest session of the whole block. Full fuelling, race kit, race shoes."},
+ 16:{wd1:"Rest or XTrain",wd2:"60 min",lr:"3 hrs 30 min",star:"🚨 PEAK LONG RUN — moved here from Jan 24 (family trip). Protect this week!",note:"🌙 START ~8:30 PM — this doubles as your 3rd midnight-race rehearsal. Your biggest session of the whole block. Full fuelling, race kit, race shoes."},
  17:{wd1:"50 min",wd2:"45 min",lr:"1 hr",star:"✈️ Away Fri–Sun. Normal week, just a short long run — and it's your post-peak recovery week anyway.",note:"Fri and Sun runs happen on the trip. Both are travel-friendly; skip either if the day gets away from you."},
  18:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs",star:"Taper begins — but one solid run first after the trip"},
  19:{wd1:"50 min",wd2:"50 min",lr:"1 hr 30 min",note:"RACE REHEARSAL — divide into 2 × 45 min, even splits",star:"Taper week 2 of 3"},
@@ -436,7 +436,14 @@ const BRIDGE={
  "-1":{wd1:"35 min",wd2:"35 min",lr:"75 min",star:"Bridge 3 — Bull Session 1 falls on Sun Sep 20. Go meet your batch!",bull:"Bull Session 1 · Sep 20"},
  "0":{wd1:"35 min",wd2:"30 min",lr:"60 min",star:"Bridge 4 — easy week. Beginner 2 starts Mon Sep 28."}};
 const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
-const RUNWALK="4:1 (run 4 min · walk 1 min)";   // moved up from 3:1 on Sep 30 — PJ adapted
+const RUNWALK="3:1 (run 3 min · walk 1 min)";
+// Reverted 4:1 → 3:1 on Oct 2. Lap data, Sep 6–Oct 2:
+//   3:1 runs → first-split-to-slowest decay 6%,  avg EF 0.738
+//   4:1 runs → decay 17%, avg EF 0.719, first splits down to 7:51/km
+// Mechanism: HR needs 2-3 min to reach steady state. A 3-min run segment ends
+// BEFORE the HR catches up; a 4-min segment lets it arrive exactly at the break,
+// which is the "everything goes downhill after the first walk" PJ reported.
+// Revisit 4:1 only after 3 runs with a flat split profile.
 
 // ── One-off day overrides (Bagu Circuit hike week, Sep 12–13) ──
 const OVERRIDE={
@@ -461,7 +468,7 @@ const OVERRIDE={
  // ── 🌙 MIDNIGHT RACE REHEARSALS — none of the three plans cover this ──
  "2026-12-13":{emo:"🌙",t:"NIGHT LONG RUN — start 9PM",d:"Race starts at MIDNIGHT. First rehearsal: run in the dark, after a normal day, with a headlamp. 2h40.",type:"long"},
  "2027-01-17":{emo:"🚨",t:"PEAK LONG RUN — 3h30",d:"Your biggest session of the block, moved from Jan 24. Consider an EVENING start (~8:30PM) to double as midnight-race rehearsal.",type:"long"},
- "2027-01-24":{emo:"✈️",lab:"trip<br>1h · 152",t:"Trip Run — 1 hr easy",d:"Away with family. Easy hour at HR 135–152, run-walk 4:1 (12 repeats). Peak run is already banked from Jan 17.",type:"long"},
+ "2027-01-24":{emo:"✈️",lab:"trip<br>1h · 152",t:"Trip Run — 1 hr easy",d:"Away with family. Easy hour at HR 135–152, run-walk 3:1 (15 repeats). Peak run is already banked from Jan 17.",type:"long"},
  "2027-01-31":{emo:"🌙",t:"NIGHT DRESS REHEARSAL — 2h00",d:"Afternoon nap → race kit → race breakfast timing → 2 hrs from 10PM. Last chance to test everything.",type:"long"},
  "2027-02-10":{emo:"🏃",t:"Last easy shakeout — 20 min",d:"Very easy, just to keep the legs awake. Then nothing until race night.",type:"easy"},
  "2027-02-11":{emo:"🎉",t:"REST + SEND OFF PARTY",d:"No exertion. Kit claiming from 4PM, party 7PM, Botanical Gardens. BRING YOUR MEDICAL CERTIFICATE.",type:"rest"},
@@ -670,9 +677,10 @@ function runwalkLine(d){const m=mission(d);
  if(["long","easy","quality"].indexOf(m.type)<0)return "";
  const mins=sessionMins(d);if(!mins)return "";
  return `<div class="totline" style="background:#eef3f8;color:var(--navy)">⏱ <b>Watch setup</b> for ${mins} min —
-  <b>3:1 → ${Math.round(mins/4)} repeats</b> (3 min run + 1 min walk) &nbsp;·&nbsp;
-  <b>4:1 → ${Math.round(mins/5)} repeats</b> (4 min run + 1 min walk)
-  <br><small style="font-weight:400">Easier: use Garmin's built-in <b>Run/Walk alert</b> (Run ▸ Settings ▸ Run/Walk) — set the times once and it repeats for the whole run. No counting.</small></div>`;}
+  <b>3:1 → ${Math.round(mins/4)} repeats</b> (3 min run + 1 min walk)
+  <br><small style="font-weight:400">Use Garmin's built-in <b>Run/Walk alert</b> (Run ▸ Settings ▸ Run/Walk) — set 3:00 / 1:00 once and it repeats all run. No counting.</small></div>
+  <div class="totline" style="background:#fff4e5;color:#7a3e00">🐌 <b>FIRST SPLIT: 10:00–10:30/km.</b> Slower than your average. It must feel embarrassing.
+  <br><small style="font-weight:400">Your heart rate lags your effort by 2–3 minutes, so split 1 always feels easier than it is. The wanting-to-keep-running feeling is the warning sign, not a green light. <b>Target: first and last split within 30 sec of each other.</b> Flatness is the only number that matters this month.</small></div>`;}
 function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
  const wd=d.getDay(),{w,p}=weekPlan(d);
  const isRace=(p.lr||"").indexOf("RACE DAY")>=0;
@@ -775,7 +783,7 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   if(p.note)main.push({ex:p.note});
   main.push({ex:"Fuel: over 75 min → 30–60g carbs/hr + electrolytes, sip every 15 min"});
   if(p.bull)main.push({ex:"👥 "+p.bull+" — run this one with your batch at Filinvest City"});
-  return{wu:["First 10 min very easy — walk breaks from the beginning"],main:main,
+  return{wu:["🐌 First split 10:00–10:30/km — embarrassingly slow. HR lags 2–3 min, so split 1 always lies to you.","First 10 min very easy — walk breaks from the beginning"],main:main,
    cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch — full rest tomorrow"]};}
  if(wd===2||wd===5){const w=weekPlan(d).w,spec=(wd===2?p.wd1:p.wd2)||"45 min";
   if(/rest/i.test(spec))return null;
@@ -785,6 +793,7 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   main.push(Object.assign({},STRIDES,{sr:stridesFor(w)}));
   main.push({ex:"🛡️ AFTER the run: 15-min prehab — hamstring, calves, ankles",note:"Order matters. Eccentric work causes temporary strength loss and muscle damage — never run on freshly-loaded hamstrings. You're also already warm. If the run leaves you wrecked, move the prehab to Thursday instead of skipping it."});
   return{wu:["⚡ 2-min activation FIRST: 10 glute bridges · 10 leg swings/side · 10 ankle circles/side",
+             "🐌 Then open at 10:00–10:30/km. Split 1 must feel embarrassing — your HR won't tell you the truth for 2–3 min.",
              "Then 5–10 min very easy running to start",
              "(Activation ≠ strength work. Primes the muscles without fatiguing them — the loading work comes AFTER the run.)"],
     main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
@@ -793,7 +802,7 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
         {ex:"If HR won't stay under 152, walk more. Slower is the point."}];
   if(hill)main.push(Object.assign({},HILLS,{sr:hill}));
   else main.push(Object.assign({},STRIDES,{sr:stridesFor(tw)}));
-  return{wu:["First 5 min very easy, let HR rise gradually"],main:main,
+  return{wu:["🐌 Open at 10:00–10:30/km — split 1 always feels too easy because HR lags 2–3 min.","First 5 min very easy, let HR rise gradually"],main:main,
    cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  return null;}
 function workoutFor(d){const ov=WO_OVERRIDE[keyOf(d)];if(ov)return ov;
@@ -1488,7 +1497,7 @@ function renderPlan(){
  <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.
  <br><small class="muted"><b>And it CANNOT be split.</b> 3 × 30 min ≠ 90 min continuous. Only a continuous long run depletes glycogen (forcing fat-oxidation adaptation), loads connective tissue for sustained duration, teaches cardiac-drift management, and trains the mental skill of continuing while tired. Marathon results correlate more with long-run distance than with weekly mileage. A 30 km week WITH the long run beats a 46 km week without it.</small></div>
  <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
- <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.<br><small class="muted">Moved up from 3:1 on Sep 30. <b>The test isn't comfort, it's heart rate:</b> if 4:1 keeps you under 152 on easy runs, it's working. If it pushes you to 155+, drop back to 3:1 — the extra running minute costs more than it gives. Long runs and race day use whatever ratio your HR says you can hold.</small></div>
+ <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.<br><small class="muted"><b>Back to 3:1 on Oct 2, from your own lap data.</b> On 3:1 your splits faded 6% across a run; on 4:1, 17%, and your first splits crept to 7:51/km. Your HR takes 2–3 min to reach steady state — a 3-min segment ends before it catches up, a 4-min segment lets it land right on the walk break. That's the "downhill after the first break" feeling. <b>Earn 4:1 back:</b> three runs where your first and last split are within 30 sec. Flatness first, ratio second.</small></div>
  <div class="ritem"><b>4. Time, not distance.</b> "The body does not inherently know distance." Only the late long runs carry a km target.</div>
  <div class="ritem"><b>5. Max 4 running days.</b> Rest or cross-train otherwise. Avoid team sports (injury risk).</div>
  <div class="ritem"><b>6. Full rest after the long run.</b> Non-negotiable — that's Monday.</div>
