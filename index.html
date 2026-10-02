@@ -139,6 +139,19 @@ small.dim{color:var(--mut);font-size:11px}
 .rgroup{margin-bottom:14px}
 .rgh{font-weight:800;font-size:13px;margin-bottom:6px;color:var(--navy)}
 .ritem{border-bottom:1px solid var(--line);padding:6px 0;font-size:12.5px}
+.rd h3{margin:14px 0 6px;font-size:13.5px}
+.rdtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.rdtab th{background:var(--base);text-align:left;padding:6px 7px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--mut)}
+.rdtab td{padding:6px 7px;border-top:1px solid var(--line);vertical-align:top}
+.rdtab tr.key td{background:#fff8e6;font-weight:800}
+.rdgoal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:8px}
+.rdgoal .g{border:2px solid var(--line);border-radius:11px;padding:10px}
+.rdgoal .g.pri{border-color:var(--teal);background:var(--base)}
+.rdgoal .g .tt{font-size:17px;font-weight:900}
+.rdgoal .g .ss{font-size:11px;color:var(--mut);margin-top:2px;line-height:1.45}
+.warnbox{background:#fdecea;border-left:4px solid #d93025;border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:9px}
+.okbox{background:#e7f6f5;border-left:4px solid var(--teal);border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:9px}
+.mental{background:#f4f1fb;border-left:4px solid #6b4fbb;border-radius:9px;padding:9px 12px;font-size:12.5px;margin-top:8px}
 .rm{color:var(--mut);font-size:11px}
 .modal{position:fixed;inset:0;background:rgba(20,30,45,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .modal.hide{display:none}
@@ -207,6 +220,7 @@ small.dim{color:var(--mut);font-size:11px}
     <div class="tab" data-t="runs">Runs</div>
     <div class="tab" data-t="plan">Plan</div>
     <div class="tab" data-t="cal">📅 Calendar</div>
+    <div class="tab" data-t="raceday">🏁 Race Day</div>
     <div class="tab" data-t="tldr">TL;DR</div>
     <div class="tab" data-t="handbook">Handbook</div>
   </div>
@@ -377,6 +391,8 @@ small.dim{color:var(--mut);font-size:11px}
     </div>
     <div class="card"><div id="calDetail"></div></div>
   </div>
+
+  <div id="raceday" class="hide"></div>
 
   <!-- TL;DR -->
   <div id="tldr" class="hide">
@@ -1468,6 +1484,175 @@ function renderGoals(){
   GOALS.map(([tier,time,pace,note])=>`<div class="ritem"><div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b>${tier}</b><span class="b" style="color:var(--teal);font-size:15px">${time}</span></div><div class="muted" style="font-size:11.5px">${pace}</div><div style="font-size:12px;margin-top:3px">${note}</div></div>`).join("")
   +`<div class="note adj" style="margin-top:10px">⚠️ <b>On race day, pacing is worth more minutes than fitness.</b> Going out 30 sec/km too fast costs 30–60 minutes in the last 10km — a bigger swing than any training difference. Run the first half at your target pace or <i>slower</i>, take walk breaks from km 1, and let the second half be the fast one.</div>`
   +`<div class="note">💡 <b>Why three goals:</b> a single time target makes race day pass/fail. With A/B/C you can have a hard day, miss the A, still hit the B, and walk away having genuinely succeeded. That's not lowering the bar — it's how experienced racers protect their own motivation.</div>`;}
+// ════════ RACE DAY ════════
+// Paces are SEGMENT averages — they already include the 3:1 walk breaks, so run
+// them off the watch's lap/average pace, never off instantaneous pace.
+const RD_PLANS={
+ A:{name:"A — 6:15",tot:"6:23",note:"Only if the Jan 17 peak run goes well and race night is cool.",
+    segs:[["0–10 km","9:06","1:31","1:31","&lt;145"],["10–21 km","8:54","1:37","3:08","145–152"],
+          ["21–32 km","8:57","1:38","4:47","150–157"],["32–38 km","9:18","0:55","5:43","155–162"],
+          ["38–42.2 km","9:36","0:40","6:23","whatever's left"]]},
+ B:{name:"B — 6:30",tot:"6:35",pri:1,note:"The honest target. Everything below is written for this one.",
+    segs:[["0–10 km","9:30","1:35","1:35","&lt;145"],["10–21 km","9:09","1:40","3:15","145–152"],
+          ["21–32 km","9:12","1:41","4:56","150–157"],["32–38 km","9:36","0:57","5:54","155–162"],
+          ["38–42.2 km","9:54","0:41","6:35","whatever's left"]]},
+ C:{name:"C — 7:00",tot:"7:05",note:"Bad night, cramps, heat. Still a finisher's medal.",
+    segs:[["0–10 km","10:06","1:41","1:41","&lt;140"],["10–21 km","9:48","1:47","3:28","140–150"],
+          ["21–32 km","9:54","1:48","5:17","148–155"],["32–38 km","10:24","1:02","6:20","152–160"],
+          ["38–42.2 km","10:48","0:45","7:05","whatever's left"]]}};
+let rdPlan="B";
+function renderRaceDay(){
+ const P=RD_PLANS[rdPlan];
+ const goals=Object.keys(RD_PLANS).map(k=>{const g=RD_PLANS[k];
+  return `<div class="g ${k===rdPlan?'pri':''}" data-p="${k}" style="cursor:pointer">
+   <div class="tt">${g.name}</div><div class="ss">finish ≈ ${g.tot}<br>${g.note}</div></div>`}).join("");
+ const rows=P.segs.map(s=>`<tr><td><b>${s[0]}</b></td><td>${s[1]}</td><td>${s[2]}</td><td>${s[3]}</td><td>${s[4]}</td></tr>`).join("");
+ const fuel=[["−4 h","Dinner",      "Rice + chicken + egg. Normal portion, low fibre, nothing new."],
+   ["−3 h","Nap",                   "Lie down even if you don't sleep. Dark room. Alarm set twice."],
+   ["−2 h","Pre-race meal",         "~80 g carbs: 2 slices white bread + banana + honey. Plus 500 ml water."],
+   ["−45 m","Last toilet + sip",    "200 ml electrolyte. Stop drinking after this."],
+   ["−25 m","Warm-up starts",       "See below. Keep HR under 140."],
+   ["−5 m","Gel #1",                "Take it BEFORE the gun, with a sip. Start the race already fuelled."],
+   ["0:35","Gel #2","Then every 35 min: 1:10, 1:45, 2:20, 2:55, 3:30, 4:05, 4:40, 5:15, 5:50, 6:25"],
+   ["every aid","Fluid",            "2–3 cups. 500–650 ml/hr. Walk through every station — it's a walk break anyway."],
+   ["hourly","Salt",                "600–900 mg sodium/hr. You cramp, so go high. Salt stick or high-sodium drink."]];
+ document.getElementById("raceday").innerHTML=`
+ <div class="card rd" style="border-color:var(--teal)">
+  <h2>🏁 Race Day — TBR InLife Dream Marathon</h2>
+  <p class="cap">Sun 14 Feb 2027 · <b>12:00 AM gun start</b> · Filinvest City · 42.195 km<br>
+   Cut-offs: <b>21 K by 4:00 AM</b> · <b>finish by 8:00 AM</b>. Both are generous — even Plan C clears the half by 3:29.</p>
+  <div class="warnbox"><b>⚠️ These numbers are provisional.</b> They're built on your October efficiency (EF 0.72) projected forward.
+   We lock the real ones after the <b>Jan 17 peak long run</b> — that 3h30 is the only honest rehearsal for this. Nothing here is final until then.</div>
+  <h3>🎯 Pick your plan — tap to switch</h3>
+  <div class="rdgoal">${goals}</div>
+
+  <h3>⏱ Pacing — ${P.name} (finish ≈ ${P.tot})</h3>
+  <table class="rdtab"><thead><tr><th>Segment</th><th>Pace</th><th>Split</th><th>Elapsed</th><th>Target HR</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="okbox"><b>The single rule that decides your race:</b> the first 10 km must feel too slow.
+   Your lap data says you open 2 min/km too fast and pay for it all session. On race night, with a crowd and adrenaline, that instinct will be
+   three times stronger. <b>If km 1 feels comfortable, you are already going too fast.</b></div>
+  <div class="warnbox"><b>HR is the boss, not pace.</b> If HR exceeds the band for your segment, slow down — even if pace looks right.
+   Heat and humidity will push HR up 5–10 bpm for the same effort. On a humid night, hold the HR and let the pace go. A 6:45 finish you ran
+   smart beats a 6:15 attempt you walked in from km 30.</div>
+
+  <h3>⌚ Garmin setup — do this the week before</h3>
+  <table class="rdtab"><tbody>
+   <tr><td><b>Run/Walk alert</b></td><td>Run ▸ Settings ▸ Run/Walk → <b>3:00 run / 1:00 walk</b>. Set it once, it repeats all race.</td></tr>
+   <tr><td><b>Data screen 1</b></td><td><b>Lap pace · Heart rate · Distance · Time of day</b>. Lap pace, NOT instantaneous — walk breaks make instant pace useless.</td></tr>
+   <tr><td><b>Data screen 2</b></td><td>Elapsed time · Avg pace · Avg HR · Lap distance.</td></tr>
+   <tr><td><b>Auto Lap</b></td><td>Every <b>1 km</b>. Gives you a per-km reality check against the table above.</td></tr>
+   <tr><td><b>HR alert</b></td><td>Set a <b>high alert at 160</b>. If it buzzes before km 32, you're overcooking it.</td></tr>
+   <tr><td><b>Battery</b></td><td>Charge to 100% the morning of Feb 13. Switch to <b>UltraTrac / battery saver</b> if your model can't hold 7 h of GPS+HR.</td></tr>
+   <tr><td><b>Night</b></td><td>Backlight → gesture ON, or you'll be stabbing at it in the dark. Brightness low to save battery.</td></tr>
+   <tr><td><b>Don't</b></td><td>Don't load a structured workout for race day. Run it off the pace band. A workout file will nag you.</td></tr>
+  </tbody></table>
+
+  <h3>🍚 Carb loading — Fri 12 & Sat 13 Feb (2 days, not 5)</h3>
+  <p class="cap">Built on your Evolt scan of 29 Sep 2026: <b>72.9 kg</b> · fat 15.9 kg · skeletal muscle 31.7 kg · BF 21.8%.
+   Re-run this if you scan again closer to the race.</p>
+  <table class="rdtab"><tbody>
+   <tr><td><b>Target</b></td><td><b>8 g/kg ≈ 585 g carbs per day.</b> 10–12 g/kg is for sub-3 elites — at a 6:30 finish you can't store that much and the surplus only bloats you.</td></tr>
+   <tr><td><b>How long</b></td><td><b>Two days.</b> Glycogen has a ceiling and trained athletes reach it in 24–48 h. The old depletion-then-load week is obsolete; past 2 days you add fat and gut content, not fuel.</td></tr>
+   <tr><td><b>Protein</b></td><td>Normal, ~130 g. Don't raise it — it crowds out carbs.</td></tr>
+   <tr><td><b>Fat</b></td><td><b>Low.</b> Fat is calorie-dense and fills you up before the carbs are in.</td></tr>
+   <tr><td><b>Fibre</b></td><td><b>Low from Feb 10, very low Feb 13.</b> White rice not brown, no beans, skip the gulay, peel your fruit. This is gut insurance for a midnight gun.</td></tr>
+   <tr><td><b>Sodium</b></td><td>Go <b>high</b> the last 24 h. Helps you hold fluid, and you're a crampier.</td></tr>
+  </tbody></table>
+  <div class="warnbox"><b>⚖️ The scale will say ~75 kg on race day. Do not panic and do not restrict.</b>
+   Every gram of glycogen binds about 3 g of water, so a full load is roughly <b>+2.0 kg</b> of water sitting inside your muscles.
+   You have worked from 78.2 kg down to 72.9 and that number matters to you — so hear this clearly: <b>the gain is the loading working.</b>
+   It is fuel and hydration, it is not fat, and it is gone within days of the race.</div>
+  <h3 style="margin-top:12px">A load day, meal by meal (~575 g)</h3>
+  <table class="rdtab"><thead><tr><th>When</th><th>What</th><th>Carbs</th></tr></thead><tbody>
+   <tr><td><b>06:00</b></td><td>2 cups rice + 2 eggs + lean tapa + 250 ml pineapple juice</td><td>120 g</td></tr>
+   <tr><td><b>09:00</b></td><td>2 pandesal + 1 tbsp honey + 1 lakatan banana</td><td>70 g</td></tr>
+   <tr><td><b>12:00</b></td><td>2 cups rice + skinless grilled chicken + clear soup</td><td>98 g</td></tr>
+   <tr><td><b>15:00</b></td><td>1 cup champorado + 500 ml Gatorade</td><td>75 g</td></tr>
+   <tr><td><b>18:00</b></td><td>2 cups rice + tinola broth (no gulay) + 150 g kamote</td><td>125 g</td></tr>
+   <tr><td><b>21:00</b></td><td>3 slices white bread + honey + 250 ml juice</td><td>86 g</td></tr>
+   <tr class="key"><td colspan="2"><b>TOTAL</b> — six smaller meals beats three big ones</td><td><b>574 g</b> = 7.9 g/kg</td></tr>
+  </tbody></table>
+  <div class="okbox"><b>Why it matters, in numbers.</b> Running 42.195 km at 72.9 kg costs about <b>3,187 kcal</b>.
+   At your pace roughly 45% comes from fat, so you need ~<b>1,750 kcal from carbohydrate</b>.
+   Fully loaded you carry ~670 g of glycogen (<b>2,680 kcal</b>) plus ~1,000 kcal of gels — comfortable.
+   Arrive <i>unloaded</i> at ~350 g and the margin nearly vanishes. <b>That gap is the wall.</b></div>
+  <div class="warnbox"><b>🧪 Rehearse it before Jan 17.</b> Load Fri + Sat, then run the 3h30 peak on the Sunday.
+   That is where you find out whether 575 g of carbs sits well in your gut — not at midnight on race day. Nothing new on race day, and that includes the food.</div>
+
+  <h3>🍚 Timeline, fuel & fluid</h3>
+  <table class="rdtab"><thead><tr><th>When</th><th>What</th><th>Detail</th></tr></thead><tbody>
+   ${fuel.map(f=>`<tr${/Gel #1|Pre-race/.test(f[1])?' class="key"':''}><td><b>${f[0]}</b></td><td>${f[1]}</td><td>${f[2]}</td></tr>`).join("")}
+  </tbody></table>
+  <div class="okbox"><b>Totals for a 6h30 race:</b> ~300–390 g carbs (11–13 gels) · 3.2–4.2 L fluid · 4–6 g sodium.
+  <br><b>Nothing new on race day.</b> Every gel flavour and every drink must have been used on a long run first. Practise the full fuel plan on <b>Jan 17</b>.</div>
+
+  <h3>🛒 Buying gels — what to actually check</h3>
+  <table class="rdtab"><thead><tr><th>Check</th><th>What you want</th></tr></thead><tbody>
+   <tr><td><b>Carbs per gel</b></td><td><b>20–25 g.</b> That's the unit the whole fuel plan is built on. A 15 g gel means you need more of them, not fewer.</td></tr>
+   <tr><td><b>Carb type</b></td><td>Look for <b>glucose/maltodextrin + fructose</b> (ideally ~2:1). Two carb types use two gut transporters, so you absorb more with less bloating. Glucose-only gels cap out sooner.</td></tr>
+   <tr><td><b>Water needed?</b></td><td>This is the one people miss. <b>Isotonic gels</b> (e.g. SiS GO) can be taken without water. <b>Concentrated gels</b> (GU, Hammer, most others) need <b>150–250 ml of water</b> or they sit in your stomach like glue. Match your gel to how you'll carry fluid.</td></tr>
+   <tr><td><b>Sodium</b></td><td>Most gels carry only <b>20–60 mg</b> — nowhere near the 600–900 mg/hr you need. <b>Do not count gels as your salt plan.</b> Carry salt sticks or a high-sodium drink separately.</td></tr>
+   <tr><td><b>Packaging</b></td><td>Easy one-hand tear, and a tab that stays attached. At 4 AM with tired hands this matters more than you'd think.</td></tr>
+   <tr><td><b>Avoid</b></td><td>Anything with a big slug of fat, protein or fibre in it — those slow gastric emptying. Gels are for fast carbs only.</td></tr>
+  </tbody></table>
+
+  <h3>☕ Caffeinated vs plain — buy both</h3>
+  <table class="rdtab"><tbody>
+   <tr><td><b>Split</b></td><td><b>Mostly plain, 2–3 caffeinated.</b> At 72.9 kg the useful dose is ~3 mg/kg ≈ <b>220 mg</b> total. A typical caffeinated gel has 25–100 mg, so 2–3 of them covers it.</td></tr>
+   <tr><td><b>Why not all caffeinated</b></td><td>Caffeine doesn't stack — more isn't better. Too much brings jitters, a raised heart rate (which wrecks your HR pacing) and GI upset.</td></tr>
+   <tr><td><b>When</b></td><td>Save them for the <b>second half</b>, when it's dark, quiet and hard. Caffeine takes ~45 min to peak, so take one <b>around km 21–25</b>, optionally another at km 32.</td></tr>
+   <tr class="key"><td><b>Hard cut-off</b></td><td><b>No caffeine after km 32 (~05:00).</b> You finish ~06:35 and will badly want to sleep. Caffeine's half-life is ~5 h — a gel at the finish is still half in you at 11:30 AM.</td></tr>
+   <tr><td><b>Your night shifts</b></td><td>You're habitually awake at these hours and probably caffeine-tolerant, so expect a smaller lift than a day-worker would get. Useful, not magic.</td></tr>
+  </tbody></table>
+  <div class="warnbox"><b>Test caffeinated gels on a long run first — ideally Jan 17.</b> Caffeine on a running gut is a different experience from caffeine with breakfast,
+   and race night is not the time to find out which way yours goes.</div>
+
+  <h3>🔥 Warm-up (25 min, finishing 5 min before the gun)</h3>
+  <ul><li><b>−25 min:</b> 10 min walk, building to brisk. Keep HR under 120.</li>
+   <li><b>−15 min:</b> 5 min very easy jog. HR under 140. This is the whole jog — resist more.</li>
+   <li><b>−10 min:</b> activation — 10 glute bridges · 10 leg swings/side · 10 ankle circles/side.</li>
+   <li><b>−6 min:</b> 2 × 20 sec strides at ~5 K effort, walk back fully between. Wakes the legs, costs nothing.</li>
+   <li><b>−5 min:</b> gel #1, last sip, into the corral. <b>No static stretching.</b> It reduces power output and does not prevent injury.</li></ul>
+
+  <h3>🦵 When a cramp starts</h3>
+  <div class="warnbox"><b>You already know this one.</b> You cramped after a 5 K Bull Session from voluntarily squeezing your calf.
+   So: <b>do not tense, test or "check" a muscle during this race.</b> Not once. Curiosity is what sets it off.</div>
+  <table class="rdtab"><thead><tr><th>Stage</th><th>Do this</th></tr></thead><tbody>
+   <tr><td><b>First twinge</b></td><td>Don't stop. <b>Shorten your stride immediately</b> and drop the pace. A twinge is a warning, not a cramp — most never arrive if you back off within 30 seconds.</td></tr>
+   <tr><td><b>Take salt</b></td><td>Salt stick / high-sodium drink now, not at the next station. Then 200–300 ml fluid.</td></tr>
+   <tr><td><b>It locks up</b></td><td>Walk. <b>Gentle</b> contract-relax of the OPPOSING muscle — for a calf cramp, pull your toes up toward your shin. Don't force a deep stretch into a locked muscle; you can tear it.</td></tr>
+   <tr><td><b>Restart</b></td><td>Walk 3–5 min, then resume at <b>run 1 min / walk 1 min</b> — not 3:1 — for two cycles. If it holds, go back to 3:1. Accept the lost minutes; you will still finish.</td></tr>
+   <tr><td><b>Both legs, repeatedly</b></td><td>That's not fuelling, that's your muscles past their trained limit. Switch to walk-dominant and finish. There is no prize for the time.</td></tr>
+  </tbody></table>
+  <div class="okbox"><b>Prevention beats all of it:</b> the real cause of late-race cramp is neuromuscular fatigue — running further than you've trained.
+   Your single best anti-cramp measure is already in the plan: <b>the Jan 17 peak 3h30.</b> Second is sodium from the first hour, not after it starts.</div>
+
+  <h3>🧠 The mental plan — what to think, and when</h3>
+  <div class="mental"><b>0–10 km · "Boring is the job."</b><br>You'll feel fantastic and everyone will pass you. Let them. Nobody has ever regretted the first 10 km of a marathon being too slow — only too fast. Your only task here is restraint.</div>
+  <div class="mental"><b>10–21 km · "Settle in."</b><br>This is the easiest stretch. Hold form, hit every gel, run the tangents. Don't bank time — you can't. Check: is my HR in band? Have I had every gel? That's the whole checklist.</div>
+  <div class="mental"><b>21–32 km · "The quiet part."</b><br>Crowds thin, it's 3 AM, the novelty is gone. This is where the race is actually decided and where your night-shift body is an advantage — you've been awake and functional at this hour hundreds of times. Count in 3:1 cycles, not kilometres.</div>
+  <div class="mental"><b>32–38 km · "The wall is a fuelling problem."</b><br>If you've eaten, the wall is mostly negotiable. Shrink the race: one cycle at a time. 3 minutes of running is something you can always do. Then do it again.</div>
+  <div class="mental"><b>38–42.2 km · "You already paid for this."</b><br>The work was done in the 20 weeks, not here. All that's left is collecting. Last 2 km: run them, however slowly. You will remember them for the rest of your life.</div>
+  <div class="okbox"><b>If the dark thoughts come</b> — and at 4 AM they will — don't argue with them. Name the feeling, then return to one concrete task: next gel, next aid station, next 3 minutes. Emotion passes; the task doesn't.
+  <br><b>And remember the 20-Minute Rule still applies mid-race.</b> You're never deciding whether to finish a marathon. You're deciding whether to run the next 3 minutes.</div>
+
+  <h3>🎒 Kit — lay it out Feb 13 morning</h3>
+  <table class="rdtab"><tbody>
+   <tr><td><b>Worn</b></td><td>Race shoes (already broken in — <b>nothing new</b>) · anti-chafe on thighs, nipples, underarms · tested socks · race singlet + bib · watch charged.</td></tr>
+   <tr><td><b>Carried</b></td><td>11–13 gels · salt sticks · soft flask or handheld · phone · small cash. Headlamp only if you've trained with it.</td></tr>
+   <tr><td><b>Drop bag</b></td><td>Dry shirt · slippers · recovery drink · towel · the medical certificate.</td></tr>
+   <tr><td><b>Before Feb 11</b></td><td><b>Medical certificate</b> — required at the Send Off Party for kit claiming. Book this in October. Don't be the person sorting it in February.</td></tr>
+  </tbody></table>
+
+  <h3>🧊 After you cross</h3>
+  <ul><li>Keep walking 10–15 min. Do not sit down immediately — that's when cramps and dizziness hit.</li>
+   <li>Within 30 min: 25–30 g protein + 60–80 g carbs. Chocolate milk works if nothing else appeals.</li>
+   <li>Fluid: 500 ml per hour for the next 4 hours, with salt. You will be badly depleted.</li>
+   <li>Shower cool, not hot. Legs up the wall 10 min. No ice bath — it blunts adaptation and you've nothing left to protect.</li>
+   <li><b>Next 2 weeks:</b> walking only for 7 days, then easy jogs. One easy day per mile raced is the old rule — don't rush back.</li></ul>
+ </div>`;
+ document.querySelectorAll("#raceday .rdgoal .g").forEach(el=>el.onclick=()=>{rdPlan=el.dataset.p;renderRaceDay()});
+}
 function renderTLDR(){
  renderGoals();
  document.getElementById("tldrCritical").innerHTML=TLDR_CRIT.map(([e,t,d])=>
@@ -1580,11 +1765,11 @@ function renderPlan(){
    `<td><small>${p.bull?"👥 "+p.bull.split(" · ")[0]:""}${p.star?" "+p.star.slice(0,42):""}</small></td>`;
   pb.appendChild(tr)}}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
- ["today","recovery","progress","food","runs","plan","cal","tldr","handbook"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
+ ["today","recovery","progress","food","runs","plan","cal","raceday","tldr","handbook"].forEach(id=>document.getElementById(id).classList.add("hide"));document.getElementById(t.dataset.t).classList.remove("hide");
  const v=t.dataset.t;
  if(v==="recovery")renderRecovery();if(v==="progress")renderProgress();if(v==="food")renderFood();
  if(v==="runs")loadRuns();if(v==="plan")renderPlan();if(v==="cal")renderCal();
- if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook()});
+ if(v==="tldr")renderTLDR();if(v==="handbook")renderHandbook();if(v==="raceday")renderRaceDay()});
 // One-time backfill: completed days, verified against Strava/Garmin. Runs once per device.
 (function(){const o=state();if(o.seeded_bridge1)return;
  ["2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-05","2026-09-06"]
