@@ -421,10 +421,10 @@ const TBR={
  12:{wd1:"70 min · last 20 min higher intensity",wd2:"50 min",lr:"1 hr 30 min"},
  13:{wd1:"Rest or XTrain",wd2:"75 min",lr:"3 hrs 15 min or min 25 km",note:"Divide into 2 × 100 & 95 min — even splits",star:"⭐ Very important week — the first long run that gives you the range to reach the finish line.",bull:"Bull Session 4 · Dec 27"},
  14:{wd1:"70 min · last 25 min higher intensity",wd2:"60 min",lr:"1 hr 30 min"},
- 15:{wd1:"60 min",wd2:"60 min",lr:"2 hrs",note:"Divide into 2 × 60 min — even splits",bull:"Bull Session 5 · Jan 10"},
- 16:{wd1:"Rest or XTrain",wd2:"70 min · last 25 min higher intensity",lr:"1 hr 30 min"},
- 17:{wd1:"75 min · last 25 min higher intensity",wd2:"45 min",lr:"3 hrs 50 min or min 30 km",star:"🚨 CRUCIAL WEEK. Final long run, then the 3-week taper begins. Protect this week!",bull:"Bull Session 6 · Jan 24"},
- 18:{wd1:"Rest or XTrain",wd2:"60 min",lr:"1 hr 30 min",star:"Taper week 1 of 3"},
+ 15:{wd1:"60 min",wd2:"60 min",lr:"2 hrs 30 min",note:"Bull Session 5 runs 2 hrs — add ~30 min solo either side",bull:"Bull Session 5 · Jan 10"},
+ 16:{wd1:"Rest or XTrain",wd2:"60 min",lr:"3 hrs 30 min",star:"🚨 PEAK LONG RUN — moved here from Jan 24 (family trip). Protect this week!",note:"Your biggest session of the whole block. Full fuelling, race kit, race shoes."},
+ 17:{wd1:"50 min",wd2:"45 min",lr:"1 hr",star:"✈️ Away Fri–Sun. Normal week, just a short long run — and it's your post-peak recovery week anyway.",note:"Fri and Sun runs happen on the trip. Both are travel-friendly; skip either if the day gets away from you."},
+ 18:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs",star:"Taper begins — but one solid run first after the trip"},
  19:{wd1:"50 min",wd2:"50 min",lr:"1 hr 30 min",note:"RACE REHEARSAL — divide into 2 × 45 min, even splits",star:"Taper week 2 of 3"},
  20:{wd1:"50 min",wd2:"50 min",lr:"🏁 RACE DAY — 42.2 km",star:"Take Thursday & Friday OFF and REST. No exertion. Rest body and mind for race day."}};
 // Bridge phase (my design) — Sep 1–27, to earn Beginner 2 by Sep 28
@@ -458,8 +458,9 @@ const OVERRIDE={
  "2026-10-05":{emo:"🛌",t:"Full Rest — post-race",d:"You raced at 180–190 bpm. Complete rest today, no exceptions.",type:"rest"},
  // ── 🌙 MIDNIGHT RACE REHEARSALS — none of the three plans cover this ──
  "2026-12-13":{emo:"🌙",t:"NIGHT LONG RUN — start 9PM",d:"Race starts at MIDNIGHT. First rehearsal: run in the dark, after a normal day, with a headlamp. 2h40.",type:"long"},
- "2027-01-17":{emo:"🌙",t:"NIGHT LONG RUN — start 9–10PM",d:"Second rehearsal. Nap in the afternoon first, exactly like race day. 1h30.",type:"long"},
- "2027-01-31":{emo:"🌙",t:"NIGHT LONG RUN — full dress rehearsal",d:"Afternoon nap → race kit → race breakfast timing → 1h30 from 10PM. Last chance to test everything.",type:"long"},
+ "2027-01-17":{emo:"🚨",t:"PEAK LONG RUN — 3h30",d:"Your biggest session of the block, moved from Jan 24. Consider an EVENING start (~8:30PM) to double as midnight-race rehearsal.",type:"long"},
+ "2027-01-24":{emo:"✈️",lab:"trip<br>1h · 152",t:"Trip Run — 1 hr easy",d:"Away with family. Easy hour at HR 135–152, run-walk 4:1 (12 repeats). Peak run is already banked from Jan 17.",type:"long"},
+ "2027-01-31":{emo:"🌙",t:"NIGHT DRESS REHEARSAL — 2h00",d:"Afternoon nap → race kit → race breakfast timing → 2 hrs from 10PM. Last chance to test everything.",type:"long"},
  "2027-02-10":{emo:"🏃",t:"Last easy shakeout — 20 min",d:"Very easy, just to keep the legs awake. Then nothing until race night.",type:"easy"},
  "2027-02-11":{emo:"🎉",t:"REST + SEND OFF PARTY",d:"No exertion. Kit claiming from 4PM, party 7PM, Botanical Gardens. BRING YOUR MEDICAL CERTIFICATE.",type:"rest"},
  "2027-02-12":{emo:"🛌",t:"REST — total",d:"TBR's instruction: no exertion. Rest your body AND your mind. Carb-load, hydrate, lay out your kit.",type:"rest"},
@@ -487,12 +488,13 @@ const WO_OVERRIDE={
         {ex:"Fuel: 45g carbs/hr from 45 min onward + electrolytes"},
         {ex:"Note how you feel at 11PM–midnight — that is your race start window"}],
   cd:["Refuel within 45 min","Expect disrupted sleep after — that's part of the lesson","Monday is full rest"]},
- "2027-01-17":{wu:["🛌 NAP in the afternoon first — 60–90 min. This is rehearsal, not laziness."],
-  main:[{ex:"🌙 1h30 starting 9–10PM, after an afternoon nap"},
-        {ex:"Eat your intended race 'breakfast' ~2.5 hrs before the start"},
-        {ex:"Full race kit — shoes, socks, shorts, belt, everything"},
-        {ex:"Fuel exactly as you plan to on race day"}],
-  cd:["Log what worked and what chafed","Adjust before the final rehearsal"]},
+ "2027-01-17":{wu:["First 10 min very easy — walk breaks from the start","Full race kit, race shoes, nothing new"],
+  main:[{ex:"🚨 PEAK LONG RUN — 3 hrs 30 min",note:"The biggest session of your block. Moved from Jan 24 for the family trip."},
+        {ex:"💡 Consider starting ~8:30PM so you finish near midnight",note:"That turns your peak run into midnight-race rehearsal — two birds. Only if you have a safe, lit route."},
+        {ex:"⛽ Fuel: 60g carbs/hr + electrolytes every 15 min. This is the rate you'll use on race day."},
+        {ex:"👟 Race shoes, race socks, race belt — test everything"},
+        {ex:"⚠️ Running this solo (Bull Session 6 is Jan 24, you'll be away). Plan your route, water stops, and tell someone where you are."}],
+  cd:["Walk 10 min","Refuel within 45 min","Full rest Monday — this one earns it"]},
  "2027-01-31":{wu:["🛌 Afternoon nap, then race breakfast at the exact race-day interval."],
   main:[{ex:"🌙 FULL DRESS REHEARSAL — 1h30 from 10PM"},
         {ex:"Nothing new after tonight. Whatever works here is what you use on Feb 14."},
@@ -699,13 +701,27 @@ const XTRAIN={wu:["5 min easy spin / stroll to warm up"],
   {ex:"🛑 Never a substitute for a run",note:"Cycling builds aerobic fitness but not running-specific durability. Never trade a scheduled run for a bike session."},
   {ex:"Cap it",note:"Max 2 cross-training sessions a week. If you're tired, sore or short on sleep, skip it — it's a bonus, not a requirement."}],
  cd:["Easy spin down 3–5 min","Light stretch","Refuel normally — this doesn't earn extra food"]};
+// ── RUNNING ECONOMY WORK (phased) ──
+// Strides from week 1 · low-level plyos from week 1 · hill sprints from week 6.
+// Total added load ≈ 4 min/session. Negligible fatigue, real economy return.
+function stridesFor(w){return w<=4?"4 × 20 sec":w<=12?"6 × 20 sec":"6 × 25 sec"}
+function hillsFor(w){if(w<6)return null;return w<=12?"4 × 10 sec":"6 × 12 sec"}
+const STRIDES={ex:"⚡ STRIDES — end of run, warm legs only",
+ note:"~5K effort, relaxed and tall. WALK BACK for full recovery between each. Not sprints — smooth and fast.",
+ tag:"Running economy: improves neuromuscular recruitment and stride mechanics. Also raises cadence naturally, without forcing it."};
+const HILLS={ex:"⛰️ HILL SPRINTS — after the run",
+ note:"Find a moderate hill. Near-max effort up, WALK all the way down. Full recovery — these are neural, not aerobic.",
+ tag:"Uphill sprinting loads the hamstring far more safely than flat sprinting — the hip doesn't extend at speed. Best economy return per minute available."};
+const PLYO=[
+ {ex:"Pogo Hops",mc:"Flat ground",sr:"2 × 20",note:"Stiff ankles, minimal knee bend, bounce off the floor. Quiet landings.",tag:"Tendon stiffness & elastic return — plus direct ankle prehab"},
+ {ex:"A-Skips",mc:"20 m",sr:"2 lengths",note:"Tall posture, quick ground contact.",tag:"Coordination and elastic recoil"}];
 const PREHAB={wu:["2 min easy movement — you've just run, you're warm"],
  main:[{ex:"HAMSTRING — pick ONE (see options below)",mc:"No machine needed",sr:"3 × 6–10",note:"Eccentric (lowering) focus, 3–4 seconds down. This is the single most important item here.",tag:"Hamstring re-injury prevention — you strained it in July"},
   {ex:"Single-Leg Calf Raise",mc:"Step or flat floor",sr:"3 × 15/side",tag:"Ankle & Achilles armor — 2 prior sprains"},
   {ex:"Tibialis Raise",mc:"Back against wall, heels out",sr:"3 × 20",tag:"Shin & ankle prehab"},
   {ex:"Single-Leg Step-Down",mc:"Stair or low box",sr:"2 × 10/side (LEFT first)",tag:"Left-leg imbalance (Evolt)"},
-  {ex:"Side Plank",mc:"Mat",sr:"2 × 30s/side",tag:"Hip stability for late-run form"}],
- cd:["Gentle calf + hip flexor stretch","Total: ~15 min, no gym required"]};
+  {ex:"Side Plank",mc:"Mat",sr:"2 × 30s/side",tag:"Hip stability for late-run form"}].concat(PLYO),
+ cd:["Gentle calf + hip flexor stretch","Total: ~17 min, no gym required"]};
 const HAMOPTS=[
  ["🥇 Single-Leg Romanian Deadlift","One dumbbell, kettlebell, or even a water jug","3 × 8/side",
   "Stand on one leg, hinge at the hip, let the weight lower toward the floor over 3–4s while the back leg rises behind you. Feel the stretch in the hamstring of the standing leg. Come up under control.",
@@ -759,20 +775,23 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   if(p.bull)main.push({ex:"👥 "+p.bull+" — run this one with your batch at Filinvest City"});
   return{wu:["First 10 min very easy — walk breaks from the beginning"],main:main,
    cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch — full rest tomorrow"]};}
- if(wd===2||wd===5){const spec=(wd===2?p.wd1:p.wd2)||"45 min";
+ if(wd===2||wd===5){const w=weekPlan(d).w,spec=(wd===2?p.wd1:p.wd2)||"45 min";
   if(/rest/i.test(spec))return null;
   const hi=/higher intensity/i.test(spec);
   const main=[{ex:`${spec.split(" · ")[0]} run`,note:`Purpose: HOLD the conditioning from Sunday's long run. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
   if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
+  main.push(Object.assign({},STRIDES,{sr:stridesFor(w)}));
   main.push({ex:"🛡️ AFTER the run: 15-min prehab — hamstring, calves, ankles",note:"Order matters. Eccentric work causes temporary strength loss and muscle damage — never run on freshly-loaded hamstrings. You're also already warm. If the run leaves you wrecked, move the prehab to Thursday instead of skipping it."});
   return{wu:["⚡ 2-min activation FIRST: 10 glute bridges · 10 leg swings/side · 10 ankle circles/side",
              "Then 5–10 min very easy running to start",
              "(Activation ≠ strength work. Primes the muscles without fatiguing them — the loading work comes AFTER the run.)"],
     main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
- if(wd===3){const w=weekNum(d),{w:tw}=weekPlan(d);
-  return{wu:["First 5 min very easy, let HR rise gradually"],
-   main:[{ex:`Easy ${extraRun(tw)} · HR ${HRZ.easy} bpm · run-walk ${RUNWALK}`,note:"Added aerobic volume on top of TBR. Pure easy — this run only works if it stays easy."},
-         {ex:"If HR won't stay under 152, walk more. Slower is the point."}],
+ if(wd===3){const {w:tw}=weekPlan(d);const hill=hillsFor(tw);
+  const main=[{ex:`Easy ${extraRun(tw)} · HR ${HRZ.easy} bpm · run-walk ${RUNWALK}`,note:"Added aerobic volume on top of TBR. Pure easy — this run only works if it stays easy."},
+        {ex:"If HR won't stay under 152, walk more. Slower is the point."}];
+  if(hill)main.push(Object.assign({},HILLS,{sr:hill}));
+  else main.push(Object.assign({},STRIDES,{sr:stridesFor(tw)}));
+  return{wu:["First 5 min very easy, let HR rise gradually"],main:main,
    cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  return null;}
 function workoutFor(d){const ov=WO_OVERRIDE[keyOf(d)];if(ov)return ov;
