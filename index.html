@@ -1006,7 +1006,7 @@ function renderQuests(log){const c=document.getElementById("quests");if(!c)retur
  const row=q=>{const on=!!log[q.key];return `<div class="qrow ${q.grp==='big'?'qbig':''} ${on?'qon':''}"><div><div class="ql">${q.label} <span class="qxp">+${q.xp} XP</span></div><div class="qs">${q.sub}</div></div><button class="qcheck ${on?'on':''}" data-k="${q.key}">${on?'✓':'＋'}</button></div>`};
  c.innerHTML=row(QUESTS[0])+`<div class="qgroup"><div class="qgh">🍚 Fuel & supplements</div>`+QUESTS.filter(q=>q.grp==="fuel").map(row).join("")+`</div>`+QUESTS.filter(q=>q.grp==="solo").map(row).join("");
  c.querySelectorAll(".qcheck").forEach(b=>b.onclick=()=>toggleQuest(b.dataset.k));}
-function toggleQuest(k){const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l[k]=!l[k];o.logs[key]=l;S.set(o);renderToday()}
+function toggleQuest(k){if(isFuture())return;const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l[k]=!l[k];o.logs[key]=l;S.set(o);renderToday()}
 function renderMeals(log){const plan=dayPlan(VIEW),done=log.meals||{};
  document.getElementById("mealType").textContent="· "+plan.type;
  let tk=0,tp=0,tc=0,tf=0;
@@ -1015,7 +1015,7 @@ function renderMeals(log){const plan=dayPlan(VIEW),done=log.meals||{};
  document.getElementById("mealTotal").innerHTML=[["≈"+tk,"kcal"],[tp+"g","protein"],[tc+"g","carbs"],[tf+"g","fat"]].map(([v,k])=>`<div class="m"><div class="v">${v}</div><div class="k">${k}</div></div>`).join("");
  const tg=plan.target;document.getElementById("mealTarget").innerHTML=`≈${tg[0]} kcal · ${tg[1]}g P · ${tg[2]}g C · ${tg[3]}g F`+
   (plan.adj>0?` <span style="color:var(--teal)">(+${plan.adj} for training volume)</span>`:"");
- document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
+ document.querySelectorAll(".mcheck").forEach(b=>b.onclick=()=>{if(isFuture())return;const o=state(),key=keyOf(VIEW);const l=o.logs[key]||{};l.meals=l.meals||{};l.meals[b.dataset.i]=!l.meals[b.dataset.i];o.logs[key]=l;S.set(o);renderToday()});}
 function renderToday(){const o=state();cur=mission(VIEW);renderDateNav();
  const dk=keyOf(VIEW),tk=keyOf(TODAY);
  document.getElementById("todayDate").textContent=fmtDate(VIEW)+(dk===tk?"":(dk<tk?"  ⏪ past day":"  ⏩ upcoming"));
@@ -1025,7 +1025,7 @@ function renderToday(){const o=state();cur=mission(VIEW);renderDateNav();
  const er=document.getElementById("effRow");
  if(er){er.innerHTML="";
   EFFORTS.forEach(([e,lab,rpe])=>{const el=document.createElement("div");el.className="effb"+(log.rpe===rpe?" on":"");el.innerHTML=`<span class="e">${e}</span>${lab}`;
-   el.onclick=()=>{const o2=state(),k=keyOf(VIEW);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});}
+   el.onclick=()=>{if(isFuture())return;const o2=state(),k=keyOf(VIEW);o2.logs[k]=Object.assign({},o2.logs[k],{rpe:rpe,effort:lab});S.set(o2);renderToday()};er.appendChild(el)});}
  renderMeals(log);renderQuests(log);
  {const nb=document.getElementById("noteBox");if(nb)nb.value=log.note||"";}
  const g=document.getElementById("guide");
@@ -1052,20 +1052,32 @@ function renderWeek(o){o=o||state();
   const el=document.createElement("div");el.className=cls;el.innerHTML=`<div class="dn">${WD[d.getDay()]}</div><div class="de">${m.emo}</div>`;
   if(d<=TODAY){el.style.cursor="pointer";el.title="Tap to open this day";const dd=new Date(d);el.onclick=()=>gotoDay(dd);}
   strip.appendChild(el)}}
+// VIEW may roam the whole program. Days after TODAY are READ-ONLY (preview);
+// isFuture() gates every write so a preview can't accidentally log something.
+function isFuture(d){return keyOf(d||VIEW)>keyOf(TODAY)}
 function gotoDay(d){const x=new Date(d);x.setHours(0,0,0,0);
- if(x>TODAY)return;                       // no logging the future
- if(x<START)return;
+ if(x<START||x>RACE)return;
  VIEW=x;renderToday();}
 function renderDateNav(){const pick=document.getElementById("dayPick");if(pick)pick.value=keyOf(VIEW);
- const nx=document.getElementById("dayNext");if(nx)nx.disabled=(keyOf(VIEW)===keyOf(TODAY));
+ const nx=document.getElementById("dayNext");if(nx)nx.disabled=(keyOf(VIEW)>=keyOf(RACE));
+ const pv=document.getElementById("dayPrev");if(pv)pv.disabled=(keyOf(VIEW)<=keyOf(START));
  const note=document.getElementById("dayBackNote");if(!note)return;
+ const jump=`<span id="backToday" style="cursor:pointer;text-decoration:underline;font-weight:700">Jump back to today</span>`;
  if(keyOf(VIEW)===keyOf(TODAY)){note.className="hide";}
+ else if(isFuture()){note.className="note adj";
+  const diff=Math.round((VIEW-TODAY)/DAY);
+  note.innerHTML=`⏩ <b>Previewing ahead</b> — ${diff} day${diff>1?"s":""} from now. Read-only; nothing here can be logged yet. ${jump}`;}
  else{note.className="note adj";
   const diff=Math.round((TODAY-VIEW)/DAY);
-  note.innerHTML=`⏪ <b>Editing a past day</b> — ${diff} day${diff>1?"s":""} ago. Anything you tick saves to <b>${fmtDate(VIEW)}</b>. <span id="backToday" style="cursor:pointer;text-decoration:underline;font-weight:700">Jump back to today</span>`;
-  const b=document.getElementById("backToday");if(b)b.onclick=()=>gotoDay(TODAY);}}
-function setStatus(s){const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
-document.getElementById("restBtn").onclick=()=>{const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
+  note.innerHTML=`⏪ <b>Editing a past day</b> — ${diff} day${diff>1?"s":""} ago. Anything you tick saves to <b>${fmtDate(VIEW)}</b>. ${jump}`;}
+ const b=document.getElementById("backToday");if(b)b.onclick=()=>gotoDay(TODAY);
+ // grey out the logging controls while previewing ahead
+ const fut=isFuture();
+ ["restBtn","missBtn","sickBtn"].forEach(id=>{const e=document.getElementById(id);
+  if(e){e.disabled=fut;e.style.opacity=fut?.45:1;e.style.cursor=fut?"not-allowed":"pointer";
+        e.title=fut?"Previewing a future day — come back on the day to log it":"";}});}
+function setStatus(s){if(isFuture())return;const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};if(s)l.status=s;else delete l.status;o.logs[k]=l;S.set(o);renderToday()}
+document.getElementById("restBtn").onclick=()=>{if(isFuture())return;const o=state(),k=keyOf(VIEW);const l=o.logs[k]||{};l.status="rest";delete l.main;delete l.pball;o.logs[k]=l;S.set(o);renderToday()};
 document.getElementById("injuryBtn").onclick=()=>{const o=state();if(o.injured){o.injured=false}else{if(!confirm("Turn ON injury mode? Pauses running & leg work and protects your streak while you heal."))return;o.injured=true;o.injuryStart=keyOf(TODAY);}S.set(o);renderToday()};
 document.getElementById("missBtn").onclick=()=>{if(confirm("Mark today missed? Streak resets."))setStatus("missed")};
 document.getElementById("sickBtn").onclick=()=>setStatus("sick");
