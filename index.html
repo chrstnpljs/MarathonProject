@@ -439,19 +439,19 @@ const START=new Date(2026,7,31), RACE=new Date(2027,1,14), DAY=86400000; // Week
 // wd1 / wd2 = weekday maintenance runs · lr = weekend long run
 const TBR={
  1:{wd1:"45 min",wd2:"50 min",lr:"50 min"},
- 2:{wd1:"45 min",wd2:"50 min · last 10 min higher intensity",lr:"1 hr"},
- 3:{wd1:"45 min",wd2:"55 min · last 10 min higher intensity",lr:"1 hr"},
- 4:{wd1:"60 min",wd2:"55 min · last 10 min higher intensity",lr:"1 hr 15 min"},
- 5:{wd1:"60 min · last 10 min higher intensity",wd2:"60 min",lr:"1 hr 15 min"},
- 6:{wd1:"60 min · last 15 min higher intensity",wd2:"Rest or XTrain",lr:"1 hr 45 min"},
- 7:{wd1:"50 min",wd2:"60 min · last 15 min higher intensity",lr:"2 hrs"},
- 8:{wd1:"60 min",wd2:"60 min · last 15 min higher intensity",lr:"2 hrs",note:"Divide into 2 × 60 min — aim for even splits",bull:"Bull Session 2 · Nov 22"},
+ 2:{wd1:"45 min",wd2:"50 min",lr:"1 hr"},
+ 3:{wd1:"45 min",wd2:"55 min",lr:"1 hr"},
+ 4:{wd1:"60 min",wd2:"55 min",lr:"1 hr 15 min"},
+ 5:{wd1:"60 min",wd2:"60 min",lr:"1 hr 15 min"},
+ 6:{wd1:"60 min",wd2:"Rest or XTrain",lr:"1 hr 45 min"},
+ 7:{wd1:"50 min",wd2:"60 min",lr:"2 hrs"},
+ 8:{wd1:"60 min",wd2:"60 min",lr:"2 hrs",note:"Divide into 2 × 60 min — aim for even splits",bull:"Bull Session 2 · Nov 22"},
  9:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 30 min",note:"Divide into 2 × 75 min — even splits"},
  10:{wd1:"50 min",wd2:"60 min",lr:"1 hr 30 min",bull:"Bull Session 3 · Dec 5"},
  11:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 40 min"},
- 12:{wd1:"70 min · last 20 min higher intensity",wd2:"50 min",lr:"1 hr 30 min"},
+ 12:{wd1:"70 min",wd2:"50 min",lr:"1 hr 30 min"},
  13:{wd1:"Rest or XTrain",wd2:"75 min",lr:"3 hrs 15 min or min 25 km",note:"Divide into 2 × 100 & 95 min — even splits",star:"⭐ Very important week — the first long run that gives you the range to reach the finish line.",bull:"Bull Session 4 · Dec 27"},
- 14:{wd1:"70 min · last 25 min higher intensity",wd2:"60 min",lr:"1 hr 30 min"},
+ 14:{wd1:"70 min",wd2:"60 min",lr:"1 hr 30 min"},
  15:{wd1:"60 min",wd2:"60 min",lr:"2 hrs 30 min",note:"Bull Session 5 runs 2 hrs — add ~30 min solo either side",bull:"Bull Session 5 · Jan 10"},
  16:{wd1:"Rest or XTrain",wd2:"60 min",lr:"3 hrs 30 min",star:"🚨 PEAK LONG RUN — moved here from Jan 24 (family trip). Protect this week!",note:"🌙 START ~8:30 PM — this doubles as your 3rd midnight-race rehearsal. Your biggest session of the whole block. Full fuelling, race kit, race shoes."},
  17:{wd1:"50 min",wd2:"45 min",lr:"1 hr",star:"✈️ Away Fri–Sun. Normal week, just a short long run — and it's your post-peak recovery week anyway.",note:"Fri and Sun runs happen on the trip. Both are travel-friendly; skip either if the day gets away from you."},
@@ -465,6 +465,40 @@ const BRIDGE={
  "-1":{wd1:"35 min",wd2:"35 min",lr:"75 min",star:"Bridge 3 — Bull Session 1 falls on Sun Sep 20. Go meet your batch!",bull:"Bull Session 1 · Sep 20"},
  "0":{wd1:"35 min",wd2:"30 min",lr:"60 min",star:"Bridge 4 — easy week. Beginner 2 starts Mon Sep 28."}};
 const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
+// ── QUALITY SESSIONS (added 5 Oct 2026) ──
+// Audit showed the block was 4.6% hard by time, with 6 of 20 weeks containing no
+// quality at all. Evidence base for endurance training is ~80/20 BY SESSION.
+// One quality session per week → 23% of sessions, ~11.7% of time. A literal 20%
+// of TIME would be ~56 hard min on top of a 2-hour long run — that is the Jan-Feb
+// pattern that ended in the March collapse, so we don't chase it.
+// The long run stays 100% easy for the whole block: quality builds the ceiling,
+// the long run builds the floor.
+function qualityFor(w){
+ if(w<=2)  return null;   // settle the 3:1 pacing first — a fast session before you
+                          // can pace a slow one just gives the problem more room
+ if(w<=9)  return {work:"4 × 6 min",hr:"158–168",rec:"2 min easy jog between",wmin:24,
+   lab:"Cruise intervals",
+   why:"Steady-state work just under threshold. This is the session that moves your efficiency number — the pace you can hold at a given heart rate."};
+ if(w<=14) return {work:"2 × 15 min",hr:"168–178",rec:"3 min easy jog between",wmin:30,
+   lab:"Threshold",
+   why:"Raises the effort you can sustain before fatigue compounds. The single biggest driver of marathon pace."};
+ if(w<=18) return {work:"last 25–30 min of the run",hr:"158–168",rec:"—",wmin:28,
+   lab:"Marathon-pace finish",
+   why:"Race-specific. Holding target effort on already-tired legs is exactly what km 32 asks of you."};
+ return {work:"10 min",hr:"158–168",rec:"—",wmin:10,
+   lab:"MP touch",why:"Taper. Keeps the legs sharp at no recovery cost."};
+}
+// Friday is the quality day — except wk 6 (Friday is rest/XT) and wk 20 (race week,
+// Thu + Fri are full rest), where it moves to Tuesday.
+function qualityDay(w){return (w===6||w===20)?2:5}
+function applyQuality(m,w,wd){
+ const q=qualityFor(w);
+ if(!q||wd!==qualityDay(w)||m.type==="rest")return m;
+ m.type="quality";
+ m.t=m.t.replace(/^Run \d — /,"")+" ⚡ "+q.lab;
+ m.d=`${q.lab}: ${q.work} @ HR ${q.hr}${q.rec!=="—"?", "+q.rec:""}. Easy running either side.`;
+ return m;
+}
 const RUNWALK="3:1 (run 3 min · walk 1 min)";
 // Reverted 4:1 → 3:1 on Oct 2. Lap data, Sep 6–Oct 2:
 //   3:1 runs → first-split-to-slowest decay 6%,  avg EF 0.738
@@ -705,7 +739,8 @@ function sessionMins(d){const m=mission(d),{w,p}=weekPlan(d),wd=d.getDay();
  if(!mins)mins=specMins(m.t);          // fallback: parse the card title (override days)
  return mins;}
 function runwalkLine(d){const m=mission(d);
- if(["long","easy","quality"].indexOf(m.type)<0)return "";
+ if(m.type==="quality")return `<div class="totline" style="background:#fff4e5;color:#7a3e00">⚡ <b>Quality day — run the hard reps continuously, no walk breaks.</b><br><small style="font-weight:400">3:1 applies only to the easy running either side. This is the one session all week where going fast is the point.</small></div>`;
+ if(["long","easy"].indexOf(m.type)<0)return "";
  const mins=sessionMins(d);if(!mins)return "";
  return `<div class="totline" style="background:#eef3f8;color:var(--navy)">⏱ <b>Watch setup</b> for ${mins} min —
   <b>3:1 → ${Math.round(mins/4)} repeats</b> (3 min run + 1 min walk)
@@ -721,10 +756,10 @@ function mission(d){const ov=OVERRIDE[keyOf(d)];if(ov)return ov;
   if(p.note)det+=" · "+p.note;
   return{emo:"🐉",t:`Long Run — ${p.lr}`,d:det,type:"long"};}
  if(wd===1)return{emo:"🛌",t:"Full Rest",d:"TBR rule: a full rest day always follows a long run — this one closes out yesterday's. Week starts here.",type:"rest"};
- if(wd===2){const m=rest_or_run(p.wd1||"45 min","Run 1");if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
+ if(wd===2){let m=rest_or_run(p.wd1||"45 min","Run 1");m=applyQuality(m,w,2);if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
  if(wd===3)return{emo:"🏃",t:`Easy Run ${extraRun(w)} — added volume`,d:`Pure easy aerobic. HR ${HRZ.easy} bpm, run-walk ${RUNWALK}. Drop this one first on a night-shift week.`,type:"easy"};
  if(wd===4)return{emo:"🚲",t:"Rest — or optional cross-train",d:`Running rest. Optional: gym bike ${xbike(w)} at HR 130–145, or a 30–45 min walk under HR 125.`,type:"rest"};
- if(wd===5){const m=rest_or_run(p.wd2||"45 min","Run 2");if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
+ if(wd===5){let m=rest_or_run(p.wd2||"45 min","Run 2");m=applyQuality(m,w,5);if(m.type!=="rest"){m.d+=" + 🛡️ 15-min prehab after.";m.emo+="🏋️";}return m;}
  return{emo:"🛌",t:"Rest + 🍱 prep",d:"Batch-cook the week. Long run tomorrow — gentle walk at most, no bike session today.",type:"rest"};
 }
 function xbike(w){return w<=4?"30 min":w<=10?"40 min":w<=16?"50 min":"30 min"}
@@ -818,9 +853,17 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
    cd:["Walk 5 min","Refuel within 45 min (protein + carbs)","Gentle stretch — full rest tomorrow"]};}
  if(wd===2||wd===5){const w=weekPlan(d).w,spec=(wd===2?p.wd1:p.wd2)||"45 min";
   if(/rest/i.test(spec))return null;
-  const hi=/higher intensity/i.test(spec);
-  const main=[{ex:`${spec.split(" · ")[0]} run`,note:`Purpose: HOLD the conditioning between long runs. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`}];
-  if(hi)main.push({ex:spec.split("· ")[1],note:`Pick it up to ${HRZ.mp} bpm — comfortably hard, not a race.`});
+  const q=qualityFor(w), isQ=q&&wd===qualityDay(w);
+  const main=[];
+  if(isQ){
+   main.push({ex:`⚡ ${q.lab} — ${q.work} @ HR ${q.hr}`,note:q.why});
+   if(q.rec!=="—")main.push({ex:`Recovery: ${q.rec}`,note:"Jog it, don't stand. Let HR fall to ~140 before the next rep."});
+   main.push({ex:"Easy running either side — warm-up and cool-down inside the same session",
+     note:`Total ${spec.split(" · ")[0]}. Run-walk is OFF during the hard reps — run those continuously. 3:1 resumes for the easy portions.`});
+   main.push({ex:"🚦 Abort rule",note:"If you can't hold the HR band on a rep, stop the session and jog home easy. A failed quality session costs nothing; forcing one costs a week."});
+  } else {
+   main.push({ex:`${spec.split(" · ")[0]} run`,note:`Purpose: HOLD the conditioning between long runs. Run-walk ${RUNWALK}, HR ${HRZ.easy} bpm.`});
+  }
   main.push(Object.assign({},STRIDES,{sr:stridesFor(w)}));
   main.push({ex:"🛡️ AFTER the run: 15-min prehab — hamstring, calves, ankles",note:"Order matters. Eccentric work causes temporary strength loss and muscle damage — never run on freshly-loaded hamstrings. You're also already warm. If the run leaves you wrecked, move the prehab to Thursday instead of skipping it."});
   return{wu:["⚡ 2-min activation FIRST: 10 glute bridges · 10 leg swings/side · 10 ankle circles/side",
@@ -1508,7 +1551,7 @@ function renderRaceDay(){
    <div class="tt">${g.name}</div><div class="ss">finish ≈ ${g.tot}<br>${g.note}</div></div>`}).join("");
  const rows=P.segs.map(s=>`<tr><td><b>${s[0]}</b></td><td>${s[1]}</td><td>${s[2]}</td><td>${s[3]}</td><td>${s[4]}</td></tr>`).join("");
  const fuel=[["−4 h","Dinner",      "Rice + chicken + egg. Normal portion, low fibre, nothing new."],
-   ["−3 h","Nap",                   "Lie down even if you don't sleep. Dark room. Alarm set twice."],
+   ["−3 h","Optional nap",          "20–30 min MAX, and only if you normally nap. Your 8 AM–3 PM sleep is the real one — see the sleep section above."],
    ["−2 h","Pre-race meal",         "~80 g carbs: 2 slices white bread + banana + honey. Plus 500 ml water."],
    ["−45 m","Last toilet + sip",    "200 ml electrolyte. Stop drinking after this."],
    ["−25 m","Warm-up starts",       "See below. Keep HR under 140."],
@@ -1547,7 +1590,33 @@ function renderRaceDay(){
    <tr><td><b>Don't</b></td><td>Don't load a structured workout for race day. Run it off the pace band. A workout file will nag you.</td></tr>
   </tbody></table>
 
-  <h3>🍚 Carb loading — Fri 12 & Sat 13 Feb (2 days, not 5)</h3>
+  <h3>😴 Sleep &amp; the midnight start — and no, don't take melatonin</h3>
+  <div class="okbox"><b>You are the one runner in that corral who doesn't need a sleep strategy — you already live it.</b>
+   Everyone else has to force their body awake and running at 3 AM. You work 10 PM–7 AM. Your circadian clock is already where it needs to be.
+   <b>The single best thing you can do is keep your normal NA-shift pattern through race week and not change a thing.</b></div>
+  <table class="rdtab"><thead><tr><th>Question</th><th>Answer</th></tr></thead><tbody>
+   <tr><td><b>Does melatonin knock you out?</b></td><td>No. It's a <b>chronobiotic, not a sedative</b> — it signals "night" to your body clock and shifts its timing. It doesn't force sleep the way people expect.</td></tr>
+   <tr class="key"><td><b>Why it backfires here</b></td><td>Evening melatonin <b>advances</b> your clock — it tells your body night is starting <i>earlier</i>. You need the opposite: to be alert from midnight to 6:30 AM. You'd be pushing your body toward sleep at exactly the hours you're racing.</td></tr>
+   <tr><td><b>Residual grogginess</b></td><td>Immediate-release clears fast, but typical 5–10 mg doses (far above physiological) can leave sedation and <b>slowed reaction time</b> for hours. Your own melatonin peaks around 2–4 AM — the middle of your race. You don't need to add to it.</td></tr>
+   <tr><td><b>Performance</b></td><td>Studies show acute melatonin can reduce alertness and short-term power output. It also lowers core temperature and causes peripheral vasodilation — unpredictable on a humid Manila night.</td></tr>
+   <tr><td><b>The bigger rule</b></td><td><b>Nothing new on race day.</b> Taking a sleep aid for the first time before your first marathon breaks the rule you're following everywhere else in this plan.</td></tr>
+  </tbody></table>
+  <h3 style="margin-top:12px">Race-week sleep plan</h3>
+  <table class="rdtab"><thead><tr><th>When</th><th>Do this</th></tr></thead><tbody>
+   <tr><td><b>Mon–Fri</b></td><td><b>Don't flip to day hours.</b> Hold your NA rhythm. Flipping to days and back is what would actually wreck you.</td></tr>
+   <tr><td><b>Sat 13, 8 AM–3 PM</b></td><td>Your normal blackout sleep — this is your main sleep for the race. Dark room, cool, phone out of reach, two alarms.</td></tr>
+   <tr><td><b>Sat 3 PM</b></td><td>Wake, eat (load day 2 continues), stay relaxed and off your feet.</td></tr>
+   <tr><td><b>Sat 8–9 PM</b></td><td><b>Optional</b> 20–30 min nap only — and only if you'd normally nap. If you slept well 8–3, skip it. A long evening nap risks sleep inertia right at the gun.</td></tr>
+   <tr><td><b>Sat 11 PM</b></td><td>Caffeine if you use it, warm-up at 11:35. Natural alertness should be fine — this is your normal working hour.</td></tr>
+   <tr><td><b>The night before the night</b></td><td>If you sleep badly Friday, it matters far less than people fear. <b>One poor night doesn't hurt endurance performance</b> — the sleep two nights out is the one that counts. Don't spiral about it.</td></tr>
+  </tbody></table>
+  <div class="warnbox"><b>If you still want to try melatonin</b> — and this is a real option, just not an untested one:
+   use a <b>low dose (0.5–1 mg, not 5–10)</b>, take it at the <i>start of your daytime sleep block</i> so it's 10+ hours clear of the gun,
+   and <b>trial it several times in training first</b> — ideally around the Jan 17 night rehearsal.
+   <br><br>I'm a coach, not a doctor. You need a <b>medical certificate</b> for kit claiming anyway — ask that physician about melatonin
+   alongside your shift pattern. That's a free, qualified opinion you're already booking.</div>
+
+  <h3>🍚 Carb loading — Fri 12 &amp; Sat 13 Feb (2 days, not 5)</h3>
   <p class="cap">Built on your Evolt scan of 29 Sep 2026: <b>72.9 kg</b> · fat 15.9 kg · skeletal muscle 31.7 kg · BF 21.8%.
    Re-run this if you scan again closer to the race.</p>
   <table class="rdtab"><tbody>
@@ -1709,6 +1778,7 @@ function renderPlan(){
  <div class="ritem"><b>1. The long run IS the program.</b> "The weekend long run is a NO-MISS training." Weekday runs only exist to hold the fitness you built on the weekend.
  <br><small class="muted"><b>And it CANNOT be split.</b> 3 × 30 min ≠ 90 min continuous. Only a continuous long run depletes glycogen (forcing fat-oxidation adaptation), loads connective tissue for sustained duration, teaches cardiac-drift management, and trains the mental skill of continuing while tired. Marathon results correlate more with long-run distance than with weekly mileage. A 30 km week WITH the long run beats a 46 km week without it.</small></div>
  <div class="ritem"><b>2. No tempo runs, no intervals.</b> TBR: these are "NOT NECESSARY FOR A FINISHER PROGRAM." Only the scheduled "last X min at higher intensity" finishes.</div>
+ <div class="ritem"><b>⚡ One quality session a week — Fridays.</b> Added 5 Oct after an audit found the block was only <b>4.6% hard</b>; it's now <b>11.7% of time / 23% of sessions</b>, which is the 80/20 that the evidence supports.<br><small class="muted">wk 3–9 cruise intervals 4 × 6 min @ 158–168 · wk 10–14 threshold 2 × 15 min @ 168–178 · wk 15–18 marathon-pace finish · wk 19–20 taper touch. <b>Run the hard reps continuously — no walk breaks.</b> 3:1 applies to the easy running either side. <b>The Sunday long run stays 100% easy all block:</b> quality builds the ceiling, the long run builds the floor. Jan–Apr you had the first and almost none of the second, and March fell apart.</small></div>
  <div class="ritem"><b>3. Run-Walk ${RUNWALK}.</b> Walk BEFORE you get tired. Walking isn't giving up — it's the strategy. Practise it on every run.<br><small class="muted"><b>Back to 3:1 on Oct 2, from your own lap data.</b> On 3:1 your splits faded 6% across a run; on 4:1, 17%, and your first splits crept to 7:51/km. Your HR takes 2–3 min to reach steady state — a 3-min segment ends before it catches up, a 4-min segment lets it land right on the walk break. That's the "downhill after the first break" feeling. <b>Earn 4:1 back:</b> three runs where your first and last split are within 30 sec. Flatness first, ratio second.</small></div>
  <div class="ritem"><b>4. Time, not distance.</b> "The body does not inherently know distance." Only the late long runs carry a km target.</div>
  <div class="ritem"><b>5. Max 4 running days.</b> Rest or cross-train otherwise. Avoid team sports (injury risk).</div>
