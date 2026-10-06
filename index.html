@@ -788,18 +788,25 @@ const STRIDES={ex:"⚡ STRIDES — end of run, warm legs only",
 const HILLS={ex:"⛰️ HILL SPRINTS — after the run",
  note:"Find a moderate hill. Near-max effort up, WALK all the way down. Full recovery — these are neural, not aerobic.",
  tag:"Uphill sprinting loads the hamstring far more safely than flat sprinting — the hip doesn't extend at speed. Best economy return per minute available."};
+// Moved to the WARM-UP on 6 Oct 2026. Plyometrics are quality-of-contact work: they
+// build tendon stiffness and elastic return only if the reps are genuinely springy.
+// Done after a 50-min run AND five sets of eccentrics, they were just tired hops —
+// no stimulus, some risk. They now run on fresh legs, after a short jog so the
+// tissue is warm (never cold plyos), and before the main effort.
 const PLYO=[
  {ex:"Pogo Hops",mc:"Flat ground",sr:"2 × 20",note:"Stiff ankles, minimal knee bend, bounce off the floor. Quiet landings.",tag:"Tendon stiffness & elastic return — plus direct ankle prehab"},
  {ex:"A-Skips",mc:"20 m",sr:"2 lengths",note:"Tall posture, quick ground contact.",tag:"Coordination and elastic recoil"}];
 const PREHAB={wu:["2 min easy movement — you've just run, you're warm"],
- main:[{ex:"HAMSTRING — pick ONE (see options below)",mc:"No machine needed",sr:"3 × 6–10",note:"Eccentric (lowering) focus, 3–4 seconds down. This is the single most important item here.",tag:"Hamstring re-injury prevention — you strained it in July"},
+ main:[{ex:"HAMSTRING — pick ONE (see options below)",mc:"No machine needed",sr:"3 × 6–10",note:"Eccentric (lowering) focus, 3–4 seconds down. This is the single most important item here. 🧍 Training outdoors? Pick option 🥇 Single-Leg RDL — it's the only one you can do standing. The sliding curl and the Nordic both need the floor.",tag:"Hamstring re-injury prevention — you strained it in July"},
   {ex:"Single-Leg Calf Raise",mc:"Step or flat floor",sr:"3 × 15/side",tag:"Ankle & Achilles armor — 2 prior sprains"},
   {ex:"Tibialis Raise",mc:"Back against wall, heels out",sr:"3 × 20",tag:"Shin & ankle prehab"},
   {ex:"Single-Leg Step-Down",mc:"Stair or low box",sr:"2 × 10/side (LEFT first)",tag:"Left-leg imbalance (Evolt)"},
-  {ex:"Side Plank",mc:"Mat",sr:"2 × 30s/side",tag:"Hip stability for late-run form"}].concat(PLYO),
- cd:["Gentle calf + hip flexor stretch","Total: ~17 min, no gym required"]};
+  {ex:"Standing Hip Hitch",mc:"A step, curb or kerb — nothing to lie on",sr:"2 × 12/side",
+   note:"Stand on ONE leg on the edge of a step, other foot hanging free beside it. Let that free hip DROP a few cm, then lift it back up by squeezing the glute of the STANDING leg. Standing knee stays almost straight. Slow: 2s down, 2s up. No step? Stand on one leg and hold 20s while slowly reaching the free foot forward, out to the side, then behind.",
+   tag:"Hip stability for late-run form — replaces the side plank, and it's more running-specific anyway"}],
+ cd:["Gentle calf + hip flexor stretch","Total: ~17 min — all standing, no mat, no gym, nothing to lie on"]};
 const HAMOPTS=[
- ["🥇 Single-Leg Romanian Deadlift","One dumbbell, kettlebell, or even a water jug","3 × 8/side",
+ ["🥇 Single-Leg Romanian Deadlift — STANDING, outdoor-friendly","One dumbbell, kettlebell, water jug, or a loaded backpack","3 × 8/side",
   "Stand on one leg, hinge at the hip, let the weight lower toward the floor over 3–4s while the back leg rises behind you. Feel the stretch in the hamstring of the standing leg. Come up under control.",
   "Trains the hamstring at LONG muscle length — exactly where strains happen. Evidence for strain prevention is as strong as Nordics, and it doubles as your single-leg balance work."],
  ["🥈 Sliding Leg Curl","A towel on tile, or furniture sliders. Zero equipment.","3 × 8–10",
@@ -866,10 +873,12 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   }
   main.push(Object.assign({},STRIDES,{sr:stridesFor(w)}));
   main.push({ex:"🛡️ AFTER the run: 15-min prehab — hamstring, calves, ankles",note:"Order matters. Eccentric work causes temporary strength loss and muscle damage — never run on freshly-loaded hamstrings. You're also already warm. If the run leaves you wrecked, move the prehab to Thursday instead of skipping it."});
-  return{wu:["⚡ 2-min activation FIRST: 10 glute bridges · 10 leg swings/side · 10 ankle circles/side",
-             "🐌 Then open at 10:00–10:30/km. Split 1 must feel embarrassing — your HR won't tell you the truth for 2–3 min.",
-             "Then 5–10 min very easy running to start",
-             "(Activation ≠ strength work. Primes the muscles without fatiguing them — the loading work comes AFTER the run.)"],
+  return{wu:["<b>1.</b> ⚡ 2-min activation, all standing: 10 hip extensions/side · 10 leg swings/side · 10 ankle circles/side",
+             "<b>2.</b> 5 min very easy jogging — get properly warm before the springy work. <small class=\"dim\">Never do plyos cold.</small>",
+             "<b>3.</b> 🦘 <b>Pogo Hops 2 × 20</b> — stiff ankles, minimal knee bend, bounce off the floor. Quiet landings.",
+             "<b>4.</b> 🦵 <b>A-Skips 2 × 20 m</b> — tall posture, quick ground contact.",
+             "<b>5.</b> 🐌 Now start the run — open at 10:00–10:30/km. Split 1 must feel embarrassing; your HR won't tell you the truth for 2–3 min.",
+             "<small class=\"dim\">Why here: springy work only builds tendon stiffness if the reps are actually springy, so it needs fresh legs. The heavy loading — hamstring eccentrics — still comes AFTER the run, because running on freshly-loaded hamstrings is how you injure them.</small>"],
     main:main.concat(PREHAB.main),cd:["Walk 3–5 min","Calf + hamstring stretch"]};}
  if(wd===3){const {w:tw}=weekPlan(d);const hill=hillsFor(tw);
   const main=[{ex:`Easy ${extraRun(tw)} · HR ${HRZ.easy} bpm · run-walk ${RUNWALK}`,note:"Added aerobic volume on top of TBR. Pure easy — this run only works if it stays easy."},
@@ -1679,7 +1688,7 @@ function renderRaceDay(){
   <h3>🔥 Warm-up (25 min, finishing 5 min before the gun)</h3>
   <ul><li><b>−25 min:</b> 10 min walk, building to brisk. Keep HR under 120.</li>
    <li><b>−15 min:</b> 5 min very easy jog. HR under 140. This is the whole jog — resist more.</li>
-   <li><b>−10 min:</b> activation — 10 glute bridges · 10 leg swings/side · 10 ankle circles/side.</li>
+   <li><b>−10 min:</b> activation, all standing — 10 hip extensions/side · 10 leg swings/side · 10 ankle circles/side.</li>
    <li><b>−6 min:</b> 2 × 20 sec strides at ~5 K effort, walk back fully between. Wakes the legs, costs nothing.</li>
    <li><b>−5 min:</b> gel #1, last sip, into the corral. <b>No static stretching.</b> It reduces power output and does not prevent injury.</li></ul>
 
