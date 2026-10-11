@@ -649,7 +649,11 @@ const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];        // indexed by getDa
 const WD_CAL=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];    // calendar grid order (weeks start Monday,
 // matching TBR's own program and every weekly total in this app: (getDay()+6)%7 snaps back to Monday)
 // HR zones from YOUR Garmin data: max 196 (measured), resting ~62 → Karvonen
-const HRMAX=196, HRREST=62;
+// HRmax 200 observed at the Oct 4 Pokémon 5K (was 196 — not a fitness gain, just the
+// first time he'd pushed hard enough to find it). HRrest 50 measured by Garmin 7 Oct,
+// down from 62. The two changes roughly cancel in Karvonen, so the zone bands below
+// are unchanged: easy works out 140-155 against the 135-152 prescribed.
+const HRMAX=200, HRREST=50;
 const HRZ={recovery:"<135",easy:"135–152",steady:"152–160",mp:"158–168",tempo:"168–180",interval:"180–196"};
 const HRTABLE=[["Recovery / walk-jog","<135","Very easy, nose-breathing"],
  ["🟢 Easy & Long runs","135–152","Conversational — 80% of your running"],
