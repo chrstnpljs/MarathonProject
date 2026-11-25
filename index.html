@@ -447,7 +447,8 @@ const TBR={
  7:{wd1:"50 min",wd2:"60 min",lr:"2 hrs"},
  8:{wd1:"60 min",wd2:"60 min",lr:"2 hrs",note:"Divide into 2 × 60 min — aim for even splits",bull:"Bull Session 2 · Nov 22"},
  9:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 30 min",note:"Divide into 2 × 75 min — even splits"},
- 10:{wd1:"50 min",wd2:"60 min",lr:"1 hr 30 min",bull:"Bull Session 3 · Dec 5"},
+ 10:{wd1:"60 min",wd2:"50 min",lr:"1 hr 30 min",bull:"Bull Session 3 · Dec 5",
+   star:"👥 BULL SESSION 3 is SATURDAY Dec 5 — the long run moves to Saturday this week and Sunday becomes full rest."},
  11:{wd1:"Rest or XTrain",wd2:"60 min",lr:"2 hrs 40 min"},
  12:{wd1:"70 min",wd2:"50 min",lr:"1 hr 30 min"},
  13:{wd1:"Rest or XTrain",wd2:"75 min",lr:"3 hrs 15 min or min 25 km",note:"Divide into 2 × 100 & 95 min — even splits",star:"⭐ Very important week — the first long run that gives you the range to reach the finish line.",bull:"Bull Session 4 · Dec 27"},
@@ -476,27 +477,29 @@ const PROGSTART=new Date(2026,8,28);   // Mon Sep 28 = TBR Week 1
 function qualityFor(w){
  if(w<=2)  return null;   // settle the 3:1 pacing first — a fast session before you
                           // can pace a slow one just gives the problem more room
- if(w<=9)  return {work:"4 × 6 min",hr:"158–168",rec:"2 min easy jog between",wmin:24,
+ if(w<=9)  return {work:"4 × 6 min",hr:"158–168",pace:"7:50–8:10/km",rec:"2 min easy jog between — jog until HR drops under 145",wmin:24,
    lab:"Cruise intervals",
    why:"Steady-state work just under threshold. This is the session that moves your efficiency number — the pace you can hold at a given heart rate."};
- if(w<=14) return {work:"2 × 15 min",hr:"168–178",rec:"3 min easy jog between",wmin:30,
+ if(w<=14) return {work:"2 × 15 min",hr:"168–178",pace:"7:20–7:40/km",rec:"3 min easy jog between — jog until HR drops under 145",wmin:30,
    lab:"Threshold",
    why:"Raises the effort you can sustain before fatigue compounds. The single biggest driver of marathon pace."};
- if(w<=18) return {work:"last 25–30 min of the run",hr:"158–168",rec:"—",wmin:28,
+ if(w<=18) return {work:"last 25–30 min of the run",hr:"150–158",pace:"8:50–9:10/km",rec:"—",wmin:28,
    lab:"Marathon-pace finish",
    why:"Race-specific. Holding target effort on already-tired legs is exactly what km 32 asks of you."};
- return {work:"10 min",hr:"158–168",rec:"—",wmin:10,
+ return {work:"10 min",hr:"150–158",pace:"8:50–9:10/km",rec:"—",wmin:10,
    lab:"MP touch",why:"Taper. Keeps the legs sharp at no recovery cost."};
 }
 // Friday is the quality day — except wk 6 (Friday is rest/XT) and wk 20 (race week,
 // Thu + Fri are full rest), where it moves to Tuesday.
-function qualityDay(w){return (w===6||w===20)?2:5}
+// wk 6 + 20: Friday is rest. wk 10: Bull Session 3 falls on Sat Dec 5, so the long
+// run moves to Saturday — quality goes to Tuesday to keep 4 days between hard efforts.
+function qualityDay(w){return (w===6||w===10||w===20)?2:5}
 function applyQuality(m,w,wd){
  const q=qualityFor(w);
  if(!q||wd!==qualityDay(w)||m.type==="rest")return m;
  m.type="quality";
  m.t=m.t.replace(/^Run \d — /,"")+" ⚡ "+q.lab;
- m.d=`${q.lab}: ${q.work} @ HR ${q.hr}${q.rec!=="—"?", "+q.rec:""}. Easy running either side.`;
+ m.d=`${q.lab}: ${q.work} @ ${q.pace} (HR ${q.hr})${q.rec!=="—"?" · "+q.rec:""}. Easy running either side.`;
  return m;
 }
 const RUNWALK="3:1 (run 3 min · walk 1 min)";
@@ -531,6 +534,10 @@ const OVERRIDE={
  // ── 🌙 MIDNIGHT RACE REHEARSALS — none of the three plans cover this ──
  "2026-12-13":{emo:"🌙",t:"NIGHT LONG RUN — start 9PM",d:"Race starts at MIDNIGHT. First rehearsal: run in the dark, after a normal day, with a headlamp. 2h40.",type:"long"},
  "2027-01-17":{emo:"🚨",t:"PEAK LONG RUN — 3h30",d:"Your biggest session of the block, moved from Jan 24. Consider an EVENING start (~8:30PM) to double as midnight-race rehearsal.",type:"long"},
+ "2026-12-05":{emo:"🐉👥",lab:"BULL 3<br>1h30 · 152",t:"BULL SESSION 3 — Long Run 1 hr 30 min",
+  d:"Filinvest City with your batch. Run-walk 3:1 (23 repeats), HR 135–152. This REPLACES Sunday's long run — Sunday is now full rest. Run your own pace, not the group's: if a pack pulls you over 152, let them go.",type:"long"},
+ "2026-12-06":{emo:"🛌",lab:"Rest",t:"Full Rest — you ran long yesterday",
+  d:"The long run moved to Saturday for Bull Session 3. Full rest today, and Monday too. Week 11 opens with a 2h40, so bank the recovery.",type:"rest"},
  "2027-01-24":{emo:"✈️",lab:"trip<br>1h · 152",t:"Trip Run — 1 hr easy",d:"Away with family. Easy hour at HR 135–152, run-walk 3:1 (15 repeats). Peak run is already banked from Jan 17.",type:"long"},
  "2027-01-31":{emo:"🌙",t:"NIGHT DRESS REHEARSAL — 2h00",d:"Afternoon nap → race kit → race breakfast timing → 2 hrs from 10PM. Last chance to test everything.",type:"long"},
  "2027-02-10":{emo:"🏃",t:"Last easy shakeout — 20 min",d:"Very easy, just to keep the legs awake. Then nothing until race night.",type:"easy"},
@@ -738,6 +745,8 @@ function weekKm(w){const m=weekMins(w);if(!m&&w!==20)return 0;
  return m/paceFor(w);}
 // How many run-walk repeats to program into the watch for a given day
 function sessionMins(d){const m=mission(d),{w,p}=weekPlan(d),wd=d.getDay();
+ if(m.type==="rest")return 0;      // an OVERRIDE can turn a plan day into rest — don't
+                                   // fall through and report the plan's duration
  let spec=wd===0?p.lr:wd===2?p.wd1:wd===3?extraRun(w):wd===5?p.wd2:"";
  let mins=specMins(spec);
  if(!mins)mins=specMins(m.t);          // fallback: parse the card title (override days)
@@ -867,7 +876,11 @@ function runWO(d){const wd=d.getDay(),{w,p}=weekPlan(d);
   const q=qualityFor(w), isQ=q&&wd===qualityDay(w);
   const main=[];
   if(isQ){
-   main.push({ex:`⚡ ${q.lab} — ${q.work} @ HR ${q.hr}`,note:q.why});
+   main.push({ex:`⚡ ${q.lab} — ${q.work} @ <b>${q.pace}</b> · HR ${q.hr}`,note:q.why});
+   main.push({ex:"⏱ MINUTES 0–3: run by PACE, not heart rate",
+     note:`Your HR lags effort by 2–3 min, so it under-reads at the start of every rep — that is exactly how 16 Oct opened at HR 174. Hold ${q.pace} on feel and the watch's pace field. Too fast here and the whole session escalates.`});
+   main.push({ex:`⏱ MINUTES 3+: now run by HR. ${q.hr.split("–")[1]} is a CEILING, not a target`,
+     note:"If a rep crosses it, slow down inside the rep. Don't bank it and pay later."});
    if(q.rec!=="—")main.push({ex:`Recovery: ${q.rec}`,note:"Jog it, don't stand. Let HR fall to ~140 before the next rep."});
    main.push({ex:"Easy running either side — warm-up and cool-down inside the same session",
      note:`Total ${spec.split(" · ")[0]}. Run-walk is OFF during the hard reps — run those continuously. 3:1 resumes for the easy portions.`});
@@ -1881,6 +1894,16 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelect
   .forEach(k=>{o.logs[k]=Object.assign({},o.logs[k],{main:true});});
  o.logs["2026-09-20"].bonus=true;
  o.seeded_bs1=true;S.set(o);})();
+(function(){const o=state();if(o.seeded_oct_nov)return;
+ // Verified against Strava 25 Nov 2026: every prescribed session Sep 28 → Nov 25
+ // was completed. 776 min done against 730 planned across the last fortnight.
+ const a=new Date(2026,8,28), b=new Date(2026,10,25);
+ for(let d=new Date(a); d<=b; d=new Date(d.getTime()+DAY)){
+  const k=keyOf(d); o.logs[k]=Object.assign({},o.logs[k],{main:true});}
+ o.logs["2026-10-04"].bonus=true;   // Pokémon 5K
+ o.logs["2026-11-08"].bonus=true;   // 397 m hike + the 105-min long run, same day
+ o.logs["2026-11-22"].bonus=true;   // Bull Session 2 — 15.17 km, longest of the block
+ o.seeded_oct_nov=true;S.set(o);})();
 document.getElementById("scDate").value=keyOf(TODAY);
 document.getElementById("efDate").value=keyOf(TODAY);
 renderToday();loadRuns();
